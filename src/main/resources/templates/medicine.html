@@ -510,6 +510,347 @@
             color: #1a1a1a;
         }
 
+        /* Comments Card */
+        .comments-card {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            padding: 24px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            animation: slideUp 0.5s ease-out 0.4s backwards;
+        }
+
+        .comments-card h4 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .comments-card h4 i {
+            color: #0ea5e9;
+        }
+
+        .comment-input-wrapper {
+            background: #f8f9fa;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .comment-input-header {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .comment-input-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .comment-input-avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        #commentInput {
+            flex: 1;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 12px;
+            font-size: 14px;
+            resize: none;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        #commentInput:focus {
+            outline: none;
+            border-color: #0ea5e9;
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+        }
+
+        .comment-input-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-image-upload {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-image-upload:hover {
+            border-color: #0ea5e9;
+            color: #0ea5e9;
+        }
+
+        .comment-image-preview {
+            max-width: 100px;
+            max-height: 100px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 2px solid #e0e0e0;
+        }
+
+        .btn-submit-comment {
+            padding: 8px 20px;
+            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-submit-comment:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+        }
+
+        .comments-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .comment-item {
+            background: #fafafa;
+            border-radius: 12px;
+            padding: 16px;
+            transition: all 0.2s;
+        }
+
+        .comment-item:hover {
+            background: #f5f5f5;
+        }
+
+        .comment-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .comment-user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .comment-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .comment-avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .comment-user-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .comment-username {
+            font-size: 14px;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+
+        .comment-time {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .comment-actions-menu {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-comment-action {
+            padding: 4px 8px;
+            background: transparent;
+            border: none;
+            color: #999;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-comment-action:hover {
+            color: #0ea5e9;
+        }
+
+        .comment-content {
+            margin-bottom: 8px;
+            line-height: 1.5;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .comment-image {
+            max-width: 100%;
+            border-radius: 12px;
+            margin-top: 8px;
+            cursor: pointer;
+        }
+
+        .comment-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-top: 8px;
+        }
+
+        .btn-like {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: none;
+            border: none;
+            color: #666;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            padding: 4px 8px;
+            border-radius: 8px;
+        }
+
+        .btn-like:hover {
+            background: #f0f0f0;
+        }
+
+        .btn-like.liked {
+            color: #ef4444;
+        }
+
+        .btn-like i {
+            font-size: 16px;
+        }
+
+        .btn-reply {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: none;
+            border: none;
+            color: #666;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            padding: 4px 8px;
+            border-radius: 8px;
+        }
+
+        .btn-reply:hover {
+            background: #f0f0f0;
+            color: #0ea5e9;
+        }
+
+        .replies-container {
+            margin-left: 48px;
+            margin-top: 12px;
+            padding-left: 16px;
+            border-left: 2px solid #e0e0e0;
+        }
+
+        .reply-item {
+            background: white;
+            border-radius: 12px;
+            padding: 12px;
+            margin-top: 12px;
+        }
+
+        .reply-input-wrapper {
+            margin-left: 48px;
+            margin-top: 12px;
+            display: none;
+        }
+
+        .reply-input-wrapper.show {
+            display: block;
+        }
+
+        .reply-input-form {
+            display: flex;
+            gap: 8px;
+            align-items: flex-start;
+        }
+
+        .reply-input-form textarea {
+            flex: 1;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 10px;
+            font-size: 13px;
+            resize: none;
+            font-family: inherit;
+        }
+
+        .reply-input-form textarea:focus {
+            outline: none;
+            border-color: #0ea5e9;
+        }
+
+        .reply-input-form button {
+            padding: 10px 16px;
+            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .reply-input-form button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(14, 165, 233, 0.3);
+        }
+
         @media (max-width: 480px) {
             .medicine-btn {
                 width: 100%;
@@ -532,6 +873,14 @@
 
             .calendar-day-time {
                 font-size: 8px;
+            }
+
+            .replies-container {
+                margin-left: 24px;
+            }
+
+            .reply-input-wrapper {
+                margin-left: 24px;
             }
         }
     </style>
@@ -595,6 +944,36 @@
             </div>
         </div>
 
+        <!-- Comments Section -->
+        <div class="comments-card">
+            <h4><i class="bi bi-chat-dots-fill"></i> 댓글 <span id="commentCount">0</span>개</h4>
+
+            <!-- Comment Input Form -->
+            <div class="comment-input-wrapper">
+                <div class="comment-input-header">
+                    <div class="comment-input-avatar">
+                        <img th:if="${user.profileImage}" th:src="${user.profileImage}" alt="프로필">
+                        <span th:if="${!user.profileImage}"
+                              th:text="${user.role == T(com.medicine.model.Role).FATHER ? '👨' : (user.role == T(com.medicine.model.Role).ADMIN ? '⚙️' : (user.role == T(com.medicine.model.Role).FAMILY ? '👨‍👩‍👧' : '👤'))}"></span>
+                    </div>
+                    <textarea id="commentInput" placeholder="댓글을 입력하세요..." rows="1"></textarea>
+                </div>
+                <div class="comment-input-actions">
+                    <label for="commentImageInput" class="btn-image-upload">
+                        <i class="bi bi-image"></i> 사진
+                        <input type="file" id="commentImageInput" accept="image/*" style="display: none;">
+                    </label>
+                    <img id="commentImagePreview" class="comment-image-preview" style="display: none;" alt="미리보기">
+                    <button id="submitCommentBtn" class="btn-submit-comment" onclick="submitComment()">
+                        게시
+                    </button>
+                </div>
+            </div>
+
+            <!-- Comments List -->
+            <div id="commentsList" class="comments-list"></div>
+        </div>
+
         <!-- Calendar Card -->
         <div class="calendar-card">
             <div class="calendar-header">
@@ -639,23 +1018,6 @@
         let currentYear = new Date().getFullYear();
         let currentMonth = new Date().getMonth();
         let medicineRecords = {};
-
-        document.addEventListener('DOMContentLoaded', function() {
-            const medicineBtn = document.getElementById('medicineBtn');
-
-            // Medicine button click handler
-            if (medicineBtn && !medicineBtn.disabled) {
-                medicineBtn.addEventListener('click', function() {
-                    const isTaken = this.getAttribute('data-taken') === 'true';
-                    if (!isTaken) {
-                        showConfirmModal();
-                    }
-                });
-            }
-
-            // Initialize calendar
-            loadCalendar();
-        });
 
         // Calendar Functions
         function loadCalendar() {
@@ -838,6 +1200,337 @@
                 }, 300);
             }, 2500);
         }
+
+        // Comments Functions
+        let currentUserId = /*[[${user.id}]]*/ '';
+        let selectedCommentImage = null;
+        let currentReplyingTo = null;
+
+        // Load comments
+        function loadComments() {
+            fetch('/api/comments')
+                .then(response => response.json())
+                .then(data => {
+                    currentUserId = data.currentUserId;
+                    renderComments(data.comments);
+                    document.getElementById('commentCount').textContent = data.comments.length;
+                })
+                .catch(error => console.error('Error loading comments:', error));
+        }
+
+        // Render comments
+        function renderComments(comments) {
+            const commentsList = document.getElementById('commentsList');
+            commentsList.innerHTML = '';
+
+            // 부모 댓글과 대댓글 분리
+            const parentComments = comments.filter(c => !c.parentCommentId);
+            const repliesMap = {};
+            comments.filter(c => c.parentCommentId).forEach(reply => {
+                if (!repliesMap[reply.parentCommentId]) {
+                    repliesMap[reply.parentCommentId] = [];
+                }
+                repliesMap[reply.parentCommentId].push(reply);
+            });
+
+            parentComments.forEach(comment => {
+                const commentEl = createCommentElement(comment, repliesMap[comment.id] || []);
+                commentsList.appendChild(commentEl);
+            });
+        }
+
+        // Create comment element
+        function createCommentElement(comment, replies) {
+            const div = document.createElement('div');
+            div.className = 'comment-item';
+            div.dataset.commentId = comment.id;
+
+            const timeAgo = getTimeAgo(comment.createdAt);
+            const canDelete = currentUserId === comment.userId;
+
+            const profileImg = comment.profileImage
+                ? `<img src="${comment.profileImage}" alt="프로필">`
+                : getDefaultEmoji(comment.username);
+
+            div.innerHTML = `
+                <div class="comment-header">
+                    <div class="comment-user-info">
+                        <div class="comment-avatar">${profileImg}</div>
+                        <div class="comment-user-details">
+                            <span class="comment-username">${comment.displayName}</span>
+                            <span class="comment-time">${timeAgo}</span>
+                        </div>
+                    </div>
+                    ${canDelete ? `
+                        <div class="comment-actions-menu">
+                            <button class="btn-comment-action" onclick="deleteComment('${comment.id}')">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    ` : ''}
+                </div>
+                <div class="comment-content">${escapeHtml(comment.content)}</div>
+                ${comment.imageUrl ? `<img src="${comment.imageUrl}" class="comment-image" alt="첨부 이미지">` : ''}
+                <div class="comment-actions">
+                    <button class="btn-like ${comment.likedUserIds && comment.likedUserIds.includes(currentUserId) ? 'liked' : ''}"
+                            onclick="toggleLike('${comment.id}')">
+                        <i class="bi ${comment.likedUserIds && comment.likedUserIds.includes(currentUserId) ? 'bi-heart-fill' : 'bi-heart'}"></i>
+                        <span>${comment.likesCount || 0}</span>
+                    </button>
+                    <button class="btn-reply" onclick="showReplyInput('${comment.id}')">
+                        <i class="bi bi-reply-fill"></i> 답글
+                    </button>
+                </div>
+            `;
+
+            // 대댓글 렌더링
+            if (replies && replies.length > 0) {
+                const repliesContainer = document.createElement('div');
+                repliesContainer.className = 'replies-container';
+                replies.forEach(reply => {
+                    const replyEl = createReplyElement(reply);
+                    repliesContainer.appendChild(replyEl);
+                });
+                div.appendChild(repliesContainer);
+            }
+
+            // 답글 입력창
+            const replyInputWrapper = document.createElement('div');
+            replyInputWrapper.className = 'reply-input-wrapper';
+            replyInputWrapper.id = `reply-input-${comment.id}`;
+            replyInputWrapper.innerHTML = `
+                <div class="reply-input-form">
+                    <textarea placeholder="답글을 입력하세요..." rows="2"></textarea>
+                    <button onclick="submitReply('${comment.id}')">답글</button>
+                </div>
+            `;
+            div.appendChild(replyInputWrapper);
+
+            return div;
+        }
+
+        // Create reply element
+        function createReplyElement(reply) {
+            const div = document.createElement('div');
+            div.className = 'reply-item';
+            div.dataset.commentId = reply.id;
+
+            const timeAgo = getTimeAgo(reply.createdAt);
+            const canDelete = currentUserId === reply.userId;
+
+            const profileImg = reply.profileImage
+                ? `<img src="${reply.profileImage}" alt="프로필">`
+                : getDefaultEmoji(reply.username);
+
+            div.innerHTML = `
+                <div class="comment-header">
+                    <div class="comment-user-info">
+                        <div class="comment-avatar">${profileImg}</div>
+                        <div class="comment-user-details">
+                            <span class="comment-username">${reply.displayName}</span>
+                            <span class="comment-time">${timeAgo}</span>
+                        </div>
+                    </div>
+                    ${canDelete ? `
+                        <div class="comment-actions-menu">
+                            <button class="btn-comment-action" onclick="deleteComment('${reply.id}')">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    ` : ''}
+                </div>
+                <div class="comment-content">${escapeHtml(reply.content)}</div>
+                ${reply.imageUrl ? `<img src="${reply.imageUrl}" class="comment-image" alt="첨부 이미지">` : ''}
+                <div class="comment-actions">
+                    <button class="btn-like ${reply.likedUserIds && reply.likedUserIds.includes(currentUserId) ? 'liked' : ''}"
+                            onclick="toggleLike('${reply.id}')">
+                        <i class="bi ${reply.likedUserIds && reply.likedUserIds.includes(currentUserId) ? 'bi-heart-fill' : 'bi-heart'}"></i>
+                        <span>${reply.likesCount || 0}</span>
+                    </button>
+                </div>
+            `;
+
+            return div;
+        }
+
+        // Submit comment
+        function submitComment() {
+            const content = document.getElementById('commentInput').value.trim();
+            if (!content && !selectedCommentImage) {
+                alert('댓글 내용을 입력하세요.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('content', content);
+            if (selectedCommentImage) {
+                formData.append('image', selectedCommentImage);
+            }
+
+            fetch('/api/comments', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('commentInput').value = '';
+                    document.getElementById('commentImagePreview').style.display = 'none';
+                    selectedCommentImage = null;
+                    loadComments();
+                    showToast('✅ 댓글이 작성되었습니다!');
+                } else {
+                    alert('오류: ' + (data.error || '댓글 작성에 실패했습니다.'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('댓글 작성 중 오류가 발생했습니다.');
+            });
+        }
+
+        // Submit reply
+        function submitReply(parentId) {
+            const replyWrapper = document.getElementById(`reply-input-${parentId}`);
+            const textarea = replyWrapper.querySelector('textarea');
+            const content = textarea.value.trim();
+
+            if (!content) {
+                alert('답글 내용을 입력하세요.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('content', content);
+            formData.append('parentCommentId', parentId);
+
+            fetch('/api/comments', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    textarea.value = '';
+                    replyWrapper.classList.remove('show');
+                    loadComments();
+                    showToast('✅ 답글이 작성되었습니다!');
+                } else {
+                    alert('오류: ' + (data.error || '답글 작성에 실패했습니다.'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('답글 작성 중 오류가 발생했습니다.');
+            });
+        }
+
+        // Toggle like
+        function toggleLike(commentId) {
+            fetch(`/api/comments/${commentId}/like`, {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    loadComments();
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        // Delete comment
+        function deleteComment(commentId) {
+            if (!confirm('정말로 이 댓글을 삭제하시겠습니까?')) {
+                return;
+            }
+
+            fetch(`/api/comments/${commentId}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    loadComments();
+                    showToast('✅ 댓글이 삭제되었습니다.');
+                } else {
+                    alert('오류: ' + (data.error || '삭제에 실패했습니다.'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('삭제 중 오류가 발생했습니다.');
+            });
+        }
+
+        // Show reply input
+        function showReplyInput(commentId) {
+            const replyWrapper = document.getElementById(`reply-input-${commentId}`);
+            replyWrapper.classList.toggle('show');
+            if (replyWrapper.classList.contains('show')) {
+                replyWrapper.querySelector('textarea').focus();
+            }
+        }
+
+        // Helper functions
+        function getTimeAgo(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const seconds = Math.floor((now - date) / 1000);
+
+            if (seconds < 60) return '방금 전';
+            if (seconds < 3600) return Math.floor(seconds / 60) + '분 전';
+            if (seconds < 86400) return Math.floor(seconds / 3600) + '시간 전';
+            if (seconds < 604800) return Math.floor(seconds / 86400) + '일 전';
+
+            return date.toLocaleDateString('ko-KR');
+        }
+
+        function getDefaultEmoji(username) {
+            if (username === 'father') return '👨';
+            if (username === 'admin') return '⚙️';
+            if (username === 'family') return '👨\u200d👩\u200d👧';
+            return '👤';
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Image upload handler
+        document.getElementById('commentImageInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                selectedCommentImage = file;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('commentImagePreview');
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Initialize comments on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadComments();
+
+            // Initialize existing code
+            const medicineBtn = document.getElementById('medicineBtn');
+            if (medicineBtn && !medicineBtn.disabled) {
+                medicineBtn.addEventListener('click', function() {
+                    const isTaken = this.getAttribute('data-taken') === 'true';
+                    if (!isTaken) {
+                        showConfirmModal();
+                    }
+                });
+            }
+
+            loadCalendar();
+        });
 
         // Close modal on background click
         document.getElementById('confirmModal').addEventListener('click', function(e) {
