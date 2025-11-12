@@ -43,7 +43,14 @@ public class MedicineService {
         LocalDate startDate = yearMonth.atDay(1);
         LocalDate endDate = yearMonth.atEndOfMonth();
 
-        List<MedicineRecord> records = medicineRecordRepository.findAllByDateBetween(startDate, endDate);
+        // Redis does not support BETWEEN queries, so we fetch all records and filter in Java
+        List<MedicineRecord> allRecords = new ArrayList<>();
+        medicineRecordRepository.findAll().forEach(allRecords::add);
+
+        List<MedicineRecord> records = allRecords.stream()
+                .filter(record -> !record.getDate().isBefore(startDate) && !record.getDate().isAfter(endDate))
+                .collect(Collectors.toList());
+
         log.debug("Retrieved {} records for {}-{}", records.size(), year, month);
         return records;
     }
