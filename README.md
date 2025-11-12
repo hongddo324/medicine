@@ -8,7 +8,7 @@
 - **Database**: Redis (Session & Data Storage)
 - **Frontend**: Thymeleaf + Bootstrap 5
 - **Calendar**: FullCalendar
-- **Build Tool**: Maven
+- **Build Tool**: Gradle 8.5
 - **Java Version**: 17
 
 ## 주요 기능
@@ -59,22 +59,32 @@ Password: hongddo
 
 ### 필수 요구사항
 - JDK 17 이상
-- Maven 3.6 이상
+- Gradle 8.5 이상 (또는 포함된 Gradle Wrapper 사용)
 - Redis 서버 (125.129.57.235:6379 접근 가능)
 
 ### 빌드
 ```bash
-mvn clean package
+./gradlew clean build
+```
+
+Windows:
+```bash
+gradlew.bat clean build
 ```
 
 ### 실행
 ```bash
-java -jar target/medicine-tracker-1.0.0.jar
+java -jar build/libs/medicine-tracker-1.0.0.jar
 ```
 
 또는 개발 모드:
 ```bash
-mvn spring-boot:run
+./gradlew bootRun
+```
+
+Windows:
+```bash
+gradlew.bat bootRun
 ```
 
 ### 접속
@@ -115,8 +125,14 @@ medicine/
 │   │           ├── login.html
 │   │           └── medicine.html
 │   └── test/
+├── gradle/
+│   └── wrapper/
+│       └── gradle-wrapper.properties
 ├── logs/ (자동 생성)
-├── pom.xml
+├── build.gradle
+├── settings.gradle
+├── gradlew
+├── gradlew.bat
 └── README.md
 ```
 
