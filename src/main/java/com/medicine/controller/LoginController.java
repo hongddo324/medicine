@@ -1,0 +1,72 @@
+package com.medicine.controller;
+
+import com.medicine.model.User;
+import com.medicine.service.UserService;
+import jakarta.servlet.http.HttpSession;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.Optional;
+
+@Slf4j
+@Controller
+@RequiredArgsConstructor
+public class LoginController {
+
+    private static final org.slf4j.Logger accessLogger = org.slf4j.LoggerFactory.getLogger("com.medicine.access");
+    private final UserService userService;
+
+    @GetMapping("/login")
+    public String loginPage(HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user != null) {
+            log.debug("User already logged in: {}, redirecting to home", user.getUsername());
+            return "redirect:/";
+        }
+        return "login";
+    }
+
+    @PostMapping("/login")
+    public String login(@RequestParam String username,
+                       @RequestParam String password,
+                       HttpSession session,
+                       Model model) {
+
+        accessLogger.debug("Login attempt - Username: {}", username);
+
+        Optional<User> userOpt = userService.authenticate(username, password);
+
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            session.setAttribute("user", user);
+            session.setMaxInactiveInterval(8640000); // 100 days
+
+            accessLogger.info("Login successful - Username: {}, Role: {}", username, user.getRole());
+            log.debug("User logged in: {} with role: {}", username, user.getRole());
+
+            return "redirect:/";
+        } else {
+            accessLogger.warn("Login failed - Username: {}", username);
+            log.debug("Login failed for username: {}", username);
+
+            model.addAttribute("error", "아이디 또는 비밀번호가 잘못되었습니다.");
+            return "login";
+        }
+    }
+
+    @GetMapping("/logout")
+    public String logout(HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user != null) {
+            accessLogger.info("Logout - Username: {}", user.getUsername());
+            log.debug("User logged out: {}", user.getUsername());
+        }
+        session.invalidate();
+        return "redirect:/login";
+    }
+}

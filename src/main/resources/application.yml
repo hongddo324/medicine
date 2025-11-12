@@ -1,0 +1,62 @@
+spring:
+  application:
+    name: medicine-tracker
+
+  # Redis Configuration
+  data:
+    redis:
+      host: 125.129.57.235
+      port: 6379
+      password: hongddo
+      timeout: 60000
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: -1ms
+
+  # Session Configuration
+  session:
+    store-type: redis
+    timeout: 8640000  # 100 days in seconds
+    redis:
+      namespace: medicine:session
+
+  # Thymeleaf Configuration
+  thymeleaf:
+    cache: false
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML
+    encoding: UTF-8
+
+  # Jackson Configuration
+  jackson:
+    time-zone: Asia/Seoul
+    date-format: yyyy-MM-dd HH:mm:ss
+
+server:
+  port: 8080
+  servlet:
+    session:
+      cookie:
+        max-age: 8640000  # 100 days in seconds
+        http-only: true
+        name: MEDICINE_SESSION
+
+# Logging Configuration
+logging:
+  level:
+    root: INFO
+    com.medicine: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: logs/medicine-tracker.log
+  logback:
+    rollingpolicy:
+      max-file-size: 10MB
+      max-history: 30
+      file-name-pattern: logs/medicine-tracker-%d{yyyy-MM-dd}.%i.log
