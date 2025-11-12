@@ -26,4 +26,6 @@ public class User implements Serializable {
     private Role role;
 
     private String displayName;
+
+    private String profileImage;  // 프로필 사진 URL 또는 Base64 데이터
 }

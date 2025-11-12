@@ -550,9 +550,14 @@
                         <span class="role-badge" th:text="${user.role.displayName}"></span>
                     </div>
                 </div>
-                <a href="/logout" class="btn logout-btn">
-                    <i class="bi bi-box-arrow-right"></i>
-                </a>
+                <div style="display: flex; gap: 10px;">
+                    <a th:if="${user.role == T(com.medicine.model.Role).ADMIN}" href="/admin" class="btn logout-btn" style="background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);">
+                        <i class="bi bi-gear-fill"></i>
+                    </a>
+                    <a href="/logout" class="btn logout-btn">
+                        <i class="bi bi-box-arrow-right"></i>
+                    </a>
+                </div>
             </div>
         </div>
 
