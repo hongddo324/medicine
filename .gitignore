@@ -69,3 +69,18 @@ Thumbs.db
 
 # Spring Boot
 spring-boot-devtools.properties
+
+# Firebase credentials
+src/main/resources/firebase-service-account.json
+
+# Node / Frontend
+node_modules/
+
+# Local and tool-specific settings
+.env
+*.local.json
+.claude/
+
+# Personal media or generated content
+meal/
+profile/

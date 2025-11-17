@@ -2,13 +2,20 @@ spring:
   application:
     name: medicine-tracker
 
+  # File Upload Configuration
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+      enabled: true
+
   # Redis Configuration
   data:
     redis:
-      host: 125.129.57.235
-      port: 6379
-      password: hongddo
-      timeout: 60000
+      host: ${REDIS_HOST:127.0.0.1}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: ${REDIS_TIMEOUT:60000}
       lettuce:
         pool:
           max-active: 8
@@ -37,13 +44,28 @@ spring:
     date-format: yyyy-MM-dd HH:mm:ss
 
 server:
-  port: 8080
+  forward-headers-strategy: native
+  port: 8283
   servlet:
     session:
       cookie:
         max-age: 8640000  # 100 days in seconds
         http-only: true
         name: MEDICINE_SESSION
+
+# OpenAI Configuration
+openai:
+  api-key: ${API_KEY}
+  model: gpt-5.1  # GPT-4 Turbo (latest stable version)
+  max-tokens: 1000
+  temperature: 0.7
+
+# Firebase Cloud Messaging Configuration
+# Service account key file required at src/main/resources/firebase-service-account.json
+# Download from: Firebase Console > Project Settings > Service Accounts > Generate New Private Key
+firebase:
+  enabled: true
+  project-id: mdedicine
 
 # Logging Configuration
 logging:

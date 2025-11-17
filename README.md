@@ -39,12 +39,24 @@
 
 ## 설정
 
-### Redis 연결 정보
+### Redis 연결 정보 (환경변수 사용)
 ```yaml
-Host: 125.129.57.235
-Port: 6379
-Password: hongddo
+Host: ${REDIS_HOST}
+Port: ${REDIS_PORT}
+Password: ${REDIS_PASSWORD}
 ```
+
+환경변수 예시:
+- Windows (PowerShell)
+  - `setx REDIS_HOST 127.0.0.1`
+  - `setx REDIS_PORT 6379`
+  - `setx REDIS_PASSWORD <비밀번호>`
+- macOS/Linux (bash/zsh)
+  - `export REDIS_HOST=127.0.0.1`
+  - `export REDIS_PORT=6379`
+  - `export REDIS_PASSWORD=<비밀번호>`
+
+애플리케이션은 `application.yml`에서 환경변수를 참조하도록 설정되어 있습니다.
 
 ### 기본 사용자 계정
 

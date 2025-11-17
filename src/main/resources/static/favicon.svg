@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- 알약 캡슐 -->
+  <defs>
+    <linearGradient id="blueGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#60A5FA;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#3B82F6;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="redGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#F87171;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#EF4444;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- 캡슐 배경 -->
+  <ellipse cx="25" cy="50" rx="15" ry="15" fill="url(#blueGradient)"/>
+  <rect x="25" y="35" width="50" height="30" fill="url(#blueGradient)"/>
+  <rect x="50" y="35" width="25" height="30" fill="url(#redGradient)"/>
+  <ellipse cx="75" cy="50" rx="15" ry="15" fill="url(#redGradient)"/>
+
+  <!-- 분할선 -->
+  <line x1="50" y1="35" x2="50" y2="65" stroke="rgba(0,0,0,0.2)" stroke-width="2"/>
+
+  <!-- 테두리 -->
+  <path d="M 25 35 A 15 15 0 0 1 25 65 L 75 65 A 15 15 0 0 1 75 35 Z"
+        fill="none" stroke="rgba(0,0,0,0.1)" stroke-width="1"/>
+</svg>

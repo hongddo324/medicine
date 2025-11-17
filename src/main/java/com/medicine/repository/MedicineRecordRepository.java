@@ -10,4 +10,5 @@ import java.util.Optional;
 @Repository
 public interface MedicineRecordRepository extends CrudRepository<MedicineRecord, String> {
     Optional<MedicineRecord> findByDate(LocalDate date);
+    Optional<MedicineRecord> findByDateAndMedicineType(LocalDate date, MedicineRecord.MedicineType medicineType);
 }

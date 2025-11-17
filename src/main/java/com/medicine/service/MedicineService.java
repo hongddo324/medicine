@@ -19,22 +19,39 @@ public class MedicineService {
 
     private final MedicineRecordRepository medicineRecordRepository;
 
-    public MedicineRecord getTodayRecord() {
+    public MedicineRecord getTodayRecord(MedicineRecord.MedicineType medicineType) {
         LocalDate today = LocalDate.now();
-        return medicineRecordRepository.findByDate(today).orElse(createDefaultRecord(today));
+        return medicineRecordRepository.findByDateAndMedicineType(today, medicineType)
+                .orElse(createDefaultRecord(today, medicineType));
     }
 
-    public MedicineRecord markAsTaken(String username) {
+    public MedicineRecord markAsTaken(String username, MedicineRecord.MedicineType medicineType) {
         LocalDate today = LocalDate.now();
-        MedicineRecord record = medicineRecordRepository.findByDate(today)
-                .orElse(createDefaultRecord(today));
+        MedicineRecord record = medicineRecordRepository.findByDateAndMedicineType(today, medicineType)
+                .orElse(createDefaultRecord(today, medicineType));
 
         record.setTaken(true);
         record.setTakenTime(LocalDateTime.now());
         record.setTakenBy(username);
 
         MedicineRecord saved = medicineRecordRepository.save(record);
-        log.debug("Medicine marked as taken for date: {} by user: {} at {}", today, username, saved.getTakenTime());
+        log.debug("Medicine marked as taken - Type: {}, Date: {}, User: {}, Time: {}",
+                medicineType, today, username, saved.getTakenTime());
+        return saved;
+    }
+
+    public MedicineRecord cancelTaken(String username, MedicineRecord.MedicineType medicineType) {
+        LocalDate today = LocalDate.now();
+        MedicineRecord record = medicineRecordRepository.findByDateAndMedicineType(today, medicineType)
+                .orElse(createDefaultRecord(today, medicineType));
+
+        record.setTaken(false);
+        record.setTakenTime(null);
+        record.setTakenBy(null);
+
+        MedicineRecord saved = medicineRecordRepository.save(record);
+        log.debug("Medicine marked as cancelled - Type: {}, Date: {}, User: {}",
+                medicineType, today, username);
         return saved;
     }
 
@@ -58,26 +75,53 @@ public class MedicineService {
     public Map<String, Object> getMonthCalendarData(int year, int month) {
         List<MedicineRecord> records = getMonthRecords(year, month);
 
-        Map<String, Object> calendarData = new HashMap<>();
-        List<Map<String, Object>> events = records.stream()
+        // Group records by date
+        Map<LocalDate, List<MedicineRecord>> recordsByDate = records.stream()
                 .filter(MedicineRecord::isTaken)
-                .map(record -> {
-                    Map<String, Object> event = new HashMap<>();
-                    event.put("date", record.getDate().toString());
-                    event.put("time", record.getTakenTime().toLocalTime().toString());
-                    event.put("title", "약 복용");
-                    return event;
-                })
-                .collect(Collectors.toList());
+                .collect(Collectors.groupingBy(MedicineRecord::getDate));
+
+        Map<String, Object> calendarData = new HashMap<>();
+        List<Map<String, Object>> events = new ArrayList<>();
+
+        for (Map.Entry<LocalDate, List<MedicineRecord>> entry : recordsByDate.entrySet()) {
+            LocalDate date = entry.getKey();
+            List<MedicineRecord> dayRecords = entry.getValue();
+
+            // Check if both morning and evening medicine are taken
+            boolean hasMorning = dayRecords.stream()
+                    .anyMatch(r -> r.getMedicineType() == MedicineRecord.MedicineType.MORNING && r.isTaken());
+            boolean hasEvening = dayRecords.stream()
+                    .anyMatch(r -> r.getMedicineType() == MedicineRecord.MedicineType.EVENING && r.isTaken());
+
+            // If at least one medicine is taken but not both, mark as incomplete
+            boolean isIncomplete = !(hasMorning && hasEvening);
+
+            // Get the first taken time for display
+            String time = dayRecords.get(0).getTakenTime().toLocalTime().toString();
+
+            Map<String, Object> event = new HashMap<>();
+            event.put("date", date.toString());
+            event.put("time", time);
+            event.put("title", "약 복용");
+            event.put("incomplete", isIncomplete);
+            event.put("hasMorning", hasMorning);
+            event.put("hasEvening", hasEvening);
+
+            log.debug("Calendar event - Date: {}, Morning: {}, Evening: {}, Incomplete: {}",
+                    date, hasMorning, hasEvening, isIncomplete);
+
+            events.add(event);
+        }
 
         calendarData.put("events", events);
         return calendarData;
     }
 
-    private MedicineRecord createDefaultRecord(LocalDate date) {
+    private MedicineRecord createDefaultRecord(LocalDate date, MedicineRecord.MedicineType medicineType) {
         MedicineRecord record = new MedicineRecord();
         record.setId(UUID.randomUUID().toString());
         record.setDate(date);
+        record.setMedicineType(medicineType);
         record.setTaken(false);
         return record;
     }

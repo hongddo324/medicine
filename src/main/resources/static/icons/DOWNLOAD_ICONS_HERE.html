@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>아이콘 자동 다운로드</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .card {
+            background: white;
+            color: #333;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        h1 { margin: 0 0 20px 0; }
+        #status {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 20px 0;
+            min-height: 60px;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .success {
+            color: #28a745;
+            font-size: 24px;
+        }
+        .instruction {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: left;
+        }
+        code {
+            background: #e9ecef;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🎨 PWA 아이콘 생성기</h1>
+        <div id="status">준비 중...</div>
+        <div id="spinner" class="spinner"></div>
+
+        <div class="instruction" id="instruction" style="display: none;">
+            <h3>📋 다음 단계:</h3>
+            <ol style="text-align: left;">
+                <li><strong>다운로드 폴더</strong>에서 8개의 PNG 파일 확인</li>
+                <li>파일들을 복사하여 다음 폴더에 붙여넣기:<br>
+                    <code style="font-size: 11px;">src/main/resources/static/icons/</code>
+                </li>
+                <li>기존 파일들을 <strong>덮어쓰기</strong></li>
+                <li>서버 재시작 후 브라우저에서 <strong>Ctrl + Shift + R</strong></li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        const sizes = [72, 96, 128, 144, 152, 192, 384, 512];
+        let downloadCount = 0;
+
+        function drawPillIcon(size) {
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+
+            ctx.clearRect(0, 0, size, size);
+
+            const centerX = size / 2;
+            const centerY = size / 2;
+            const pillWidth = size * 0.7;
+            const pillHeight = size * 0.4;
+            const radius = pillHeight / 2;
+
+            // 그림자
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
+            ctx.shadowBlur = size * 0.05;
+            ctx.shadowOffsetX = size * 0.02;
+            ctx.shadowOffsetY = size * 0.02;
+
+            // 배경
+            ctx.fillStyle = '#FFFFFF';
+            ctx.beginPath();
+            ctx.arc(centerX - pillWidth/2 + radius, centerY, radius, Math.PI/2, Math.PI*3/2);
+            ctx.arc(centerX + pillWidth/2 - radius, centerY, radius, -Math.PI/2, Math.PI/2);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.shadowColor = 'transparent';
+
+            // 파란색 왼쪽
+            const gradient1 = ctx.createLinearGradient(
+                centerX - pillWidth/2, centerY - radius,
+                centerX - pillWidth/2, centerY + radius
+            );
+            gradient1.addColorStop(0, '#60A5FA');
+            gradient1.addColorStop(1, '#3B82F6');
+
+            ctx.fillStyle = gradient1;
+            ctx.beginPath();
+            ctx.arc(centerX - pillWidth/2 + radius, centerY, radius, Math.PI/2, Math.PI*3/2);
+            ctx.lineTo(centerX, centerY - radius);
+            ctx.lineTo(centerX, centerY + radius);
+            ctx.closePath();
+            ctx.fill();
+
+            // 빨간색 오른쪽
+            const gradient2 = ctx.createLinearGradient(
+                centerX + pillWidth/2, centerY - radius,
+                centerX + pillWidth/2, centerY + radius
+            );
+            gradient2.addColorStop(0, '#F87171');
+            gradient2.addColorStop(1, '#EF4444');
+
+            ctx.fillStyle = gradient2;
+            ctx.beginPath();
+            ctx.arc(centerX + pillWidth/2 - radius, centerY, radius, -Math.PI/2, Math.PI/2);
+            ctx.lineTo(centerX, centerY + radius);
+            ctx.lineTo(centerX, centerY - radius);
+            ctx.closePath();
+            ctx.fill();
+
+            // 테두리
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.1)';
+            ctx.lineWidth = Math.max(1, size * 0.01);
+            ctx.beginPath();
+            ctx.arc(centerX - pillWidth/2 + radius, centerY, radius, Math.PI/2, Math.PI*3/2);
+            ctx.arc(centerX + pillWidth/2 - radius, centerY, radius, -Math.PI/2, Math.PI/2);
+            ctx.closePath();
+            ctx.stroke();
+
+            // 분할선
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.15)';
+            ctx.lineWidth = Math.max(1, size * 0.015);
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY - radius);
+            ctx.lineTo(centerX, centerY + radius);
+            ctx.stroke();
+
+            // 하이라이트
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.beginPath();
+            ctx.ellipse(
+                centerX - pillWidth/4, centerY - radius/3,
+                pillWidth/3, radius/2.5,
+                0, 0, Math.PI * 2
+            );
+            ctx.fill();
+
+            return canvas;
+        }
+
+        function downloadIcon(canvas, size) {
+            return new Promise((resolve) => {
+                canvas.toBlob((blob) => {
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `icon-${size}x${size}.png`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(url);
+
+                    downloadCount++;
+                    const statusEl = document.getElementById('status');
+                    statusEl.innerHTML = `
+                        다운로드 중...<br>
+                        <span style="font-size: 32px;">${downloadCount}/8</span><br>
+                        <small>icon-${size}x${size}.png</small>
+                    `;
+
+                    setTimeout(resolve, 400);
+                }, 'image/png');
+            });
+        }
+
+        async function generateAllIcons() {
+            document.getElementById('status').innerHTML = '아이콘 생성 시작...';
+
+            for (const size of sizes) {
+                const canvas = drawPillIcon(size);
+                await downloadIcon(canvas, size);
+            }
+
+            document.getElementById('spinner').style.display = 'none';
+            document.getElementById('status').innerHTML = `
+                <div class="success">✅ 완료!</div>
+                <div style="margin-top: 10px; font-size: 16px;">
+                    8개의 아이콘이 다운로드되었습니다
+                </div>
+            `;
+            document.getElementById('instruction').style.display = 'block';
+        }
+
+        window.onload = () => {
+            setTimeout(generateAllIcons, 1000);
+        };
+    </script>
+</body>
+</html>
