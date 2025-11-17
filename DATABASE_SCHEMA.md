@@ -22,6 +22,7 @@ CREATE TABLE users (
     role VARCHAR(20) NOT NULL,
     display_name VARCHAR(100),
     profile_image TEXT,
+    points INTEGER DEFAULT 0,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -37,6 +38,7 @@ COMMENT ON COLUMN users.password IS '암호화된 비밀번호';
 COMMENT ON COLUMN users.role IS '사용자 역할 (ADMIN, FATHER, FAMILY, OTHER)';
 COMMENT ON COLUMN users.display_name IS '표시 이름';
 COMMENT ON COLUMN users.profile_image IS '프로필 사진 (URL 또는 Base64)';
+COMMENT ON COLUMN users.points IS '사용자 포인트 (기본값: 0)';
 COMMENT ON COLUMN users.created_at IS '생성 일시';
 COMMENT ON COLUMN users.updated_at IS '수정 일시';
 ```

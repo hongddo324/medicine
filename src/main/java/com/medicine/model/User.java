@@ -45,10 +45,16 @@ public class User implements Serializable {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(name = "points")
+    private Integer points = 0;  // 사용자 포인트 (기본값: 0)
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
+        if (points == null) {
+            points = 0;
+        }
     }
 
     @PreUpdate
