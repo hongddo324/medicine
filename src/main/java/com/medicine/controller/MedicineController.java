@@ -7,7 +7,9 @@ import com.medicine.model.User;
 import com.medicine.service.CommentService;
 import com.medicine.service.FileStorageService;
 import com.medicine.service.MedicineService;
+import com.medicine.service.PointService;
 import com.medicine.service.PushNotificationService;
+import com.medicine.model.PointHistory;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +35,7 @@ public class MedicineController {
     private final CommentService commentService;
     private final FileStorageService fileStorageService;
     private final PushNotificationService pushNotificationService;
+    private final PointService pointService;
 
     @GetMapping("/")
     public String home(HttpSession session, Model model) {
@@ -72,7 +75,14 @@ public class MedicineController {
 
         try {
             MedicineRecord.MedicineType type = MedicineRecord.MedicineType.valueOf(medicineType.toUpperCase());
-            MedicineRecord record = medicineService.markAsTaken(user.getUsername(), type);
+            MedicineRecord record = medicineService.markAsTaken(user, type);
+
+            // 포인트 적립 (FATHER 권한만)
+            if (user.getRole() == Role.FATHER) {
+                pointService.addPoints(user, 10, PointHistory.PointType.MEDICINE,
+                    type.getDisplayName() + " 약 복용");
+                log.info("Points added - User: {}, Points: +10, Type: MEDICINE", user.getUsername());
+            }
 
             log.info("Medicine taken - User: {}, Type: {}, Date: {}, Time: {}",
                 user.getUsername(), type, record.getDate(), record.getTakenTime());
@@ -81,7 +91,7 @@ public class MedicineController {
             response.put("success", true);
             response.put("taken", true);
             response.put("takenTime", record.getTakenTime().toString());
-            response.put("takenBy", record.getTakenBy());
+            response.put("takenBy", record.getTakenBy() != null ? record.getTakenBy().getUsername() : null);
             response.put("medicineType", type.name());
 
             return ResponseEntity.ok(response);
@@ -107,7 +117,7 @@ public class MedicineController {
 
         try {
             MedicineRecord.MedicineType type = MedicineRecord.MedicineType.valueOf(medicineType.toUpperCase());
-            MedicineRecord record = medicineService.cancelTaken(user.getUsername(), type);
+            MedicineRecord record = medicineService.cancelTaken(user, type);
 
             log.info("Medicine cancelled - User: {}, Type: {}, Date: {}",
                 user.getUsername(), type, record.getDate());
@@ -151,36 +161,34 @@ public class MedicineController {
         }
 
         List<Comment> comments = commentService.getAllComments();
-        return ResponseEntity.ok(Map.of("comments", comments, "currentUserId", user.getId()));
+        return ResponseEntity.ok(comments);
     }
 
     // 댓글 작성
     @PostMapping("/api/comments")
     @ResponseBody
-    public ResponseEntity<?> createComment(
-            @RequestParam String content,
-            @RequestParam(required = false) MultipartFile image,
-            @RequestParam(required = false) String parentCommentId,
-            HttpSession session) {
-
+    public ResponseEntity<?> createComment(@RequestBody Map<String, Object> requestBody, HttpSession session) {
         User user = (User) session.getAttribute("user");
         if (user == null) {
             return ResponseEntity.status(401).body(Map.of("error", "인증되지 않은 사용자입니다."));
         }
 
         try {
-            String imageUrl = null;
-            if (image != null && !image.isEmpty()) {
-                // Generate a temporary comment ID for storing the image
-                String tempCommentId = "comment_" + System.currentTimeMillis();
-                imageUrl = fileStorageService.storeCommentImage(image, tempCommentId);
-                log.info("Comment image stored - User: {}, Path: {}, Size: {} bytes",
-                        user.getUsername(), imageUrl, image.getSize());
+            String content = (String) requestBody.get("content");
+            String imageData = (String) requestBody.get("imageData");
+            Object parentCommentIdObj = requestBody.get("parentCommentId");
+            Long parentCommentId = null;
+            if (parentCommentIdObj != null) {
+                if (parentCommentIdObj instanceof Integer) {
+                    parentCommentId = ((Integer) parentCommentIdObj).longValue();
+                } else if (parentCommentIdObj instanceof Long) {
+                    parentCommentId = (Long) parentCommentIdObj;
+                }
             }
 
-            Comment comment = commentService.createComment(content, imageUrl, user, parentCommentId);
-            log.info("Comment created - User: {}, ID: {}, HasImage: {}",
-                    user.getUsername(), comment.getId(), imageUrl != null);
+            Comment comment = commentService.createComment(content, imageData, user, parentCommentId);
+            log.info("Comment created - User: {}, ID: {}, HasImage: {}, ParentId: {}",
+                    user.getUsername(), comment.getId(), imageData != null, parentCommentId);
 
             // 댓글 작성 알림 전송 (작성자 본인 제외)
             String notificationTitle = "💬 새 댓글";
@@ -188,7 +196,7 @@ public class MedicineController {
                     (content.length() > 30 ? content.substring(0, 30) + "..." : content);
             Map<String, String> notificationData = Map.of(
                     "type", "comment",
-                    "commentId", comment.getId(),
+                    "commentId", String.valueOf(comment.getId()),
                     "userId", user.getUsername()
             );
             pushNotificationService.sendNotificationToAllUsersExcept(
@@ -202,16 +210,16 @@ public class MedicineController {
             log.info("FCM notification sent for new comment - User: {}", user.getUsername());
 
             return ResponseEntity.ok(Map.of("success", true, "comment", comment));
-        } catch (IOException e) {
-            log.error("Failed to process comment image for user: {}", user.getUsername(), e);
-            return ResponseEntity.status(500).body(Map.of("error", "이미지 처리 중 오류가 발생했습니다."));
+        } catch (Exception e) {
+            log.error("Failed to create comment for user: {}", user.getUsername(), e);
+            return ResponseEntity.status(500).body(Map.of("error", "댓글 작성 중 오류가 발생했습니다."));
         }
     }
 
     // 댓글 좋아요 토글
     @PostMapping("/api/comments/{commentId}/like")
     @ResponseBody
-    public ResponseEntity<?> toggleLike(@PathVariable String commentId, HttpSession session) {
+    public ResponseEntity<?> toggleLike(@PathVariable Long commentId, HttpSession session) {
         User user = (User) session.getAttribute("user");
         if (user == null) {
             return ResponseEntity.status(401).body(Map.of("error", "인증되지 않은 사용자입니다."));
@@ -233,7 +241,7 @@ public class MedicineController {
     // 댓글 삭제
     @DeleteMapping("/api/comments/{commentId}")
     @ResponseBody
-    public ResponseEntity<?> deleteComment(@PathVariable String commentId, HttpSession session) {
+    public ResponseEntity<?> deleteComment(@PathVariable Long commentId, HttpSession session) {
         User user = (User) session.getAttribute("user");
         if (user == null) {
             return ResponseEntity.status(401).body(Map.of("error", "인증되지 않은 사용자입니다."));
@@ -245,20 +253,39 @@ public class MedicineController {
         }
 
         // 본인의 댓글이거나 관리자만 삭제 가능
-        if (!comment.getUserId().equals(user.getId()) && user.getRole() != Role.ADMIN) {
+        if (!comment.getUser().getId().equals(user.getId()) && user.getRole() != Role.ADMIN) {
             return ResponseEntity.status(403).body(Map.of("error", "삭제 권한이 없습니다."));
         }
 
         // Delete comment image if exists
         if (comment.getImageUrl() != null && !comment.getImageUrl().isEmpty()
-                && comment.getImageUrl().startsWith("/files/")) {
-            fileStorageService.deleteFile(comment.getImageUrl());
-            log.info("Comment image deleted - CommentId: {}, Path: {}", commentId, comment.getImageUrl());
+                && comment.getImageUrl().startsWith("data:image")) {
+            // Base64 이미지는 DB에만 저장되므로 삭제할 파일 없음
+            log.debug("Comment has Base64 image - CommentId: {}", commentId);
         }
 
         commentService.deleteComment(commentId);
         log.info("Comment deleted - User: {}, CommentId: {}", user.getUsername(), commentId);
 
         return ResponseEntity.ok(Map.of("success", true));
+    }
+
+    // 오늘의 약 복용 상태 조회
+    @GetMapping("/api/medicine/today")
+    @ResponseBody
+    public ResponseEntity<?> getTodayMedicineStatus(HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return ResponseEntity.status(401).body(Map.of("error", "인증되지 않은 사용자입니다."));
+        }
+
+        MedicineRecord morningRecord = medicineService.getTodayRecord(MedicineRecord.MedicineType.MORNING);
+        MedicineRecord eveningRecord = medicineService.getTodayRecord(MedicineRecord.MedicineType.EVENING);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("morning", Map.of("taken", morningRecord.isTaken()));
+        response.put("evening", Map.of("taken", eveningRecord.isTaken()));
+
+        return ResponseEntity.ok(response);
     }
 }
