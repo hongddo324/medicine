@@ -1,6 +1,7 @@
 package com.medicine.service;
 
 import com.medicine.model.MedicineRecord;
+import com.medicine.model.User;
 import com.medicine.repository.MedicineRecordRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,22 +26,22 @@ public class MedicineService {
                 .orElse(createDefaultRecord(today, medicineType));
     }
 
-    public MedicineRecord markAsTaken(String username, MedicineRecord.MedicineType medicineType) {
+    public MedicineRecord markAsTaken(User user, MedicineRecord.MedicineType medicineType) {
         LocalDate today = LocalDate.now();
         MedicineRecord record = medicineRecordRepository.findByDateAndMedicineType(today, medicineType)
                 .orElse(createDefaultRecord(today, medicineType));
 
         record.setTaken(true);
         record.setTakenTime(LocalDateTime.now());
-        record.setTakenBy(username);
+        record.setTakenBy(user);
 
         MedicineRecord saved = medicineRecordRepository.save(record);
         log.debug("Medicine marked as taken - Type: {}, Date: {}, User: {}, Time: {}",
-                medicineType, today, username, saved.getTakenTime());
+                medicineType, today, user.getUsername(), saved.getTakenTime());
         return saved;
     }
 
-    public MedicineRecord cancelTaken(String username, MedicineRecord.MedicineType medicineType) {
+    public MedicineRecord cancelTaken(User user, MedicineRecord.MedicineType medicineType) {
         LocalDate today = LocalDate.now();
         MedicineRecord record = medicineRecordRepository.findByDateAndMedicineType(today, medicineType)
                 .orElse(createDefaultRecord(today, medicineType));
@@ -51,7 +52,7 @@ public class MedicineService {
 
         MedicineRecord saved = medicineRecordRepository.save(record);
         log.debug("Medicine marked as cancelled - Type: {}, Date: {}, User: {}",
-                medicineType, today, username);
+                medicineType, today, user.getUsername());
         return saved;
     }
 
@@ -60,13 +61,8 @@ public class MedicineService {
         LocalDate startDate = yearMonth.atDay(1);
         LocalDate endDate = yearMonth.atEndOfMonth();
 
-        // Redis does not support BETWEEN queries, so we fetch all records and filter in Java
-        List<MedicineRecord> allRecords = new ArrayList<>();
-        medicineRecordRepository.findAll().forEach(allRecords::add);
-
-        List<MedicineRecord> records = allRecords.stream()
-                .filter(record -> !record.getDate().isBefore(startDate) && !record.getDate().isAfter(endDate))
-                .collect(Collectors.toList());
+        // JPA를 사용하여 날짜 범위로 조회
+        List<MedicineRecord> records = medicineRecordRepository.findByDateBetweenOrderByDateDescMedicineTypeAsc(startDate, endDate);
 
         log.debug("Retrieved {} records for {}-{}", records.size(), year, month);
         return records;
@@ -119,7 +115,6 @@ public class MedicineService {
 
     private MedicineRecord createDefaultRecord(LocalDate date, MedicineRecord.MedicineType medicineType) {
         MedicineRecord record = new MedicineRecord();
-        record.setId(UUID.randomUUID().toString());
         record.setDate(date);
         record.setMedicineType(medicineType);
         record.setTaken(false);
