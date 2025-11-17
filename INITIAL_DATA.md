@@ -19,13 +19,14 @@ psql -h localhost -p 5432 -U postgres -d medicine
 ### Example 1: Admin User
 
 ```sql
-INSERT INTO users (username, password, display_name, role, profile_image, created_at)
+INSERT INTO users (username, password, display_name, role, profile_image, points, created_at)
 VALUES (
     'admin',
     'admin123',  -- Change this to a secure password
     '관리자',
     'ADMIN',
     '/images/profile/default.png',
+    0,
     CURRENT_TIMESTAMP
 );
 ```
@@ -33,13 +34,14 @@ VALUES (
 ### Example 2: Regular User (User1)
 
 ```sql
-INSERT INTO users (username, password, display_name, role, profile_image, created_at)
+INSERT INTO users (username, password, display_name, role, profile_image, points, created_at)
 VALUES (
     'user1',
     'password123',  -- Change this to a secure password
     '홍길동',
     'USER',
     '/images/profile/default.png',
+    0,
     CURRENT_TIMESTAMP
 );
 ```
@@ -47,13 +49,14 @@ VALUES (
 ### Example 3: Regular User (User2)
 
 ```sql
-INSERT INTO users (username, password, display_name, role, profile_image, created_at)
+INSERT INTO users (username, password, display_name, role, profile_image, points, created_at)
 VALUES (
     'user2',
     'password456',  -- Change this to a secure password
     '김철수',
     'USER',
     '/images/profile/default.png',
+    0,
     CURRENT_TIMESTAMP
 );
 ```
@@ -63,12 +66,12 @@ VALUES (
 If you want to create multiple users at once:
 
 ```sql
-INSERT INTO users (username, password, display_name, role, profile_image, created_at)
+INSERT INTO users (username, password, display_name, role, profile_image, points, created_at)
 VALUES
-    ('admin', 'admin123', '관리자', 'ADMIN', '/images/profile/default.png', CURRENT_TIMESTAMP),
-    ('user1', 'password123', '홍길동', 'USER', '/images/profile/default.png', CURRENT_TIMESTAMP),
-    ('user2', 'password456', '김철수', 'USER', '/images/profile/default.png', CURRENT_TIMESTAMP),
-    ('user3', 'password789', '이영희', 'USER', '/images/profile/default.png', CURRENT_TIMESTAMP);
+    ('admin', 'admin123', '관리자', 'ADMIN', '/images/profile/default.png', 0, CURRENT_TIMESTAMP),
+    ('user1', 'password123', '홍길동', 'USER', '/images/profile/default.png', 0, CURRENT_TIMESTAMP),
+    ('user2', 'password456', '김철수', 'USER', '/images/profile/default.png', 0, CURRENT_TIMESTAMP),
+    ('user3', 'password789', '이영희', 'USER', '/images/profile/default.png', 0, CURRENT_TIMESTAMP);
 ```
 
 ## Verify Users Created
@@ -95,6 +98,19 @@ UPDATE users SET password = 'new_password' WHERE username = 'user1';
 
 ```sql
 UPDATE users SET profile_image = '/images/profile/user1.jpg' WHERE username = 'user1';
+```
+
+### Update Points
+
+```sql
+-- Add points to a user
+UPDATE users SET points = points + 10 WHERE username = 'user1';
+
+-- Set specific points value
+UPDATE users SET points = 50 WHERE username = 'user1';
+
+-- Reset points to 0
+UPDATE users SET points = 0 WHERE username = 'user1';
 ```
 
 ## Delete User
@@ -134,6 +150,26 @@ The application supports two roles:
 mkdir -p /home/user/medicine/uploads/profile
 ```
 
+### Points System
+
+The application includes a points system to gamify user engagement:
+
+- **Default Points**: All users start with 0 points
+- **Points Display**: User points are displayed prominently on the home screen with an animated trophy icon
+- **Points Tracking**: Points are stored in the `points` column (INTEGER type)
+- **Future Features**: Points can be used for:
+  - Rewarding medication adherence (taking medicine on time)
+  - Completing daily meal uploads
+  - Consistent engagement with the app
+  - Achievements and milestones
+
+Example point values (can be customized):
+- Taking morning medicine: +5 points
+- Taking evening medicine: +5 points
+- Uploading meal with good nutrition score: +10 points
+- Writing encouraging comment: +2 points
+- Daily streak bonus: +20 points
+
 ### Serial ID
 
 The `id` column is auto-generated using PostgreSQL's `BIGSERIAL` type (equivalent to `IDENTITY`). You should **NOT** specify the `id` value in INSERT statements.
@@ -146,13 +182,14 @@ For production environments, you might want to use hashed passwords:
 -- Using pgcrypto extension for password hashing
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
-INSERT INTO users (username, password, display_name, role, profile_image, created_at)
+INSERT INTO users (username, password, display_name, role, profile_image, points, created_at)
 VALUES (
     'admin',
     crypt('your_secure_password', gen_salt('bf')),  -- Blowfish hashing
     '관리자',
     'ADMIN',
     '/images/profile/default.png',
+    0,
     CURRENT_TIMESTAMP
 );
 ```
