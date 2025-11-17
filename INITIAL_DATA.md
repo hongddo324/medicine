@@ -229,3 +229,44 @@ The database schema hasn't been created yet. Either:
 ### Error: "column does not exist"
 
 Make sure your database schema is up to date. Run the application with `spring.jpa.hibernate.ddl-auto=update` to sync the schema.
+
+## Point Items (Example Products)
+
+### Create Point Items
+
+Create some example point items for the point shop:
+
+```sql
+INSERT INTO point_items (name, description, points, icon, color, available, created_at)
+VALUES
+    ('커피 쿠폰', '스타벅스 아메리카노 톨 사이즈', 100, 'cup-hot', '#fef3c7', true, CURRENT_TIMESTAMP),
+    ('치킨 쿠폰', 'BBQ 황금올리브 치킨', 300, 'egg-fried', '#fecaca', true, CURRENT_TIMESTAMP),
+    ('영화 관람권', 'CGV 영화 관람권 1매', 200, 'film', '#e0e7ff', true, CURRENT_TIMESTAMP),
+    ('피자 쿠폰', '피자헛 라지 피자', 350, 'box', '#fef08a', true, CURRENT_TIMESTAMP),
+    ('편의점 상품권', 'CU/GS25 5천원 상품권', 150, 'shop', '#d9f99d', true, CURRENT_TIMESTAMP),
+    ('택시 쿠폰', '카카오택시 5천원 쿠폰', 180, 'taxi-front', '#a5f3fc', true, CURRENT_TIMESTAMP),
+    ('문화상품권', '문화상품권 1만원', 400, 'gift', '#fda4af', true, CURRENT_TIMESTAMP),
+    ('도서 상품권', '교보문고 5천원', 170, 'book', '#c4b5fd', true, CURRENT_TIMESTAMP);
+```
+
+### View Point Items
+
+```sql
+SELECT id, name, description, points, available FROM point_items ORDER BY points;
+```
+
+### Update Point Item
+
+```sql
+-- Make item unavailable
+UPDATE point_items SET available = false WHERE name = '커피 쿠폰';
+
+-- Change points
+UPDATE point_items SET points = 120 WHERE name = '커피 쿠폰';
+```
+
+### Delete Point Item
+
+```sql
+DELETE FROM point_items WHERE id = 1;
+```
