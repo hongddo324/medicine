@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./gradlew build)",
+      "Bash(./gradlew build:*)",
+      "Bash(dir:*)",
+      "Bash(gradlew.bat build:*)",
+      "Bash(gradle build:*)",
+      "Bash(redis-cli:*)",
+      "Bash(mkdir:*)",
+      "Bash(powershell -Command \"(Get-Content ''C:\\Users\\hongs\\Desktop\\home-lab\\test\\medicine\\medicine\\src\\main\\resources\\templates\\medicine.html'').Length\")",
+      "Bash(powershell:*)",
+      "Bash(./gradlew.bat build -x test)",
+      "Bash(npm install:*)",
+      "Bash(npx web-push:*)",
+      "Bash(./gradlew.bat:*)",
+      "Bash(gradle clean build:*)",
+      "Bash(node generate-vapid-keys.js:*)",
+      "Bash(jar tf:*)",
+      "Bash(del \"C:\\Users\\hongs\\Desktop\\home-lab\\test\\medicine\\medicine\\src\\main\\java\\com\\medicine\\config\\FirebaseConfig.java\")"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

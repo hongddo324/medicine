@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#4A90E2">
+
+    <!-- PWA Meta Tags -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="약복용">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="alternate icon" href="/icons/icon-192x192.png">
+
+    <title>프로필 설정</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 40%, #dbeafe 100%);
+            min-height: 100vh;
+            padding: 0;
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            overflow-x: hidden;
+        }
+
+        .main-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+            padding: 20px;
+            margin-bottom: 16px;
+            border: 1px solid rgba(0, 0, 0, 0.04);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-title h4 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+
+        .back-btn {
+            padding: 8px 16px;
+            background: white;
+            color: #0ea5e9;
+            border: 2px solid #e0f2fe;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .back-btn:hover {
+            background: #f0f9ff;
+            border-color: #0ea5e9;
+            transform: scale(1.05);
+        }
+
+        .profile-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+            padding: 24px;
+            margin-bottom: 16px;
+            border: 1px solid rgba(0, 0, 0, 0.04);
+        }
+
+        .profile-avatar-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            box-shadow: 0 4px 16px rgba(14, 165, 233, 0.3);
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .avatar-upload-btn {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            transition: all 0.2s;
+        }
+
+        .avatar-upload-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 14px;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #0ea5e9;
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+        }
+
+        .form-input:disabled {
+            background: #f5f5f5;
+            color: #999;
+            cursor: not-allowed;
+        }
+
+        .role-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            background: linear-gradient(135deg, #cffafe 0%, #a5f3fc 100%);
+            color: #0284c7;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .btn-save {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+        }
+
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(14, 165, 233, 0.4);
+        }
+
+        .btn-save:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10000;
+        }
+
+        .custom-toast {
+            background: white;
+            border-radius: 16px;
+            padding: 16px 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .toast-message {
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .loading-spinner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10001;
+        }
+
+        .loading-spinner.show {
+            display: flex;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #e0f2fe;
+            border-top: 4px solid #0ea5e9;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .help-text {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        /* Toggle Switch Styles */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 28px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 28px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(22px);
+        }
+
+        input:disabled + .slider {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <!-- Header -->
+        <div class="header-card">
+            <div class="header-title">
+                <i class="bi bi-person-gear" style="font-size: 24px; color: #0ea5e9;"></i>
+                <h4>프로필 설정</h4>
+            </div>
+            <a href="/" class="back-btn">
+                <i class="bi bi-arrow-left"></i> 돌아가기
+            </a>
+        </div>
+
+        <!-- Profile Form -->
+        <div class="profile-card">
+            <form id="profileForm" enctype="multipart/form-data">
+                <!-- Profile Avatar -->
+                <div class="profile-avatar-wrapper">
+                    <div class="profile-avatar" id="profileAvatar">
+                        <img th:if="${user.profileImage != null and user.profileImage != ''}"
+                             th:src="${user.profileImage}"
+                             alt="프로필"
+                             id="avatarPreview">
+                        <span th:unless="${user.profileImage != null and user.profileImage != ''}"
+                              th:text="${user.role == T(com.medicine.model.Role).FATHER ? '👨' : (user.role == T(com.medicine.model.Role).ADMIN ? '⚙️' : (user.role == T(com.medicine.model.Role).FAMILY ? '👨‍👩‍👧' : '👤'))}"
+                              id="avatarEmoji"></span>
+                        <label for="profileImageInput" class="avatar-upload-btn">
+                            <i class="bi bi-camera-fill"></i>
+                        </label>
+                    </div>
+                    <input type="file" id="profileImageInput" accept="image/*" style="display: none;">
+                    <p class="help-text">사진을 클릭하여 변경</p>
+                </div>
+
+                <!-- Username (Read-only) -->
+                <div class="form-group">
+                    <label class="form-label">아이디</label>
+                    <input type="text" class="form-input" th:value="${user.username}" disabled>
+                </div>
+
+                <!-- Role (Read-only) -->
+                <div class="form-group">
+                    <label class="form-label">역할</label>
+                    <div>
+                        <span class="role-badge" th:text="${user.role.displayName}"></span>
+                    </div>
+                </div>
+
+                <!-- Display Name -->
+                <div class="form-group">
+                    <label class="form-label">닉네임</label>
+                    <input type="text" class="form-input" id="displayName" th:value="${user.displayName}"
+                           placeholder="닉네임을 입력하세요" required>
+                    <p class="help-text">다른 사용자에게 표시될 이름입니다</p>
+                </div>
+
+                <!-- Password -->
+                <div class="form-group">
+                    <label class="form-label">새 비밀번호</label>
+                    <input type="password" class="form-input" id="password"
+                           placeholder="변경하지 않으려면 비워두세요">
+                    <p class="help-text">비밀번호를 변경하지 않으려면 비워두세요</p>
+                </div>
+
+                <!-- Password Confirm -->
+                <div class="form-group">
+                    <label class="form-label">비밀번호 확인</label>
+                    <input type="password" class="form-input" id="passwordConfirm"
+                           placeholder="비밀번호를 다시 입력하세요">
+                </div>
+
+                <!-- Push Notification Setting -->
+                <div class="form-group" style="padding: 20px; background: #f0f9ff; border-radius: 12px; border: 2px solid #e0f2fe;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                        <label class="form-label" style="margin: 0;">
+                            <i class="bi bi-bell-fill" style="color: #0ea5e9; margin-right: 8px;"></i>
+                            푸시 알림 설정
+                        </label>
+                        <label class="switch">
+                            <input type="checkbox" id="pushToggle">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <p class="help-text" style="margin: 0;">
+                        약 복용 시간, 식사 업로드, 댓글 알림을 받을 수 있습니다
+                    </p>
+                    <p class="help-text" id="pushStatus" style="margin-top: 8px; color: #0284c7; font-weight: 600;">
+                        확인 중...
+                    </p>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="btn-save">
+                    <i class="bi bi-check-circle-fill"></i> 저장
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Loading Spinner -->
+    <div class="loading-spinner" id="loadingSpinner">
+        <div style="display: flex; flex-direction: column; align-items: center;">
+            <div class="spinner"></div>
+            <div style="margin-top: 16px; color: #0284c7; font-weight: 600; font-size: 14px;">저장 중...</div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js"></script>
+
+    <script>
+        let selectedProfileImage = null;
+
+        // Profile image upload handler
+        document.getElementById('profileImageInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                // Check file size (max 5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    showToast('⚠️ 파일 크기는 5MB 이하여야 합니다');
+                    return;
+                }
+
+                // Check file type
+                if (!file.type.startsWith('image/')) {
+                    showToast('⚠️ 이미지 파일만 업로드 가능합니다');
+                    return;
+                }
+
+                selectedProfileImage = file;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const avatarPreview = document.getElementById('avatarPreview');
+                    const avatarEmoji = document.getElementById('avatarEmoji');
+
+                    if (avatarPreview) {
+                        avatarPreview.src = e.target.result;
+                    } else {
+                        const img = document.createElement('img');
+                        img.id = 'avatarPreview';
+                        img.src = e.target.result;
+                        img.alt = '프로필';
+                        img.style.width = '100%';
+                        img.style.height = '100%';
+                        img.style.objectFit = 'cover';
+
+                        if (avatarEmoji) {
+                            avatarEmoji.remove();
+                        }
+
+                        document.getElementById('profileAvatar').insertBefore(
+                            img,
+                            document.querySelector('.avatar-upload-btn')
+                        );
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Form submit handler
+        document.getElementById('profileForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const displayName = document.getElementById('displayName').value.trim();
+            const password = document.getElementById('password').value;
+            const passwordConfirm = document.getElementById('passwordConfirm').value;
+
+            // Validation
+            if (!displayName) {
+                showToast('⚠️ 닉네임을 입력하세요');
+                return;
+            }
+
+            if (password && password !== passwordConfirm) {
+                showToast('⚠️ 비밀번호가 일치하지 않습니다');
+                return;
+            }
+
+            if (password && password.length < 6) {
+                showToast('⚠️ 비밀번호는 6자 이상이어야 합니다');
+                return;
+            }
+
+            // Create FormData
+            const formData = new FormData();
+            formData.append('displayName', displayName);
+            if (password) {
+                formData.append('password', password);
+            }
+            if (selectedProfileImage) {
+                formData.append('profileImage', selectedProfileImage);
+            }
+
+            // Show loading
+            showLoading();
+
+            // Submit
+            fetch('/api/profile/update', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (response.status === 401) {
+                    window.location.href = '/login';
+                    return;
+                }
+                return response.json();
+            })
+            .then(data => {
+                hideLoading();
+                if (!data) return;
+
+                if (data.success) {
+                    showToast('✅ 프로필이 성공적으로 업데이트되었습니다');
+                    setTimeout(() => {
+                        window.location.href = '/';
+                    }, 1500);
+                } else {
+                    showToast('❌ ' + (data.error || '프로필 업데이트에 실패했습니다'));
+                }
+            })
+            .catch(error => {
+                hideLoading();
+                console.error('Error:', error);
+                showToast('❌ 프로필 업데이트 중 오류가 발생했습니다');
+            });
+        });
+
+        // Loading functions
+        function showLoading() {
+            document.getElementById('loadingSpinner').classList.add('show');
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingSpinner').classList.remove('show');
+        }
+
+        // Toast function
+        function showToast(message) {
+            const toastContainer = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'custom-toast';
+            toast.innerHTML = `<span class="toast-message">${message}</span>`;
+
+            toastContainer.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.animation = 'slideDown 0.3s ease-out reverse';
+                setTimeout(() => {
+                    toastContainer.removeChild(toast);
+                }, 300);
+            }, 2500);
+        }
+
+        // ==========================================
+        // Firebase Cloud Messaging 푸시 알림 시스템
+        // ==========================================
+        const pushToggle = document.getElementById('pushToggle');
+        const pushStatus = document.getElementById('pushStatus');
+        let messaging = null;
+        let currentToken = null;
+
+        // Firebase 설정
+        const firebaseConfig = {
+            apiKey: "AIzaSyC4oP4zGjT1W5gVsWu0kyOoHVpbieOtVpM",
+            authDomain: "mdedicine.firebaseapp.com",
+            projectId: "mdedicine",
+            storageBucket: "mdedicine.firebasestorage.app",
+            messagingSenderId: "659585584078",
+            appId: "1:659585584078:web:bf9f90d5a2fdcd42f5b99f",
+            measurementId: "G-GETB4S7XM4"
+        };
+
+        // VAPID 키 (Firebase Console > 프로젝트 설정 > Cloud Messaging > 웹 푸시 인증서)
+        const VAPID_KEY = "BIrApXDFZYn_pv3CVOizD9OlT646gcbuNXXnTf2PIv-yI4y7zZ6VdZPY-3eWseoP5Aq6jAtweiQmVU3TE9SiBL0";
+
+        // Firebase 초기화
+        try {
+            firebase.initializeApp(firebaseConfig);
+            messaging = firebase.messaging();
+            console.log('✅ Firebase initialized successfully');
+            initPushNotification();
+        } catch (error) {
+            console.error('❌ Firebase initialization failed:', error);
+            updatePushStatus('Firebase 초기화 실패 - 설정을 확인하세요', false);
+            pushToggle.disabled = true;
+        }
+
+        // 푸시 알림 초기화
+        async function initPushNotification() {
+            if (!messaging) {
+                updatePushStatus('메시징이 초기화되지 않았습니다', false);
+                pushToggle.disabled = true;
+                return;
+            }
+
+            try {
+                // 현재 FCM 토큰 확인
+                currentToken = await messaging.getToken({ vapidKey: VAPID_KEY });
+
+                if (currentToken) {
+                    pushToggle.checked = true;
+                    updatePushStatus('✅ 푸시 알림이 켜져 있습니다', true);
+                    console.log('✅ FCM Token:', currentToken.substring(0, 50) + '...');
+                } else {
+                    pushToggle.checked = false;
+                    updatePushStatus('푸시 알림이 꺼져 있습니다', false);
+                }
+
+                // 토글 이벤트 리스너
+                pushToggle.addEventListener('change', handlePushToggle);
+
+            } catch (error) {
+                console.error('❌ Failed to get FCM token:', error);
+                pushToggle.checked = false;
+                updatePushStatus('푸시 알림이 꺼져 있습니다', false);
+                pushToggle.addEventListener('change', handlePushToggle);
+            }
+        }
+
+        // 푸시 알림 토글 핸들러
+        async function handlePushToggle(e) {
+            const isChecked = e.target.checked;
+            pushToggle.disabled = true;
+
+            try {
+                if (isChecked) {
+                    // 푸시 알림 켜기
+                    const permission = await Notification.requestPermission();
+
+                    if (permission !== 'granted') {
+                        showToast('⚠️ 알림 권한을 허용해주세요');
+                        pushToggle.checked = false;
+                        updatePushStatus('권한이 거부되었습니다', false);
+                        pushToggle.disabled = false;
+                        return;
+                    }
+
+                    const subscription = await subscribeToPush();
+
+                    if (subscription) {
+                        pushToggle.checked = true;
+                        updatePushStatus('푸시 알림이 켜져 있습니다', true);
+                        showToast('✅ 푸시 알림이 설정되었습니다');
+                    } else {
+                        pushToggle.checked = false;
+                        updatePushStatus('구독 실패', false);
+                        showToast('❌ 푸시 알림 설정에 실패했습니다');
+                    }
+                } else {
+                    // 푸시 알림 끄기
+                    await unsubscribeFromPush();
+                    pushToggle.checked = false;
+                    updatePushStatus('푸시 알림이 꺼져 있습니다', false);
+                    showToast('🔕 푸시 알림이 해제되었습니다');
+                }
+            } catch (error) {
+                console.error('❌ Push toggle error:', error);
+                pushToggle.checked = !isChecked;
+                showToast('❌ 오류가 발생했습니다: ' + error.message);
+            } finally {
+                pushToggle.disabled = false;
+            }
+        }
+
+        // FCM 토큰 등록
+        async function subscribeToPush() {
+            try {
+                // 알림 권한 요청
+                const permission = await Notification.requestPermission();
+                if (permission !== 'granted') {
+                    throw new Error('알림 권한이 거부되었습니다');
+                }
+
+                // FCM 토큰 생성
+                const fcmToken = await messaging.getToken({ vapidKey: VAPID_KEY });
+
+                if (!fcmToken) {
+                    throw new Error('FCM 토큰을 생성할 수 없습니다');
+                }
+
+                currentToken = fcmToken;
+                console.log('✅ FCM Token generated:', fcmToken.substring(0, 50) + '...');
+
+                // 서버에 FCM 토큰 등록
+                const response = await fetch('/api/push/token', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ token: fcmToken })
+                });
+
+                if (!response.ok) {
+                    throw new Error('서버에 FCM 토큰을 등록할 수 없습니다');
+                }
+
+                const data = await response.json();
+                console.log('✅ FCM token registered:', data.message);
+                return fcmToken;
+
+            } catch (error) {
+                console.error('❌ Failed to subscribe to FCM:', error);
+                throw error;
+            }
+        }
+
+        // FCM 토큰 삭제
+        async function unsubscribeFromPush() {
+            try {
+                if (!currentToken) {
+                    currentToken = await messaging.getToken({ vapidKey: VAPID_KEY });
+                }
+
+                if (currentToken) {
+                    // 서버에서 토큰 삭제
+                    await fetch('/api/push/token', {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ token: currentToken })
+                    });
+
+                    // Firebase에서 FCM 토큰 삭제
+                    await messaging.deleteToken();
+                    currentToken = null;
+                    console.log('✅ FCM token deleted');
+                }
+            } catch (error) {
+                console.error('❌ Failed to unsubscribe from FCM:', error);
+                throw error;
+            }
+        }
+
+        // 푸시 상태 업데이트
+        function updatePushStatus(message, isEnabled) {
+            pushStatus.textContent = message;
+            pushStatus.style.color = isEnabled ? '#059669' : '#0284c7';
+        }
+    </script>
+</body>
+</html>

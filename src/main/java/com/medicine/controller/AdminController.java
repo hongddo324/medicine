@@ -1,11 +1,14 @@
 package com.medicine.controller;
 
+import com.medicine.model.MedicineMode;
 import com.medicine.model.Role;
 import com.medicine.model.User;
+import com.medicine.service.MedicineModeService;
 import com.medicine.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +18,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.io.IOException;
 import java.util.Base64;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Slf4j
@@ -24,6 +28,7 @@ import java.util.UUID;
 public class AdminController {
 
     private final UserService userService;
+    private final MedicineModeService medicineModeService;
 
     @GetMapping
     public String adminPage(HttpSession session, Model model) {
@@ -38,9 +43,13 @@ public class AdminController {
 
         // 모든 사용자 목록 조회
         List<User> users = userService.getAllUsers();
+        MedicineMode medicineMode = medicineModeService.getCurrentMode();
+
         model.addAttribute("users", users);
         model.addAttribute("user", user);
         model.addAttribute("roles", Role.values());
+        model.addAttribute("medicineMode", medicineMode);
+        model.addAttribute("medicineModes", MedicineMode.Mode.values());
 
         return "admin";
     }
@@ -127,6 +136,37 @@ public class AdminController {
         } catch (Exception e) {
             log.error("Failed to delete user", e);
             return "{\"success\": false, \"message\": \"삭제 중 오류가 발생했습니다.\"}";
+        }
+    }
+
+    @PostMapping("/medicine-mode")
+    @ResponseBody
+    public ResponseEntity<?> updateMedicineMode(
+            @RequestParam String mode,
+            HttpSession session) {
+
+        User currentUser = (User) session.getAttribute("user");
+
+        if (currentUser == null || currentUser.getRole() != Role.ADMIN) {
+            return ResponseEntity.status(403).body(Map.of("success", false, "message", "권한이 없습니다."));
+        }
+
+        try {
+            MedicineMode.Mode modeEnum = MedicineMode.Mode.valueOf(mode);
+            MedicineMode updated = medicineModeService.updateMode(modeEnum);
+
+            log.info("Medicine mode updated to: {} by admin: {}", mode, currentUser.getUsername());
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "약 복용 모드가 변경되었습니다.",
+                    "mode", updated.getMode().name(),
+                    "displayName", updated.getMode().getDisplayName()
+            ));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "잘못된 모드입니다."));
+        } catch (Exception e) {
+            log.error("Failed to update medicine mode", e);
+            return ResponseEntity.status(500).body(Map.of("success", false, "message", "모드 변경 중 오류가 발생했습니다."));
         }
     }
 }

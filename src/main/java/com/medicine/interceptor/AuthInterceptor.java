@@ -32,11 +32,12 @@ public class AuthInterceptor implements HandlerInterceptor {
                 requestURI, method, remoteAddr);
         }
 
-        // Allow login page and static resources
+        // Allow login page, static resources, and file serving
         if (requestURI.startsWith("/login") ||
             requestURI.startsWith("/css") ||
             requestURI.startsWith("/js") ||
-            requestURI.startsWith("/images")) {
+            requestURI.startsWith("/images") ||
+            requestURI.startsWith("/files")) {
             return true;
         }
 

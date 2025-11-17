@@ -41,6 +41,9 @@ dependencies {
     // Jackson for JSON (included in spring-boot-starter-web)
     implementation 'com.fasterxml.jackson.core:jackson-databind'
 
+    // Firebase Admin SDK for FCM
+    implementation 'com.google.firebase:firebase-admin:9.2.0'
+
     // Spring Boot DevTools
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 

@@ -17,7 +17,16 @@ public class WebConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(authInterceptor)
                 .addPathPatterns("/**")
-                .excludePathPatterns("/login", "/css/**", "/js/**", "/images/**");
+                .excludePathPatterns(
+                        "/login",
+                        "/css/**",
+                        "/js/**",
+                        "/images/**",
+                        "/files/**",
+                        "/manifest.json",
+                        "/service-worker.js",
+                        "/icons/**"
+                );
     }
 
     @Override
@@ -28,5 +37,13 @@ public class WebConfig implements WebMvcConfigurer {
                 .addResourceLocations("classpath:/static/js/");
         registry.addResourceHandler("/images/**")
                 .addResourceLocations("classpath:/static/images/");
+        registry.addResourceHandler("/icons/**")
+                .addResourceLocations("classpath:/static/icons/");
+
+        // PWA 관련 파일들을 정적 리소스로 제공
+        registry.addResourceHandler("/manifest.json")
+                .addResourceLocations("classpath:/static/manifest.json");
+        registry.addResourceHandler("/service-worker.js")
+                .addResourceLocations("classpath:/static/service-worker.js");
     }
 }

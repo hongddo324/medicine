@@ -14,10 +14,10 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@RedisHash("MedicineRecord")
-public class MedicineRecord implements Serializable {
+@RedisHash("MealCheck")
+public class MealCheck implements Serializable {
 
-    private static final long serialVersionUID = 2L;
+    private static final long serialVersionUID = 1L;
 
     @Id
     private String id;
@@ -26,22 +26,26 @@ public class MedicineRecord implements Serializable {
     private LocalDate date;
 
     @Indexed
-    private MedicineType medicineType;  // MORNING or EVENING
+    private MealType mealType;  // 아침, 점심, 저녁
 
-    private LocalDateTime takenTime;
+    private String imageUrl;  // 식단 이미지 URL
 
-    private String takenBy;
+    private LocalDateTime uploadedAt;  // 업로드 시간
 
-    private boolean taken;
+    private String uploadedBy;  // 업로드한 사용자 ID
 
-    public enum MedicineType {
-        MORNING("아침"),
+    private String aiEvaluation;  // AI 평가 결과
+
+    private Integer score;  // AI가 매긴 점수 (0-100)
+
+    public enum MealType {
+        BREAKFAST("아침"),
         LUNCH("점심"),
-        EVENING("저녁");
+        DINNER("저녁");
 
         private final String displayName;
 
-        MedicineType(String displayName) {
+        MealType(String displayName) {
             this.displayName = displayName;
         }
 
