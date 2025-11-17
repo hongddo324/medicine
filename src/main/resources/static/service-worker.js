@@ -66,45 +66,5 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-// Push notification event
-self.addEventListener('push', (event) => {
-  const data = event.data ? event.data.json() : {};
-  const title = data.title || '약복용 알림';
-  const options = {
-    body: data.body || '알림이 도착했습니다.',
-    icon: '/icons/icon-192x192.png',
-    badge: '/icons/icon-72x72.png',
-    vibrate: [200, 100, 200],
-    tag: data.tag || 'medicine-notification',
-    requireInteraction: true,
-    data: {
-      url: data.url || '/medicine'
-    }
-  };
-
-  event.waitUntil(
-    self.registration.showNotification(title, options)
-  );
-});
-
-// Notification click event
-self.addEventListener('notificationclick', (event) => {
-  event.notification.close();
-
-  event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true })
-      .then((clientList) => {
-        // If a window is already open, focus it
-        for (let i = 0; i < clientList.length; i++) {
-          const client = clientList[i];
-          if (client.url === event.notification.data.url && 'focus' in client) {
-            return client.focus();
-          }
-        }
-        // Otherwise, open a new window
-        if (clients.openWindow) {
-          return clients.openWindow(event.notification.data.url);
-        }
-      })
-  );
-});
+// Push notification은 firebase-messaging-sw.js에서 처리합니다.
+// 중복 알림을 방지하기 위해 여기서는 처리하지 않습니다.

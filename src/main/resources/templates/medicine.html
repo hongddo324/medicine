@@ -4,3245 +4,372 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#4A90E2">
-
-    <!-- PWA Meta Tags -->
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="약복용">
     <link rel="manifest" href="/manifest.json">
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-    <link rel="alternate icon" href="/icons/icon-192x192.png">
-
     <title>약 복용 관리</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <style>
-        * {
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 40%, #dbeafe 100%);
-            min-height: 100vh;
-            padding: 0;
-            margin: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            overflow-x: hidden;
-        }
-
-        .main-container {
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        /* Header Card */
-        .header-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            box-shadow: 0 2px 16px rgba(0,0,0,0.06);
-            padding: 20px;
-            margin-bottom: 16px;
-            border: 1px solid rgba(0, 0, 0, 0.04);
-            animation: slideDown 0.5s ease-out;
-        }
-
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .user-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #f0f0f0;
-        }
-
-        .user-greeting {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .user-avatar {
-            width: 48px;
-            height: 48px;
-            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
-            overflow: hidden;
-        }
-
-        .user-details h5 {
-            margin: 0;
-            font-size: 16px;
-            font-weight: 700;
-            color: #1a1a1a;
-        }
-
-        .user-details .role-badge {
-            display: inline-block;
-            padding: 4px 12px;
-            background: linear-gradient(135deg, #cffafe 0%, #a5f3fc 100%);
-            color: #0284c7;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 600;
-            margin-top: 4px;
-        }
-
-        .logout-btn {
-            padding: 8px 16px;
-            background: white;
-            color: #ff6b6b;
-            border: 2px solid #ffe0e0;
-            border-radius: 12px;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.2s;
-        }
-
-        .logout-btn:hover {
-            background: #fff5f5;
-            border-color: #ff6b6b;
-            transform: scale(1.05);
-        }
-
-        /* Date Display */
-        .date-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            box-shadow: 0 2px 16px rgba(0,0,0,0.06);
-            padding: 24px;
-            margin-bottom: 16px;
-            text-align: center;
-            border: 1px solid rgba(0, 0, 0, 0.04);
-            animation: slideUp 0.5s ease-out 0.1s backwards;
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .date-card h2 {
-            font-size: 28px;
-            font-weight: 800;
-            margin-bottom: 8px;
-            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .date-card p {
-            color: #666;
-            font-size: 15px;
-            margin: 0;
-        }
-
-        /* Medicine Button Card */
-        .medicine-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            box-shadow: 0 2px 16px rgba(0,0,0,0.06);
-            padding: 36px 24px;
-            margin-bottom: 16px;
-            text-align: center;
-            border: 1px solid rgba(0, 0, 0, 0.04);
-            animation: slideUp 0.5s ease-out 0.2s backwards;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .medicine-buttons-container {
-            display: flex;
-            gap: 16px;
-            justify-content: center;
-            align-items: flex-start;
-            width: 100%;
-            max-width: 500px;
-            margin: 0 auto;
-            flex-wrap: wrap;
-        }
-
-        .medicine-btn-wrapper {
-            flex: 1;
-            min-width: 140px;
-            max-width: 180px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .medicine-btn {
-            width: 140px;
-            height: 140px;
-            border-radius: 50%;
-            border: none;
-            font-size: 13px;
-            font-weight: 700;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            position: relative;
-            overflow: hidden;
-            flex-shrink: 0;
-            padding: 8px;
-        }
-
-        .medicine-btn span {
-            line-height: 1.1;
-            white-space: nowrap;
-        }
-
-        @media (max-width: 600px) {
-            .medicine-buttons-container {
-                gap: 12px;
-                max-width: 100%;
-            }
-
-            .medicine-btn-wrapper {
-                min-width: 120px;
-                max-width: 140px;
-            }
-
-            .medicine-btn {
-                width: 120px;
-                height: 120px;
-                font-size: 10px;
-                gap: 4px;
-                padding: 6px;
-            }
-
-            .medicine-btn i {
-                font-size: 44px;
-            }
-
-            .medicine-btn span {
-                font-size: 10px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .medicine-btn-wrapper {
-                min-width: 100px;
-                max-width: 120px;
-            }
-
-            .medicine-btn {
-                width: 100px;
-                height: 100px;
-                font-size: 9px;
-                gap: 2px;
-                padding: 4px;
-            }
-
-            .medicine-btn i {
-                font-size: 36px;
-            }
-
-            .medicine-btn span {
-                font-size: 9px;
-            }
-        }
-
-        @media (max-width: 360px) {
-            .medicine-btn-wrapper {
-                min-width: 90px;
-                max-width: 100px;
-            }
-
-            .medicine-btn {
-                width: 90px;
-                height: 90px;
-                font-size: 8px;
-                gap: 1px;
-                padding: 3px;
-            }
-
-            .medicine-btn i {
-                font-size: 32px;
-            }
-
-            .medicine-btn span {
-                font-size: 8px;
-            }
-        }
-
-        .medicine-btn::before {
-            content: '';
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.2);
-            transform: scale(0);
-            transition: transform 0.5s;
-        }
-
-        .medicine-btn:active::before {
-            transform: scale(1);
-        }
-
-        .medicine-btn.not-taken {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-            color: white;
-        }
-
-        .medicine-btn.taken {
-            background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
-            color: white;
-        }
-
-        .medicine-btn:not(:disabled):hover {
-            transform: scale(1.05);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
-        }
-
-        .medicine-btn:disabled {
-            opacity: 0.8;
-            cursor: not-allowed;
-        }
-
-        .medicine-btn i {
-            font-size: 64px;
-        }
-
-        .medicine-info {
-            margin-top: 20px;
-            padding: 14px;
-            background: linear-gradient(135deg, #f0f9ff 0%, #dbeafe 100%);
-            border-radius: 14px;
-            animation: fadeIn 0.5s ease-out 0.5s backwards;
-            border: 1px solid #bfdbfe;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .medicine-info p {
-            margin: 0;
-            color: #666;
-            font-size: 14px;
-        }
-
-        .taken-time {
-            color: #16a34a;
-            font-weight: 700;
-        }
-
-        /* Custom Calendar Card */
-        .calendar-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            box-shadow: 0 2px 16px rgba(0,0,0,0.06);
-            padding: 20px;
-            border: 1px solid rgba(0, 0, 0, 0.04);
-            animation: slideUp 0.5s ease-out 0.3s backwards;
-            margin-bottom: 16px;
-        }
-
-        .calendar-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 20px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid #f0f0f0;
-        }
-
-        .calendar-title {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .calendar-icon {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 20px;
-        }
-
-        .calendar-title h4 {
-            margin: 0;
-            font-size: 18px;
-            font-weight: 700;
-            color: #1a1a1a;
-        }
-
-        .calendar-nav {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .calendar-nav button {
-            width: 36px;
-            height: 36px;
-            border-radius: 12px;
-            border: none;
-            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .calendar-nav button:hover {
-            transform: scale(1.1);
-            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
-        }
-
-        .calendar-month-year {
-            font-size: 15px;
-            font-weight: 700;
-            color: #667eea;
-            min-width: 100px;
-            text-align: center;
-        }
-
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 6px;
-        }
-
-        @media (max-width: 600px) {
-            .calendar-grid {
-                gap: 4px;
-            }
-        }
-
-        @media (max-width: 400px) {
-            .calendar-grid {
-                gap: 2px;
-            }
-        }
-
-        .calendar-day-header {
-            text-align: center;
-            font-size: 12px;
-            font-weight: 600;
-            color: #999;
-            padding: 8px 0;
-        }
-
-        @media (max-width: 600px) {
-            .calendar-day-header {
-                font-size: 11px;
-                padding: 6px 0;
-            }
-        }
-
-        @media (max-width: 400px) {
-            .calendar-day-header {
-                font-size: 10px;
-                padding: 4px 0;
-            }
-        }
-
-        .calendar-day-header.sunday {
-            color: #ff6b6b;
-        }
-
-        .calendar-day-header.saturday {
-            color: #667eea;
-        }
-
-        .calendar-day {
-            aspect-ratio: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            border-radius: 12px;
-            font-size: 14px;
-            font-weight: 600;
-            color: #333;
-            cursor: pointer;
-            transition: all 0.2s;
-            position: relative;
-            padding: 2px;
-        }
-
-        .calendar-day:hover {
-            background: #f5f5f5;
-        }
-
-        .calendar-day.other-month {
-            color: #ccc;
-        }
-
-        .calendar-day.today {
-            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-            color: #1e40af;
-            font-weight: 700;
-            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
-        }
-
-        .calendar-day.selected {
-            border: 3px solid #0ea5e9;
-            box-shadow: 0 4px 16px rgba(14, 165, 233, 0.4);
-            transform: scale(1.05);
-        }
-
-        .calendar-day.has-record {
-            background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
-            color: white;
-            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
-        }
-
-        .calendar-day.has-record::after {
-            content: '✓';
-            position: absolute;
-            bottom: 4px;
-            font-size: 10px;
-        }
-
-        .calendar-day.incomplete {
-            background: linear-gradient(135deg, #fca5a5 0%, #ef4444 100%);
-            color: white;
-            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.25);
-        }
-
-        .calendar-day.incomplete::after {
-            content: '!';
-            position: absolute;
-            bottom: 4px;
-            font-size: 10px;
-            font-weight: bold;
-        }
-
-        .calendar-day-number {
-            font-size: 14px;
-            line-height: 1;
-        }
-
-        .calendar-day-time {
-            font-size: 9px;
-            opacity: 0.8;
-            margin-top: 2px;
-            line-height: 1;
-            white-space: nowrap;
-        }
-
-        /* Custom Modal */
-        .custom-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 9999;
-            align-items: center;
-            justify-content: center;
-            animation: fadeIn 0.3s;
-        }
-
-        .custom-modal.show {
-            display: flex;
-        }
-
-        .modal-content {
-            background: white;
-            border-radius: 20px;
-            padding: 36px 28px;
-            max-width: 360px;
-            width: 90%;
-            text-align: center;
-            animation: slideUp 0.3s ease-out;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-        }
-
-        .modal-icon {
-            font-size: 64px;
-            margin-bottom: 20px;
-        }
-
-        .modal-title {
-            font-size: 22px;
-            font-weight: 700;
-            color: #1a1a1a;
-            margin-bottom: 12px;
-        }
-
-        .modal-message {
-            color: #666;
-            margin-bottom: 32px;
-            font-size: 15px;
-        }
-
-        .modal-buttons {
-            display: flex;
-            gap: 12px;
-        }
-
-        .modal-btn {
-            flex: 1;
-            padding: 14px;
-            border: none;
-            border-radius: 12px;
-            font-weight: 700;
-            font-size: 15px;
-            transition: all 0.2s;
-        }
-
-        .modal-btn-primary {
-            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
-            color: white;
-            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
-        }
-
-        .modal-btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(14, 165, 233, 0.4);
-        }
-
-        .modal-btn-secondary {
-            background: #f0f0f0;
-            color: #666;
-        }
-
-        .modal-btn-secondary:hover {
-            background: #e0e0e0;
-        }
-
-        /* Success Toast */
-        .toast-container {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 10000;
-        }
-
-        .custom-toast {
-            background: white;
-            border-radius: 16px;
-            padding: 16px 24px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            animation: slideDown 0.3s ease-out;
-        }
-
-        .toast-icon {
-            font-size: 24px;
-        }
-
-        .toast-message {
-            font-weight: 600;
-            color: #1a1a1a;
-        }
-
-        /* Meal Check Card */
-        .meal-check-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            box-shadow: 0 2px 16px rgba(0,0,0,0.06);
-            padding: 20px;
-            margin-bottom: 16px;
-            border: 1px solid rgba(0, 0, 0, 0.04);
-            animation: slideUp 0.5s ease-out 0.35s backwards;
-        }
-
-        .meal-check-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 20px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid #f0f0f0;
-        }
-
-        .meal-check-icon {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 20px;
-        }
-
-        .meal-check-header h4 {
-            margin: 0;
-            font-size: 18px;
-            font-weight: 700;
-            color: #1a1a1a;
-        }
-
-        .meal-stats {
-            border-radius: 14px;
-            padding: 16px;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            transition: all 0.3s ease;
-        }
-
-        /* 점수별 배경색 - 토스/인스타그램 스타일 */
-        .meal-stats.score-excellent {
-            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-            border: 1px solid #86efac;
-            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.1);
-        }
-
-        .meal-stats.score-good {
-            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-            border: 1px solid #93c5fd;
-            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
-        }
-
-        .meal-stats.score-average {
-            background: linear-gradient(135deg, #fefce8 0%, #fef9c3 100%);
-            border: 1px solid #fde047;
-            box-shadow: 0 2px 8px rgba(234, 179, 8, 0.1);
-        }
-
-        .meal-stats.score-poor {
-            background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
-            border: 1px solid #fdba74;
-            box-shadow: 0 2px 8px rgba(249, 115, 22, 0.1);
-        }
-
-        .meal-stats.score-bad {
-            background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
-            border: 1px solid #fca5a5;
-            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.1);
-        }
-
-        .meal-stats-score {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .meal-stats-emoji {
-            font-size: 48px;
-        }
-
-        .meal-stats-text {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .meal-stats-label {
-            font-size: 12px;
-            color: #666;
-            font-weight: 600;
-        }
-
-        .meal-stats-value {
-            font-size: 28px;
-            font-weight: 800;
-            color: #1a1a1a;
-        }
-
-        .meal-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-
-        @media (max-width: 600px) {
-            .meal-grid {
-                grid-template-columns: 1fr;
-                gap: 16px;
-            }
-        }
-
-        .meal-item {
-            background: #f9fafb;
-            border-radius: 16px;
-            padding: 14px;
-            text-align: center;
-            border: 1px solid #e5e7eb;
-            transition: all 0.2s;
-            cursor: pointer;
-        }
-
-        .meal-item:hover {
-            border-color: #d1d5db;
-            background: #f3f4f6;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        }
-
-        .meal-item.has-meal {
-            border-width: 1px;
-        }
-
-        /* 점수별 식단 카드 배경색 - 토스/인스타그램 스타일 */
-        .meal-item.has-meal.score-excellent {
-            border-color: #86efac;
-            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.12);
-        }
-
-        .meal-item.has-meal.score-good {
-            border-color: #93c5fd;
-            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.12);
-        }
-
-        .meal-item.has-meal.score-average {
-            border-color: #fde047;
-            background: linear-gradient(135deg, #fefce8 0%, #fef9c3 100%);
-            box-shadow: 0 2px 8px rgba(234, 179, 8, 0.12);
-        }
-
-        .meal-item.has-meal.score-poor {
-            border-color: #fdba74;
-            background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
-            box-shadow: 0 2px 8px rgba(249, 115, 22, 0.12);
-        }
-
-        .meal-item.has-meal.score-bad {
-            border-color: #fca5a5;
-            background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
-            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.12);
-        }
-
-        .meal-item-label {
-            font-size: 14px;
-            font-weight: 700;
-            color: #1a1a1a;
-            margin-bottom: 8px;
-        }
-
-        .meal-item-image-container {
-            width: 100%;
-            aspect-ratio: 1;
-            background: white;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 8px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .meal-item-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .meal-item-placeholder {
-            font-size: 32px;
-            color: #d1d5db;
-        }
-
-        .meal-item-info {
-            font-size: 11px;
-            color: #666;
-        }
-
-        .meal-item-score {
-            font-size: 16px;
-            font-weight: 800;
-            margin-top: 4px;
-        }
-
-        /* 개별 식단 점수별 색상 */
-        .meal-item-score.score-excellent {
-            color: #10b981;
-        }
-
-        .meal-item-score.score-good {
-            color: #3b82f6;
-        }
-
-        .meal-item-score.score-average {
-            color: #eab308;
-        }
-
-        .meal-item-score.score-poor {
-            color: #f97316;
-        }
-
-        .meal-item-score.score-bad {
-            color: #ef4444;
-        }
-
-        .meal-item-upload-btn {
-            width: 100%;
-            padding: 8px;
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 12px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .meal-item-upload-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-        }
-
-        .meal-evaluation {
-            border-radius: 16px;
-            padding: 14px;
-            margin-top: 12px;
-            border: none;
-            transition: all 0.3s ease;
-        }
-
-        /* 평가 배경색 점수별 구분 - 토스/인스타그램 스타일 */
-        .meal-evaluation.score-excellent {
-            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-        }
-
-        .meal-evaluation.score-good {
-            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-        }
-
-        .meal-evaluation.score-average {
-            background: linear-gradient(135deg, #fefce8 0%, #fef9c3 100%);
-        }
-
-        .meal-evaluation.score-poor {
-            background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
-        }
-
-        .meal-evaluation.score-bad {
-            background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
-        }
-
-        .meal-evaluation-title {
-            font-size: 12px;
-            font-weight: 700;
-            color: #666;
-            margin-bottom: 8px;
-        }
-
-        .meal-evaluation-content {
-            font-size: 13px;
-            color: #333;
-            line-height: 1.5;
-            white-space: pre-wrap;
-        }
-
-        /* Comments Card */
-        .comments-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            box-shadow: 0 2px 16px rgba(0,0,0,0.06);
-            padding: 20px;
-            margin-bottom: 16px;
-            border: 1px solid rgba(0, 0, 0, 0.04);
-            animation: slideUp 0.5s ease-out 0.4s backwards;
-        }
-
-        .comments-card h4 {
-            font-size: 18px;
-            font-weight: 700;
-            color: #1a1a1a;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .comments-card h4 i {
-            color: #0ea5e9;
-        }
-
-        .comment-input-wrapper {
-            background: #f7fafc;
-            border-radius: 14px;
-            padding: 14px;
-            margin-bottom: 16px;
-            border: 1px solid #e8f0f5;
-        }
-
-        .comment-input-header {
-            display: flex;
-            gap: 12px;
-            align-items: flex-start;
-            margin-bottom: 12px;
-        }
-
-        .comment-input-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            flex-shrink: 0;
-            overflow: hidden;
-        }
-
-        .comment-input-avatar img {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-
-        #commentInput {
-            flex: 1;
-            border: 2px solid #e0e0e0;
-            border-radius: 12px;
-            padding: 12px;
-            font-size: 14px;
-            resize: none;
-            transition: all 0.2s;
-            font-family: inherit;
-        }
-
-        #commentInput:focus {
-            outline: none;
-            border-color: #0ea5e9;
-            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
-        }
-
-        .comment-input-actions {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .btn-image-upload {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 8px 14px;
-            background: white;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 13px;
-            font-weight: 600;
-            color: #666;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn-image-upload:hover {
-            border-color: #0ea5e9;
-            color: #0ea5e9;
-        }
-
-        .comment-image-preview {
-            max-width: 100px;
-            max-height: 100px;
-            border-radius: 8px;
-            object-fit: cover;
-            border: 2px solid #e0e0e0;
-        }
-
-        .btn-submit-comment {
-            padding: 8px 20px;
-            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 14px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn-submit-comment:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
-        }
-
-        .comments-list {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .comment-item {
-            background: #f9fafb;
-            border-radius: 14px;
-            padding: 14px;
-            transition: all 0.2s;
-            border: 1px solid #f0f1f3;
-        }
-
-        .comment-item:hover {
-            background: #f3f4f6;
-            border-color: #e5e7eb;
-        }
-
-        .comment-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 8px;
-        }
-
-        .comment-user-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .comment-avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            overflow: hidden;
-        }
-
-        .comment-avatar img {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-
-        .comment-user-details {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .comment-username {
-            font-size: 14px;
-            font-weight: 700;
-            color: #1a1a1a;
-        }
-
-        .comment-time {
-            font-size: 12px;
-            color: #999;
-        }
-
-        .comment-actions-menu {
-            display: flex;
-            gap: 8px;
-        }
-
-        .btn-comment-action {
-            padding: 4px 8px;
-            background: transparent;
-            border: none;
-            color: #999;
-            font-size: 18px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn-comment-action:hover {
-            color: #0ea5e9;
-        }
-
-        .comment-content {
-            margin-bottom: 8px;
-            line-height: 1.5;
-            color: #333;
-            font-size: 14px;
-        }
-
-        .comment-image {
-            max-width: 100%;
-            border-radius: 12px;
-            margin-top: 8px;
-            cursor: pointer;
-        }
-
-        .comment-actions {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            margin-top: 8px;
-        }
-
-        .btn-like {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            background: none;
-            border: none;
-            color: #666;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            padding: 4px 8px;
-            border-radius: 8px;
-        }
-
-        .btn-like:hover {
-            background: #f0f0f0;
-        }
-
-        .btn-like.liked {
-            color: #ef4444;
-        }
-
-        .btn-like i {
-            font-size: 16px;
-        }
-
-        .btn-reply {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            background: none;
-            border: none;
-            color: #666;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            padding: 4px 8px;
-            border-radius: 8px;
-        }
-
-        .btn-reply:hover {
-            background: #f0f0f0;
-            color: #0ea5e9;
-        }
-
-        .replies-container {
-            margin-left: 48px;
-            margin-top: 12px;
-            padding-left: 16px;
-            border-left: 2px solid #e0e0e0;
-        }
-
-        .reply-item {
-            background: white;
-            border-radius: 12px;
-            padding: 12px;
-            margin-top: 12px;
-            border: 1px solid #f0f1f3;
-            transition: all 0.2s;
-        }
-
-        .reply-item:hover {
-            background: #fafbfc;
-            border-color: #e5e7eb;
-        }
-
-        .reply-input-wrapper {
-            margin-left: 48px;
-            margin-top: 12px;
-            display: none;
-        }
-
-        .reply-input-wrapper.show {
-            display: block;
-        }
-
-        .reply-input-form {
-            display: flex;
-            gap: 8px;
-            align-items: flex-start;
-        }
-
-        .reply-input-form textarea {
-            flex: 1;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            padding: 10px;
-            font-size: 13px;
-            resize: none;
-            font-family: inherit;
-        }
-
-        .reply-input-form textarea:focus {
-            outline: none;
-            border-color: #0ea5e9;
-        }
-
-        .reply-input-form button {
-            padding: 10px 16px;
-            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 13px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .reply-input-form button:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 2px 8px rgba(14, 165, 233, 0.3);
-        }
-
-        /* Loading Spinner */
-        .loading-spinner {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.3);
-            backdrop-filter: blur(3px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 10001;
-        }
-
-        .loading-spinner.show {
-            display: flex;
-        }
-
-        .spinner {
-            width: 60px;
-            height: 60px;
-            border: 5px solid rgba(224, 242, 254, 0.3);
-            border-top: 5px solid #0ea5e9;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .loading-text {
-            margin-top: 16px;
-            color: #0284c7;
-            font-weight: 700;
-            font-size: 15px;
-            text-shadow: 0 2px 4px rgba(255, 255, 255, 0.8);
-        }
-
-        /* Comprehensive Mobile Optimizations */
-        @media (max-width: 768px) {
-            .main-container {
-                padding: 16px;
-            }
-
-            .header-card,
-            .date-card,
-            .medicine-card,
-            .calendar-card,
-            .meal-check-card,
-            .comments-card {
-                padding: 16px;
-                margin-bottom: 12px;
-            }
-
-            .user-avatar {
-                width: 42px;
-                height: 42px;
-                font-size: 20px;
-            }
-
-            .user-details h5 {
-                font-size: 15px;
-            }
-
-            .role-badge {
-                font-size: 11px;
-                padding: 3px 10px;
-            }
-
-            .logout-btn {
-                padding: 6px 12px;
-                font-size: 13px;
-            }
-
-            .date-card h2 {
-                font-size: 24px;
-            }
-
-            .date-card p {
-                font-size: 14px;
-            }
-
-            .medicine-card {
-                padding: 24px 16px;
-            }
-
-            .medicine-info p {
-                font-size: 13px;
-            }
-
-            .calendar-header h4,
-            .meal-check-header h4,
-            .comments-card h4 {
-                font-size: 16px;
-            }
-
-            .calendar-icon,
-            .meal-check-icon {
-                width: 36px;
-                height: 36px;
-                font-size: 18px;
-            }
-
-            .calendar-nav button {
-                width: 32px;
-                height: 32px;
-                font-size: 14px;
-            }
-
-            .calendar-month-year {
-                font-size: 14px;
-                min-width: 90px;
-            }
-
-            .meal-stats {
-                padding: 14px;
-                flex-direction: column;
-                text-align: center;
-                gap: 12px;
-            }
-
-            .meal-stats-emoji {
-                font-size: 40px;
-            }
-
-            .meal-stats-value {
-                font-size: 24px;
-            }
-
-            .meal-stats-label {
-                font-size: 11px;
-            }
-
-            .meal-item-label {
-                font-size: 13px;
-            }
-
-            .meal-item-upload-btn {
-                font-size: 11px;
-                padding: 7px;
-            }
-
-            .meal-evaluation {
-                padding: 12px;
-                margin-top: 10px;
-            }
-
-            .meal-evaluation-title {
-                font-size: 11px;
-            }
-
-            .meal-evaluation-content {
-                font-size: 12px;
-            }
-
-            .comment-input-header {
-                gap: 10px;
-            }
-
-            .comment-input-avatar {
-                width: 36px;
-                height: 36px;
-                font-size: 18px;
-            }
-
-            #commentInput {
-                font-size: 13px;
-                padding: 10px;
-            }
-
-            .btn-image-upload {
-                font-size: 12px;
-                padding: 7px 12px;
-            }
-
-            .btn-submit-comment {
-                font-size: 13px;
-                padding: 7px 16px;
-            }
-
-            .comment-avatar {
-                width: 32px;
-                height: 32px;
-                font-size: 16px;
-            }
-
-            .comment-username {
-                font-size: 13px;
-            }
-
-            .comment-time {
-                font-size: 11px;
-            }
-
-            .comment-content {
-                font-size: 13px;
-            }
-
-            .btn-like,
-            .btn-reply {
-                font-size: 13px;
-                padding: 3px 6px;
-            }
-
-            .btn-like i {
-                font-size: 14px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .main-container {
-                padding: 12px;
-            }
-
-            .header-card,
-            .date-card,
-            .medicine-card,
-            .calendar-card,
-            .meal-check-card,
-            .comments-card {
-                padding: 14px;
-                margin-bottom: 10px;
-                border-radius: 16px;
-            }
-
-            .user-avatar {
-                width: 38px;
-                height: 38px;
-                font-size: 18px;
-            }
-
-            .user-details h5 {
-                font-size: 14px;
-            }
-
-            .date-card h2 {
-                font-size: 22px;
-            }
-
-            .date-card p {
-                font-size: 13px;
-            }
-
-            .medicine-card {
-                padding: 20px 14px;
-            }
-
-            .medicine-btn i {
-                font-size: 48px;
-            }
-
-            .calendar-day {
-                font-size: 11px;
-                border-radius: 10px;
-                padding: 1px;
-            }
-
-            .calendar-day-number {
-                font-size: 11px;
-            }
-
-            .calendar-day-time {
-                font-size: 7px;
-                margin-top: 1px;
-            }
-
-            .calendar-day.has-record::after {
-                font-size: 8px;
-                bottom: 2px;
-            }
-
-            .calendar-header h4,
-            .meal-check-header h4,
-            .comments-card h4 {
-                font-size: 15px;
-            }
-
-            .meal-stats-emoji {
-                font-size: 36px;
-            }
-
-            .meal-stats-value {
-                font-size: 22px;
-            }
-
-            .meal-item-score {
-                font-size: 14px;
-            }
-
-            .replies-container {
-                margin-left: 24px;
-                padding-left: 12px;
-            }
-
-            .reply-input-wrapper {
-                margin-left: 24px;
-            }
-
-            .modal-content {
-                padding: 28px 20px;
-            }
-
-            .modal-icon {
-                font-size: 56px;
-                margin-bottom: 16px;
-            }
-
-            .modal-title {
-                font-size: 20px;
-            }
-
-            .modal-message {
-                font-size: 14px;
-                margin-bottom: 24px;
-            }
-
-            .modal-btn {
-                padding: 12px;
-                font-size: 14px;
-            }
-        }
-
-        @media (max-width: 360px) {
-            .main-container {
-                padding: 10px;
-            }
-
-            .header-card,
-            .date-card,
-            .medicine-card,
-            .calendar-card,
-            .meal-check-card,
-            .comments-card {
-                padding: 12px;
-                border-radius: 14px;
-            }
-
-            .date-card h2 {
-                font-size: 20px;
-            }
-
-            .medicine-card {
-                padding: 18px 12px;
-            }
-
-            .meal-stats-emoji {
-                font-size: 32px;
-            }
-
-            .meal-stats-value {
-                font-size: 20px;
-            }
-
-            .calendar-nav button {
-                width: 28px;
-                height: 28px;
-            }
-
-            .calendar-month-year {
-                font-size: 13px;
-                min-width: 80px;
-            }
-
-            .calendar-day {
-                font-size: 10px;
-                border-radius: 8px;
-                padding: 1px;
-            }
-
-            .calendar-day-number {
-                font-size: 10px;
-            }
-
-            .calendar-day-time {
-                font-size: 6px;
-                margin-top: 1px;
-            }
-
-            .calendar-day.has-record::after {
-                font-size: 7px;
-                bottom: 1px;
-            }
-        }
+        *{-webkit-tap-highlight-color:transparent;margin:0;padding:0;box-sizing:border-box}
+        :root{--primary:#4A90E2;--success:#5cb85c;--danger:#d9534f;--warning:#f0ad4e;--info:#5bc0de;--gray-100:#f8f9fa;--gray-200:#e9ecef;--gray-300:#dee2e6;--gray-600:#6c757d;--gray-900:#212529;--nav-height:65px}
+        body{background:linear-gradient(135deg,#f0f9ff 0%,#e0f2fe 40%,#dbeafe 100%);min-height:100vh;padding-bottom:var(--nav-height);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;overflow-x:hidden}
+        .tab-content-wrapper{display:none;animation:fadeIn .3s ease-in}
+        .tab-content-wrapper.active{display:block}
+        @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+        .app-container{max-width:600px;margin:0 auto;padding:20px 16px}
+        .custom-card{background:rgba(255,255,255,.95);backdrop-filter:blur(20px);border-radius:16px;box-shadow:0 2px 16px rgba(0,0,0,.06);padding:20px;margin-bottom:16px;border:1px solid rgba(0,0,0,.04)}
+        .user-header{display:flex;justify-content:space-between;align-items:center;padding-bottom:16px;border-bottom:1px solid var(--gray-200)}
+        .user-info{display:flex;align-items:center;gap:12px}
+        .user-avatar{width:48px;height:48px;background:linear-gradient(135deg,var(--primary) 0%,#0284c7 100%);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:0 4px 12px rgba(74,144,226,.3);overflow:hidden;cursor:pointer}
+        .user-avatar img{width:100%;height:100%;object-fit:cover}
+        .user-details h5{margin:0;font-size:16px;font-weight:700;color:var(--gray-900)}
+        .role-badge{display:inline-block;padding:4px 12px;background:linear-gradient(135deg,#cffafe 0%,#a5f3fc 100%);color:#0369a1;border-radius:12px;font-size:12px;font-weight:600}
+        .bottom-nav{position:fixed;bottom:0;left:0;right:0;height:var(--nav-height);background:rgba(255,255,255,.98);backdrop-filter:blur(20px);border-top:1px solid rgba(0,0,0,.06);box-shadow:0 -2px 16px rgba(0,0,0,.06);display:flex;justify-content:space-around;align-items:center;z-index:1000}
+        .nav-item{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;height:100%;color:var(--gray-600);text-decoration:none;transition:all .3s;cursor:pointer;user-select:none}
+        .nav-item i{font-size:24px;margin-bottom:4px;transition:transform .3s}
+        .nav-item span{font-size:11px;font-weight:500}
+        .nav-item.active{color:var(--primary)}
+        .nav-item.active i{transform:scale(1.1)}
+        .comment-section{margin-top:20px}
+        .comment-input-wrapper{display:flex;gap:8px;margin-bottom:20px}
+        .comment-input{flex:1;padding:12px 16px;border:1px solid var(--gray-300);border-radius:24px;font-size:14px;outline:none;transition:all .3s}
+        .comment-input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(74,144,226,.1)}
+        .comment-submit-btn{padding:12px 24px;background:var(--primary);color:white;border:none;border-radius:24px;font-weight:600;cursor:pointer;transition:all .3s}
+        .comment-submit-btn:hover{background:#357abd;transform:scale(1.05)}
+        .comment-list{display:flex;flex-direction:column;gap:16px}
+        .comment-item{background:white;border-radius:12px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.05);position:relative}
+        .comment-item.new::before{content:'NEW';position:absolute;top:-8px;right:12px;background:#ef4444;color:white;padding:2px 8px;border-radius:8px;font-size:10px;font-weight:700}
+        .comment-header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+        .comment-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--primary) 0%,#0284c7 100%);display:flex;align-items:center;justify-content:center;color:white;font-weight:600;overflow:hidden;cursor:pointer;transition:transform .3s}
+        .comment-avatar:hover{transform:scale(1.1)}
+        .comment-avatar img{width:100%;height:100%;object-fit:cover}
+        .comment-user-info{flex:1}
+        .comment-username{font-weight:600;color:var(--gray-900);font-size:14px}
+        .comment-time{font-size:12px;color:var(--gray-600)}
+        .comment-content{margin-bottom:12px;line-height:1.5;color:var(--gray-900)}
+        .comment-image{width:100%;border-radius:8px;margin-bottom:12px;cursor:pointer}
+        .comment-actions{display:flex;gap:16px;padding-top:12px;border-top:1px solid var(--gray-200)}
+        .comment-action-btn{display:flex;align-items:center;gap:4px;background:none;border:none;color:var(--gray-600);cursor:pointer;font-size:14px;transition:all .3s}
+        .comment-action-btn:hover{color:var(--primary)}
+        .comment-action-btn.liked{color:#ef4444}
+        .pagination-wrapper{display:flex;justify-content:center;margin-top:24px}
+        .pagination{display:flex;gap:8px}
+        .page-btn{padding:8px 12px;border:1px solid var(--gray-300);background:white;border-radius:8px;cursor:pointer;transition:all .3s}
+        .page-btn:hover{background:var(--gray-100)}
+        .page-btn.active{background:var(--primary);color:white;border-color:var(--primary)}
+        .medicine-buttons{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+        .medicine-btn{padding:32px 16px;border:2px solid var(--gray-300);background:white;border-radius:16px;cursor:pointer;transition:all .3s;text-align:center}
+        .medicine-btn:hover{transform:translateY(-4px);box-shadow:0 8px 20px rgba(0,0,0,.1)}
+        .medicine-btn.taken{background:linear-gradient(135deg,#dcfce7 0%,#bbf7d0 100%);border-color:var(--success)}
+        .medicine-btn.disabled{opacity:.6;cursor:not-allowed}
+        .medicine-icon{font-size:48px;margin-bottom:12px}
+        .medicine-label{font-size:18px;font-weight:700;margin-bottom:8px;color:var(--gray-900)}
+        .medicine-status{font-size:14px;color:var(--gray-600)}
+        .calendar-wrapper{margin-top:20px}
+        .calendar-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+        .calendar-title{font-size:18px;font-weight:700}
+        .calendar-nav-btn{padding:8px 12px;background:white;border:1px solid var(--gray-300);border-radius:8px;cursor:pointer;transition:all .3s}
+        .calendar-nav-btn:hover{background:var(--gray-100)}
+        .calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+        .calendar-day-header{text-align:center;font-size:12px;font-weight:600;color:var(--gray-600);padding:8px 0}
+        .calendar-day{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;background:white;border-radius:8px;cursor:pointer;transition:all .3s;position:relative}
+        .calendar-day:hover{background:var(--gray-100)}
+        .calendar-day.today{background:var(--primary);color:white}
+        .calendar-day.has-record::after{content:'';position:absolute;bottom:4px;width:6px;height:6px;background:var(--success);border-radius:50%}
+        .meal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+        .meal-item{aspect-ratio:1;background:white;border-radius:12px;padding:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .3s;border:2px dashed var(--gray-300)}
+        .meal-item:hover{transform:scale(1.05);box-shadow:0 4px 12px rgba(0,0,0,.1)}
+        .meal-item.has-image{border:2px solid var(--success);padding:0;overflow:hidden}
+        .meal-item img{width:100%;height:100%;object-fit:cover}
+        .meal-placeholder{font-size:32px;margin-bottom:8px}
+        .meal-label{font-size:12px;font-weight:600;color:var(--gray-600)}
+        .settings-list{display:flex;flex-direction:column;gap:12px}
+        .settings-item{background:white;border-radius:12px;padding:16px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:all .3s}
+        .settings-item:hover{background:var(--gray-100)}
+        .settings-item-content{display:flex;align-items:center;gap:12px}
+        .settings-item-icon{font-size:24px;color:var(--primary)}
+        .settings-item-text h6{margin:0;font-size:16px;font-weight:600}
+        .settings-item-text p{margin:0;font-size:12px;color:var(--gray-600)}
+        .empty-state{text-align:center;padding:60px 20px}
+        .empty-state-icon{font-size:64px;color:var(--gray-300);margin-bottom:16px}
+        .empty-state-title{font-size:18px;font-weight:700;color:var(--gray-600);margin-bottom:8px}
+        .empty-state-text{font-size:14px;color:var(--gray-600)}
+        .modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.75);z-index:2000;align-items:center;justify-content:center;animation:fadeIn .3s}
+        .modal-overlay.active{display:flex}
+        .modal-content{background:white;border-radius:16px;padding:24px;max-width:90%;max-height:90vh;overflow:auto;animation:slideUp .3s}
+        @keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+        .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+        .modal-title{font-size:20px;font-weight:700}
+        .modal-close{background:none;border:none;font-size:24px;cursor:pointer;color:var(--gray-600)}
+        .modal-image{width:100%;border-radius:12px}
+        .loading{text-align:center;padding:20px}
+        .loading-spinner{width:40px;height:40px;border:4px solid var(--gray-200);border-top-color:var(--primary);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto}
+        @keyframes spin{to{transform:rotate(360deg)}}
+        .toast-container{position:fixed;top:20px;right:20px;z-index:3000}
+        .toast{background:white;border-radius:12px;padding:16px 24px;box-shadow:0 4px 16px rgba(0,0,0,.2);margin-bottom:12px;animation:slideInRight .3s}
+        @keyframes slideInRight{from{transform:translateX(400px);opacity:0}to{transform:translateX(0);opacity:1}}
+        .toast.success{border-left:4px solid var(--success)}
+        .toast.error{border-left:4px solid var(--danger)}
+        .toast.info{border-left:4px solid var(--info)}
+        @media (max-width:480px){.app-container{padding:16px 12px}.custom-card{padding:16px}}
+        .switch{position:relative;display:inline-block;width:51px;height:28px}
+        .switch input{opacity:0;width:0;height:0}
+        .switch-slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background-color:var(--gray-300);transition:.4s;border-radius:28px}
+        .switch-slider:before{position:absolute;content:"";height:20px;width:20px;left:4px;bottom:4px;background-color:white;transition:.4s;border-radius:50%}
+        input:checked+.switch-slider{background-color:var(--success)}
+        input:checked+.switch-slider:before{transform:translateX(23px)}
     </style>
 </head>
 <body>
-    <div class="main-container">
-        <!-- Header Card -->
-        <div class="header-card">
-            <div class="user-info">
-                <div class="user-greeting">
-                    <div class="user-avatar">
-                        <img th:if="${user.profileImage != null and user.profileImage != ''}"
-                             th:src="${user.profileImage}"
-                             alt="프로필"
-                             style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
-                        <span th:unless="${user.profileImage != null and user.profileImage != ''}"
-                              th:text="${user.role == T(com.medicine.model.Role).FATHER ? '👨' : (user.role == T(com.medicine.model.Role).ADMIN ? '⚙️' : (user.role == T(com.medicine.model.Role).FAMILY ? '👨‍👩‍👧' : '👤'))}"></span>
+<div id="homeTab" class="tab-content-wrapper active">
+    <div class="app-container">
+        <div class="custom-card">
+            <div class="user-header">
+                <div class="user-info">
+                    <div class="user-avatar" id="headerUserAvatar" th:onclick="|showProfileModal('[[${user.profileImage}]]','[[${user.displayName}]]')|">
+                        <img th:if="${user.profileImage!=null}" th:src="${user.profileImage}" alt="프로필">
+                        <span th:if="${user.profileImage==null}" th:text="${user.displayName!=null?user.displayName.substring(0,1):user.username.substring(0,1)}"></span>
                     </div>
                     <div class="user-details">
-                        <h5><span th:text="${user.displayName}"></span>님</h5>
-                        <span class="role-badge" th:text="${user.role.displayName}"></span>
+                        <h5 th:text="${user.displayName!=null?user.displayName:user.username}">사용자</h5>
+                        <span class="role-badge" th:text="${user.role.displayName}">역할</span>
                     </div>
                 </div>
-                <div style="display: flex; gap: 10px;">
-                    <a href="/profile" class="btn logout-btn" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border-color: #10b981;" title="프로필 설정">
-                        <i class="bi bi-person-gear"></i>
-                    </a>
-                    <a th:if="${user.role == T(com.medicine.model.Role).ADMIN}" href="/admin" class="btn logout-btn" style="background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); color: white; border-color: #0ea5e9;" title="관리자">
-                        <i class="bi bi-gear-fill"></i>
-                    </a>
-                    <a href="/logout" class="btn logout-btn" title="로그아웃">
-                        <i class="bi bi-box-arrow-right"></i>
-                    </a>
+            </div>
+            <div class="comment-section">
+                <h6 style="margin-bottom:16px;font-weight:700"><i class="bi bi-chat-heart"></i> 응원 메시지</h6>
+                <div class="comment-input-wrapper">
+                    <input type="text" id="commentInput" class="comment-input" placeholder="응원 메시지를 남겨주세요...">
+                    <button class="comment-submit-btn" onclick="submitComment()"><i class="bi bi-send-fill"></i></button>
                 </div>
+                <div class="comment-list" id="commentList">
+                    <div class="loading">
+                        <div class="loading-spinner"></div>
+                        <p style="margin-top:12px;color:var(--gray-600)">댓글을 불러오는 중...</p>
+                    </div>
+                </div>
+                <div class="pagination-wrapper" id="commentPagination"></div>
             </div>
         </div>
-
-        <!-- Date Card -->
-        <div class="date-card">
-            <h2>
-                📅 <span id="selectedDateDisplay" th:text="${#temporals.format(today, 'MM월 dd일')}"></span>
-            </h2>
-            <p id="selectedDayDisplay" th:text="${#temporals.format(today, 'EEEE')}"></p>
-        </div>
-
-        <!-- Medicine Button Card -->
-        <div class="medicine-card">
-            <div class="medicine-buttons-container">
-                <!-- Morning Button -->
-                <div class="medicine-btn-wrapper">
-                    <button id="morningMedicineBtn"
-                            th:classappend="${morningRecord.taken} ? 'taken' : 'not-taken'"
-                            th:disabled="${!canTakeMedicine}"
-                            th:attr="data-taken=${morningRecord.taken}"
-                            class="medicine-btn"
-                            data-type="morning">
-                        <i class="bi" th:classappend="${morningRecord.taken} ? 'bi-check-circle-fill' : 'bi-x-circle-fill'"></i>
-                        <span>🌅 아침</span>
-                        <span th:text="${morningRecord.taken} ? '복용 완료' : '복용하기'"></span>
-                    </button>
-                    <div class="medicine-info" th:if="${morningRecord.taken}" style="margin-top: 8px;">
-                        <p style="font-size: 12px; margin: 0;">
-                            <i class="bi bi-clock-fill"></i>
-                            <span th:text="${#temporals.format(morningRecord.takenTime, 'HH:mm')}"></span>
-                        </p>
+    </div>
+</div>
+<div id="medicineTab" class="tab-content-wrapper">
+    <div class="app-container">
+        <div class="custom-card">
+            <h5 style="margin-bottom:20px;font-weight:700"><i class="bi bi-capsule"></i> 오늘의 약 복용</h5>
+            <div class="medicine-buttons">
+                <div class="medicine-btn" id="morningBtn" th:classappend="${!canTakeMedicine}?'disabled'" th:onclick="${canTakeMedicine}?'toggleMedicine(\'MORNING\')':''">
+                    <div class="medicine-icon">🌅</div>
+                    <div class="medicine-label">아침</div>
+                    <div class="medicine-status" id="morningStatus">
+                        <span th:text="${morningRecord.taken}?'복용완료':'미복용'">미복용</span>
                     </div>
                 </div>
-
-                <!-- Evening Button -->
-                <div class="medicine-btn-wrapper">
-                    <button id="eveningMedicineBtn"
-                            th:classappend="${eveningRecord.taken} ? 'taken' : 'not-taken'"
-                            th:disabled="${!canTakeMedicine}"
-                            th:attr="data-taken=${eveningRecord.taken}"
-                            class="medicine-btn"
-                            data-type="evening">
-                        <i class="bi" th:classappend="${eveningRecord.taken} ? 'bi-check-circle-fill' : 'bi-x-circle-fill'"></i>
-                        <span>🌙 저녁</span>
-                        <span th:text="${eveningRecord.taken} ? '복용 완료' : '복용하기'"></span>
-                    </button>
-                    <div class="medicine-info" th:if="${eveningRecord.taken}" style="margin-top: 8px;">
-                        <p style="font-size: 12px; margin: 0;">
-                            <i class="bi bi-clock-fill"></i>
-                            <span th:text="${#temporals.format(eveningRecord.takenTime, 'HH:mm')}"></span>
-                        </p>
+                <div class="medicine-btn" id="eveningBtn" th:classappend="${!canTakeMedicine}?'disabled'" th:onclick="${canTakeMedicine}?'toggleMedicine(\'EVENING\')':''">
+                    <div class="medicine-icon">🌙</div>
+                    <div class="medicine-label">저녁</div>
+                    <div class="medicine-status" id="eveningStatus">
+                        <span th:text="${eveningRecord.taken}?'복용완료':'미복용'">미복용</span>
                     </div>
                 </div>
             </div>
-
-            <div class="medicine-info" th:if="${!canTakeMedicine}" style="margin-top: 16px;">
-                <p>
-                    <i class="bi bi-info-circle-fill"></i>
-                    약 복용 기록은 월곡이 아버님만 가능합니다
-                </p>
+            <div class="calendar-wrapper">
+                <div class="calendar-header">
+                    <button class="calendar-nav-btn" onclick="changeMonth(-1)"><i class="bi bi-chevron-left"></i></button>
+                    <div class="calendar-title" id="calendarTitle">2025년 1월</div>
+                    <button class="calendar-nav-btn" onclick="changeMonth(1)"><i class="bi bi-chevron-right"></i></button>
+                </div>
+                <div class="calendar-grid" id="calendarGrid"></div>
             </div>
         </div>
-
-        <!-- Meal Check Section -->
-        <div class="meal-check-card">
-            <div class="meal-check-header">
-                <div class="meal-check-icon">
-                    <i class="bi bi-egg-fried"></i>
-                </div>
-                <h4>식단 체크</h4>
-            </div>
-
-            <!-- Average Score Display -->
-            <div class="meal-stats">
-                <div class="meal-stats-score">
-                    <div class="meal-stats-emoji" id="mealStatsEmoji">-</div>
-                    <div class="meal-stats-text">
-                        <span class="meal-stats-label">오늘의 평균 점수</span>
-                        <span class="meal-stats-value" id="mealStatsScore">-</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Meal Grid (Breakfast, Lunch, Dinner) -->
+    </div>
+</div>
+<div id="mealTab" class="tab-content-wrapper">
+    <div class="app-container">
+        <div class="custom-card">
+            <h5 style="margin-bottom:20px;font-weight:700"><i class="bi bi-egg-fried"></i> 오늘의 식단</h5>
             <div class="meal-grid">
-                <!-- Breakfast -->
-                <div class="meal-item" id="meal-breakfast">
-                    <div class="meal-item-label">🌅 아침</div>
-                    <div class="meal-item-image-container">
-                        <span class="meal-item-placeholder">🍳</span>
-                    </div>
-                    <button th:if="${user.role == T(com.medicine.model.Role).FATHER}"
-                            class="meal-item-upload-btn" id="breakfast-btn">
-                        <i class="bi bi-camera"></i> 촬영/업로드
-                    </button>
-                    <div th:unless="${user.role == T(com.medicine.model.Role).FATHER}"
-                         class="meal-item-info" style="font-size: 11px; color: #999; margin-top: 8px;">
-                        아버님만 업로드 가능
-                    </div>
-                    <input type="file" id="breakfast-image" accept="image/*" style="display: none;">
+                <div class="meal-item" id="breakfastMeal" onclick="uploadMeal('BREAKFAST')">
+                    <div class="meal-placeholder">🍳</div>
+                    <div class="meal-label">아침</div>
                 </div>
-
-                <!-- Lunch -->
-                <div class="meal-item" id="meal-lunch">
-                    <div class="meal-item-label">☀️ 점심</div>
-                    <div class="meal-item-image-container">
-                        <span class="meal-item-placeholder">🍱</span>
-                    </div>
-                    <button th:if="${user.role == T(com.medicine.model.Role).FATHER}"
-                            class="meal-item-upload-btn" id="lunch-btn">
-                        <i class="bi bi-camera"></i> 촬영/업로드
-                    </button>
-                    <div th:unless="${user.role == T(com.medicine.model.Role).FATHER}"
-                         class="meal-item-info" style="font-size: 11px; color: #999; margin-top: 8px;">
-                        아버님만 업로드 가능
-                    </div>
-                    <input type="file" id="lunch-image" accept="image/*" style="display: none;">
+                <div class="meal-item" id="lunchMeal" onclick="uploadMeal('LUNCH')">
+                    <div class="meal-placeholder">🍱</div>
+                    <div class="meal-label">점심</div>
                 </div>
-
-                <!-- Dinner -->
-                <div class="meal-item" id="meal-dinner">
-                    <div class="meal-item-label">🌙 저녁</div>
-                    <div class="meal-item-image-container">
-                        <span class="meal-item-placeholder">🍽️</span>
-                    </div>
-                    <button th:if="${user.role == T(com.medicine.model.Role).FATHER}"
-                            class="meal-item-upload-btn" id="dinner-btn">
-                        <i class="bi bi-camera"></i> 촬영/업로드
-                    </button>
-                    <div th:unless="${user.role == T(com.medicine.model.Role).FATHER}"
-                         class="meal-item-info" style="font-size: 11px; color: #999; margin-top: 8px;">
-                        아버님만 업로드 가능
-                    </div>
-                    <input type="file" id="dinner-image" accept="image/*" style="display: none;">
+                <div class="meal-item" id="dinnerMeal" onclick="uploadMeal('DINNER')">
+                    <div class="meal-placeholder">🍽️</div>
+                    <div class="meal-label">저녁</div>
+                </div>
+            </div>
+            <input type="file" id="mealImageInput" accept="image/*" style="display:none" onchange="handleMealImageUpload()">
+            <div id="mealEvaluationSection" style="display:none;margin-top:20px">
+                <div class="custom-card" style="background:linear-gradient(135deg,#f0f9ff 0%,#e0f2fe 100%)">
+                    <h6 style="font-weight:700;margin-bottom:12px"><i class="bi bi-robot"></i> AI 영양 평가</h6>
+                    <div id="mealEvaluationContent"></div>
                 </div>
             </div>
         </div>
-
-        <!-- Comments Section -->
-        <div class="comments-card">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h4 style="margin: 0;"><i class="bi bi-chat-dots-fill"></i> 댓글 <span id="commentCount">0</span>개 <span id="commentDateFilter" style="font-size: 14px; color: #666; font-weight: 500;"></span></h4>
-                <button id="showAllCommentsBtn" style="display: none; padding: 6px 12px; background: #f0f0f0; border: none; border-radius: 8px; font-size: 12px; font-weight: 600; color: #666; cursor: pointer;">
-                    전체 댓글 보기
-                </button>
+    </div>
+</div>
+<div id="pointTab" class="tab-content-wrapper">
+    <div class="app-container">
+        <div class="custom-card">
+            <div class="empty-state">
+                <div class="empty-state-icon"><i class="bi bi-trophy"></i></div>
+                <div class="empty-state-title">포인트 기능</div>
+                <div class="empty-state-text">곧 추가될 기능입니다</div>
             </div>
-
-            <!-- Comment Input Form -->
-            <div class="comment-input-wrapper">
-                <div class="comment-input-header">
-                    <div class="comment-input-avatar">
-                        <img th:if="${user.profileImage != null and user.profileImage != ''}" th:src="${user.profileImage}" alt="프로필">
-                        <span th:unless="${user.profileImage != null and user.profileImage != ''}"
-                              th:text="${user.role == T(com.medicine.model.Role).FATHER ? '👨' : (user.role == T(com.medicine.model.Role).ADMIN ? '⚙️' : (user.role == T(com.medicine.model.Role).FAMILY ? '👨‍👩‍👧' : '👤'))}"></span>
+        </div>
+    </div>
+</div>
+<div id="settingsTab" class="tab-content-wrapper">
+    <div class="app-container">
+        <div class="custom-card">
+            <h5 style="margin-bottom:20px;font-weight:700"><i class="bi bi-gear"></i> 설정</h5>
+            <div class="settings-list">
+                <div class="settings-item" onclick="showProfileSettings()">
+                    <div class="settings-item-content">
+                        <div class="settings-item-icon"><i class="bi bi-person-circle"></i></div>
+                        <div class="settings-item-text">
+                            <h6>프로필 변경</h6>
+                            <p>프로필 사진 및 표시 이름 변경</p>
+                        </div>
                     </div>
-                    <textarea id="commentInput" placeholder="댓글을 입력하세요..." rows="1"></textarea>
+                    <i class="bi bi-chevron-right"></i>
                 </div>
-                <div class="comment-input-actions">
-                    <label for="commentImageInput" class="btn-image-upload">
-                        <i class="bi bi-image"></i> 사진
-                        <input type="file" id="commentImageInput" accept="image/*" style="display: none;">
+                <div class="settings-item" onclick="showPasswordSettings()">
+                    <div class="settings-item-content">
+                        <div class="settings-item-icon"><i class="bi bi-shield-lock"></i></div>
+                        <div class="settings-item-text">
+                            <h6>비밀번호 변경</h6>
+                            <p>계정 보안을 위해 비밀번호 변경</p>
+                        </div>
+                    </div>
+                    <i class="bi bi-chevron-right"></i>
+                </div>
+                <div class="settings-item">
+                    <div class="settings-item-content">
+                        <div class="settings-item-icon"><i class="bi bi-bell"></i></div>
+                        <div class="settings-item-text">
+                            <h6>Push 알림</h6>
+                            <p>약 복용 알림 설정</p>
+                        </div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="pushNotificationSwitch" onchange="togglePushNotification()">
+                        <span class="switch-slider"></span>
                     </label>
-                    <img id="commentImagePreview" class="comment-image-preview" style="display: none;" alt="미리보기">
-                    <button id="submitCommentBtn" class="btn-submit-comment">
-                        게시
-                    </button>
                 </div>
-            </div>
-
-            <!-- Comments List -->
-            <div id="commentsList" class="comments-list"></div>
-        </div>
-
-        <!-- Calendar Card -->
-        <div class="calendar-card">
-            <div class="calendar-header">
-                <div class="calendar-title">
-                    <div class="calendar-icon">
-                        <i class="bi bi-calendar3"></i>
-                    </div>
-                    <h4>복용 기록</h4>
-                </div>
-                <div class="calendar-nav">
-                    <button id="prevMonthBtn">
-                        <i class="bi bi-chevron-left"></i>
-                    </button>
-                    <span class="calendar-month-year" id="currentMonthYear"></span>
-                    <button id="nextMonthBtn">
-                        <i class="bi bi-chevron-right"></i>
-                    </button>
-                </div>
-            </div>
-            <div class="calendar-grid" id="calendarGrid"></div>
-        </div>
-    </div>
-
-    <!-- Custom Confirmation Modal -->
-    <div id="confirmModal" class="custom-modal">
-        <div class="modal-content">
-            <div class="modal-icon">💊</div>
-            <div class="modal-title">약 복용 확인</div>
-            <div class="modal-message">오늘 약을 복용하셨나요?<br>복용 시간이 기록됩니다.</div>
-            <div class="modal-buttons">
-                <button class="modal-btn modal-btn-secondary" id="cancelModalBtn">취소</button>
-                <button class="modal-btn modal-btn-primary" id="confirmModalBtn">확인</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Cancel Confirmation Modal -->
-    <div id="cancelModal" class="custom-modal">
-        <div class="modal-content">
-            <div class="modal-icon">⚠️</div>
-            <div class="modal-title">약 복용 취소</div>
-            <div class="modal-message">약 복용 기록을 취소하시겠습니까?<br>기록된 시간이 삭제됩니다.</div>
-            <div class="modal-buttons">
-                <button class="modal-btn modal-btn-secondary" id="cancelCancelModalBtn">돌아가기</button>
-                <button class="modal-btn modal-btn-primary" id="confirmCancelModalBtn" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">취소하기</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Toast Container -->
-    <div class="toast-container" id="toastContainer"></div>
-
-    <!-- Loading Spinner -->
-    <div class="loading-spinner" id="loadingSpinner">
-        <div style="display: flex; flex-direction: column; align-items: center;">
-            <div class="spinner"></div>
-            <div class="loading-text">로딩 중...</div>
-        </div>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script th:inline="javascript">
-        let currentYear = new Date().getFullYear();
-        let currentMonth = new Date().getMonth();
-        let medicineRecords = {};
-        let mealRecords = {};
-        let currentDate = new Date();
-        let selectedDate = new Date();
-
-        // Loading Spinner Functions
-        function showLoading() {
-            document.getElementById('loadingSpinner').classList.add('show');
-        }
-
-        function hideLoading() {
-            document.getElementById('loadingSpinner').classList.remove('show');
-        }
-
-        // Calendar Functions
-        function loadCalendar() {
-            const year = currentYear;
-            const month = currentMonth;
-
-            // Update month/year display
-            const monthNames = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'];
-            document.getElementById('currentMonthYear').textContent = `${year}년 ${monthNames[month]}`;
-
-            // Fetch medicine records and meal records in parallel
-            Promise.all([
-                fetch(`/api/medicine/calendar/${year}/${month + 1}`).then(r => r.json()),
-                fetch(`/api/meal/calendar/${year}/${month + 1}`).then(r => r.json())
-            ])
-            .then(([medicineData, mealData]) => {
-                // Process medicine records
-                medicineRecords = {};
-                if (medicineData && medicineData.events && Array.isArray(medicineData.events)) {
-                    medicineData.events.forEach(event => {
-                        medicineRecords[event.date] = {
-                            time: event.time.substring(0, 5),
-                            incomplete: event.incomplete === true,
-                            hasMorning: event.hasMorning === true,
-                            hasEvening: event.hasEvening === true
-                        };
-                    });
-                }
-
-                // Process meal records
-                mealRecords = {};
-                if (mealData && mealData.events && Array.isArray(mealData.events)) {
-                    mealData.events.forEach(event => {
-                        mealRecords[event.date] = {
-                            emoji: event.emoji,
-                            averageScore: event.averageScore,
-                            mealCount: event.mealCount
-                        };
-                    });
-                }
-
-                renderCalendar();
-            })
-            .catch(error => {
-                console.error('Error loading calendar:', error);
-                renderCalendar();
-                showToast('❌ 달력 로딩 중 오류가 발생했습니다');
-            });
-        }
-
-        function renderCalendar() {
-            const grid = document.getElementById('calendarGrid');
-            grid.innerHTML = '';
-
-            // Day headers
-            const dayHeaders = ['일', '월', '화', '수', '목', '금', '토'];
-            const dayClasses = ['sunday', '', '', '', '', 'saturday', ''];
-
-            dayHeaders.forEach((day, index) => {
-                const header = document.createElement('div');
-                header.className = `calendar-day-header ${dayClasses[index]}`;
-                header.textContent = day;
-                grid.appendChild(header);
-            });
-
-            // Calculate calendar days
-            const firstDay = new Date(currentYear, currentMonth, 1);
-            const lastDay = new Date(currentYear, currentMonth + 1, 0);
-            const prevLastDay = new Date(currentYear, currentMonth, 0);
-
-            const firstDayOfWeek = firstDay.getDay();
-            const lastDate = lastDay.getDate();
-            const prevLastDate = prevLastDay.getDate();
-
-            const today = new Date();
-            const isCurrentMonth = today.getFullYear() === currentYear && today.getMonth() === currentMonth;
-            const todayDate = today.getDate();
-
-            // Check if selectedDate is in current month
-            const selectedDateInMonth = selectedDate.getFullYear() === currentYear && selectedDate.getMonth() === currentMonth;
-            const selectedDateNum = selectedDate.getDate();
-
-            // Previous month days
-            for (let i = firstDayOfWeek - 1; i >= 0; i--) {
-                const day = createDayElement(prevLastDate - i, true, false, null);
-                grid.appendChild(day);
-            }
-
-            // Current month days
-            for (let date = 1; date <= lastDate; date++) {
-                const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
-                const medicineData = medicineRecords[dateStr];
-                const isToday = isCurrentMonth && date === todayDate;
-                const day = createDayElement(date, false, isToday, medicineData);
-
-                // Add selected class if this is the selected date
-                if (selectedDateInMonth && date === selectedDateNum) {
-                    day.classList.add('selected');
-                }
-
-                grid.appendChild(day);
-            }
-
-            // Next month days
-            const remainingDays = 42 - (firstDayOfWeek + lastDate);
-            for (let date = 1; date <= remainingDays; date++) {
-                const day = createDayElement(date, true, false, null);
-                grid.appendChild(day);
-            }
-
-            // Update UI based on selected date after rendering calendar
-            updateDateBasedUI();
-        }
-
-        function createDayElement(date, isOtherMonth, isToday, medicineData) {
-            const day = document.createElement('div');
-            day.className = 'calendar-day';
-
-            if (isOtherMonth) {
-                day.classList.add('other-month');
-            }
-            if (isToday) {
-                day.classList.add('today');
-            }
-            if (medicineData) {
-                // 불완전하면 빨간색, 완전하면 초록색
-                if (medicineData.incomplete) {
-                    day.classList.add('incomplete');
-                } else {
-                    day.classList.add('has-record');
-                }
-            }
-
-            // Create date string for lookup
-            const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
-            const mealData = mealRecords[dateStr];
-
-            // Add click handler to show meal data and filter comments
-            day.onclick = () => {
-                const clickedDate = new Date(currentYear, currentMonth, date);
-                selectedDate = clickedDate;
-                selectedCommentDate = clickedDate;
-
-                // Remove selected class from all days
-                document.querySelectorAll('.calendar-day').forEach(d => d.classList.remove('selected'));
-
-                // Add selected class to clicked day
-                day.classList.add('selected');
-
-                // Update top date display
-                updateTopDateDisplay(clickedDate);
-
-                // Update UI based on selected date (show/hide buttons)
-                updateDateBasedUI();
-
-                loadMealData(clickedDate);
-                renderComments();
-                updateCommentCount();
-
-                let message = `📅 ${currentYear}년 ${currentMonth + 1}월 ${date}일\n`;
-                if (medicineData) {
-                    message += `💊 복용: `;
-                    if (medicineData.hasMorning) message += '아침 ';
-                    if (medicineData.hasEvening) message += '저녁 ';
-                    if (medicineData.incomplete) message += '(미완료)';
-                    message += `\n`;
-                }
-                if (mealData) {
-                    message += `${mealData.emoji} 식단 평균: ${mealData.averageScore}점 (${mealData.mealCount}끼)\n`;
-                }
-                showToast(message);
-
-                // Update comments header
-                updateCommentsHeader();
-            };
-
-            const number = document.createElement('div');
-            number.className = 'calendar-day-number';
-            number.textContent = date;
-            day.appendChild(number);
-
-            // Show medicine time
-            if (medicineData) {
-                const timeDiv = document.createElement('div');
-                timeDiv.className = 'calendar-day-time';
-                timeDiv.textContent = medicineData.time;
-                day.appendChild(timeDiv);
-            }
-
-            // Show meal emoji
-            if (mealData && mealData.emoji) {
-                const emojiDiv = document.createElement('div');
-                emojiDiv.className = 'calendar-day-time';
-                emojiDiv.textContent = mealData.emoji;
-                emojiDiv.style.fontSize = '14px';
-                day.appendChild(emojiDiv);
-            }
-
-            return day;
-        }
-
-        // Update top date display
-        function updateTopDateDisplay(date) {
-            const monthNames = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'];
-            const dayNames = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'];
-
-            const month = monthNames[date.getMonth()];
-            const day = date.getDate();
-            const dayOfWeek = dayNames[date.getDay()];
-
-            document.getElementById('selectedDateDisplay').textContent = `${month} ${day}일`;
-            document.getElementById('selectedDayDisplay').textContent = dayOfWeek;
-        }
-
-        // Check if selected date is today
-        function isToday(date) {
-            const today = new Date();
-            return date.getFullYear() === today.getFullYear() &&
-                   date.getMonth() === today.getMonth() &&
-                   date.getDate() === today.getDate();
-        }
-
-        // Update UI based on selected date
-        function updateDateBasedUI() {
-            const isTodaySelected = isToday(selectedDate);
-            const canTakeMedicine = /*[[${canTakeMedicine}]]*/ false;
-
-            // Show/hide meal upload buttons
-            const mealUploadButtons = document.querySelectorAll('.meal-item-upload-btn');
-            mealUploadButtons.forEach(btn => {
-                if (isTodaySelected && canTakeMedicine) {
-                    btn.style.display = 'block';
-                } else {
-                    btn.style.display = 'none';
-                }
-            });
-
-            // Show/hide medicine buttons card
-            const medicineCard = document.querySelector('.medicine-card');
-            if (medicineCard) {
-                if (isTodaySelected) {
-                    medicineCard.style.display = 'flex';
-                } else {
-                    medicineCard.style.display = 'none';
-                }
-            }
-        }
-
-        window.changeMonth = function(delta) {
-            currentMonth += delta;
-            if (currentMonth > 11) {
-                currentMonth = 0;
-                currentYear++;
-            } else if (currentMonth < 0) {
-                currentMonth = 11;
-                currentYear--;
-            }
-            loadCalendar();
-        };
-
-        // Store current medicine type for confirm modal
-        let currentMedicineType = null;
-
-        // Modal Functions
-        window.showConfirmModal = function(medicineType) {
-            currentMedicineType = medicineType;
-            document.getElementById('confirmModal').classList.add('show');
-        };
-
-        window.closeConfirmModal = function() {
-            document.getElementById('confirmModal').classList.remove('show');
-        };
-
-        window.confirmTakeMedicine = function() {
-            closeConfirmModal();
-            if (currentMedicineType) {
-                takeMedicine(currentMedicineType);
-            }
-        };
-
-        window.showCancelModal = function(medicineType) {
-            currentMedicineType = medicineType;
-            document.getElementById('cancelModal').classList.add('show');
-        };
-
-        window.closeCancelModal = function() {
-            document.getElementById('cancelModal').classList.remove('show');
-        };
-
-        window.confirmCancelMedicine = function() {
-            closeCancelModal();
-            if (currentMedicineType) {
-                cancelMedicine(currentMedicineType);
-            }
-        };
-
-        // Take medicine API call
-        function takeMedicine(medicineType) {
-            const formData = new URLSearchParams();
-            formData.append('medicineType', medicineType);
-
-            fetch('/api/medicine/take', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: formData
-            })
-            .then(response => {
-                if (response.status === 401) {
-                    window.location.href = '/login';
-                    return;
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (!data) return;
-
-                if (data.success) {
-                    const btnId = medicineType === 'morning' ? 'morningMedicineBtn' : 'eveningMedicineBtn';
-                    const medicineBtn = document.getElementById(btnId);
-                    const typeLabel = medicineType === 'morning' ? '🌅 아침' : '🌙 저녁';
-
-                    medicineBtn.classList.remove('not-taken');
-                    medicineBtn.classList.add('taken');
-                    medicineBtn.innerHTML = `<i class="bi bi-check-circle-fill"></i><span>${typeLabel}</span><span>복용 완료</span>`;
-                    medicineBtn.setAttribute('data-taken', 'true');
-
-                    // Reload calendar
-                    loadCalendar();
-
-                    // Show success toast
-                    showToast('✅ 약 복용이 기록되었습니다!');
-                } else {
-                    showToast('❌ ' + (data.error || '오류가 발생했습니다'));
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showToast('❌ 서버 오류가 발생했습니다');
-            });
-        }
-
-        // Cancel medicine API call
-        function cancelMedicine(medicineType) {
-            const formData = new URLSearchParams();
-            formData.append('medicineType', medicineType);
-
-            fetch('/api/medicine/cancel', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: formData
-            })
-            .then(response => {
-                if (response.status === 401) {
-                    window.location.href = '/login';
-                    return;
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (!data) return;
-
-                if (data.success) {
-                    const btnId = medicineType === 'morning' ? 'morningMedicineBtn' : 'eveningMedicineBtn';
-                    const medicineBtn = document.getElementById(btnId);
-                    const typeLabel = medicineType === 'morning' ? '🌅 아침' : '🌙 저녁';
-
-                    medicineBtn.classList.remove('taken');
-                    medicineBtn.classList.add('not-taken');
-                    medicineBtn.innerHTML = `<i class="bi bi-x-circle-fill"></i><span>${typeLabel}</span><span>복용하기</span>`;
-                    medicineBtn.setAttribute('data-taken', 'false');
-
-                    // Reload calendar
-                    loadCalendar();
-
-                    // Show success toast
-                    showToast('⚠️ 약 복용이 취소되었습니다');
-                } else {
-                    showToast('❌ ' + (data.error || '오류가 발생했습니다'));
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showToast('❌ 서버 오류가 발생했습니다');
-            });
-        }
-
-        // Toast Function
-        function showToast(message) {
-            const toastContainer = document.getElementById('toastContainer');
-            const toast = document.createElement('div');
-            toast.className = 'custom-toast';
-            toast.innerHTML = `<span class="toast-message">${message}</span>`;
-
-            toastContainer.appendChild(toast);
-
-            setTimeout(() => {
-                toast.style.animation = 'slideUp 0.3s ease-out reverse';
-                setTimeout(() => {
-                    toastContainer.removeChild(toast);
-                }, 300);
-            }, 2500);
-        }
-
-        // Comments Functions
-        let currentUserId = /*[[${user.id}]]*/ '';
-        let selectedCommentImage = null;
-        let currentReplyingTo = null;
-        let allComments = []; // 전체 댓글 저장
-        let selectedCommentDate = new Date(); // 선택된 날짜 (초기값은 오늘)
-
-        // Load comments
-        function loadComments() {
-            fetch('/api/comments')
-                .then(response => {
-                    if (response.status === 401) {
-                        window.location.href = '/login';
-                        return;
-                    }
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data) {
-                        currentUserId = data.currentUserId;
-                        allComments = data.comments || [];
-                        renderComments();
-                        updateCommentCount();
-                        updateCommentsHeader();
-                    }
-                })
-                .catch(error => {
-                    console.error('Error loading comments:', error);
-                    showToast('❌ 댓글 로딩 중 오류가 발생했습니다');
-                });
-        }
-
-        // Update comment count
-        function updateCommentCount() {
-            let commentsToShow = allComments;
-            if (selectedCommentDate) {
-                commentsToShow = filterCommentsByDate(allComments, selectedCommentDate);
-            }
-            document.getElementById('commentCount').textContent = commentsToShow.filter(c => !c.parentCommentId).length;
-        }
-
-        // Update comments header with selected date
-        function updateCommentsHeader() {
-            const dateFilter = document.getElementById('commentDateFilter');
-            const showAllBtn = document.getElementById('showAllCommentsBtn');
-
-            if (selectedCommentDate) {
-                const year = selectedCommentDate.getFullYear();
-                const month = selectedCommentDate.getMonth() + 1;
-                const date = selectedCommentDate.getDate();
-                dateFilter.textContent = `(${year}.${month}.${date})`;
-                showAllBtn.style.display = 'block';
-            } else {
-                dateFilter.textContent = '';
-                showAllBtn.style.display = 'none';
-            }
-        }
-
-        // Show all comments (remove date filter)
-        window.showAllComments = function() {
-            selectedCommentDate = null;
-            renderComments();
-            updateCommentCount();
-            updateCommentsHeader();
-            showToast('📋 전체 댓글을 표시합니다');
-        };
-
-        // Filter comments by date
-        function filterCommentsByDate(comments, date) {
-            const dateStr = formatDateForAPI(date);
-            return comments.filter(comment => {
-                const commentDate = comment.createdAt.substring(0, 10); // "YYYY-MM-DD"
-                return commentDate === dateStr;
-            });
-        }
-
-        // Render comments
-        function renderComments() {
-            const commentsList = document.getElementById('commentsList');
-            commentsList.innerHTML = '';
-
-            // 날짜 필터링 적용
-            let commentsToShow = allComments;
-            if (selectedCommentDate) {
-                commentsToShow = filterCommentsByDate(allComments, selectedCommentDate);
-            }
-
-            // 부모 댓글과 대댓글 분리
-            const parentComments = commentsToShow.filter(c => !c.parentCommentId);
-            const repliesMap = {};
-            commentsToShow.filter(c => c.parentCommentId).forEach(reply => {
-                if (!repliesMap[reply.parentCommentId]) {
-                    repliesMap[reply.parentCommentId] = [];
-                }
-                repliesMap[reply.parentCommentId].push(reply);
-            });
-
-            parentComments.forEach(comment => {
-                const commentEl = createCommentElement(comment, repliesMap[comment.id] || []);
-                commentsList.appendChild(commentEl);
-            });
-        }
-
-        // Create comment element
-        function createCommentElement(comment, replies) {
-            const div = document.createElement('div');
-            div.className = 'comment-item';
-            div.dataset.commentId = comment.id;
-
-            const timeAgo = getTimeAgo(comment.createdAt);
-            const canDelete = currentUserId === comment.userId;
-
-            // Extract emoji/image before template literal to avoid Unicode issues
-            let profileImg;
-            if (comment.profileImage) {
-                profileImg = `<img src="${comment.profileImage}" alt="프로필">`;
-            } else {
-                const emoji = getDefaultEmoji(comment.username);
-                profileImg = `<span>${emoji}</span>`;
-            }
-
-            div.innerHTML = `
-                <div class="comment-header">
-                    <div class="comment-user-info">
-                        <div class="comment-avatar">${profileImg}</div>
-                        <div class="comment-user-details">
-                            <span class="comment-username">${comment.displayName}</span>
-                            <span class="comment-time">${timeAgo}</span>
+                <div class="settings-item" onclick="logout()">
+                    <div class="settings-item-content">
+                        <div class="settings-item-icon" style="color:var(--danger)"><i class="bi bi-box-arrow-right"></i></div>
+                        <div class="settings-item-text">
+                            <h6 style="color:var(--danger)">로그아웃</h6>
+                            <p>계정에서 로그아웃</p>
                         </div>
                     </div>
-                    ${canDelete ? `
-                        <div class="comment-actions-menu">
-                            <button class="btn-comment-action" data-action="delete" data-comment-id="${comment.id}">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </div>
-                    ` : ''}
+                    <i class="bi bi-chevron-right"></i>
                 </div>
-                <div class="comment-content">${escapeHtml(comment.content)}</div>
-                ${comment.imageUrl ? `<img src="${comment.imageUrl}" class="comment-image" alt="첨부 이미지">` : ''}
-                <div class="comment-actions">
-                    <button class="btn-like ${comment.likedUserIds && comment.likedUserIds.includes(currentUserId) ? 'liked' : ''}"
-                            data-action="like" data-comment-id="${comment.id}">
-                        <i class="bi ${comment.likedUserIds && comment.likedUserIds.includes(currentUserId) ? 'bi-heart-fill' : 'bi-heart'}"></i>
-                        <span>${comment.likesCount || 0}</span>
-                    </button>
-                    <button class="btn-reply" data-action="reply" data-comment-id="${comment.id}">
-                        <i class="bi bi-reply-fill"></i> 답글
-                    </button>
-                </div>
-            `;
-
-            // Add event listeners
-            const deleteBtn = div.querySelector('[data-action="delete"]');
-            if (deleteBtn) {
-                deleteBtn.addEventListener('click', function() {
-                    deleteComment(comment.id);
-                });
-            }
-
-            const likeBtn = div.querySelector('[data-action="like"]');
-            if (likeBtn) {
-                likeBtn.addEventListener('click', function() {
-                    toggleLike(comment.id);
-                });
-            }
-
-            const replyBtn = div.querySelector('[data-action="reply"]');
-            if (replyBtn) {
-                replyBtn.addEventListener('click', function() {
-                    showReplyInput(comment.id);
-                });
-            }
-
-            // 대댓글 렌더링
-            if (replies && replies.length > 0) {
-                const repliesContainer = document.createElement('div');
-                repliesContainer.className = 'replies-container';
-                replies.forEach(reply => {
-                    const replyEl = createReplyElement(reply);
-                    repliesContainer.appendChild(replyEl);
-                });
-                div.appendChild(repliesContainer);
-            }
-
-            // 답글 입력창
-            const replyInputWrapper = document.createElement('div');
-            replyInputWrapper.className = 'reply-input-wrapper';
-            replyInputWrapper.id = `reply-input-${comment.id}`;
-            replyInputWrapper.innerHTML = `
-                <div class="reply-input-form">
-                    <textarea placeholder="답글을 입력하세요..." rows="2"></textarea>
-                    <button data-action="submit-reply" data-parent-id="${comment.id}">답글</button>
-                </div>
-            `;
-
-            // Add event listener for reply submit button
-            const replySubmitBtn = replyInputWrapper.querySelector('[data-action="submit-reply"]');
-            if (replySubmitBtn) {
-                replySubmitBtn.addEventListener('click', function() {
-                    submitReply(comment.id);
-                });
-            }
-
-            div.appendChild(replyInputWrapper);
-
-            return div;
-        }
-
-        // Create reply element
-        function createReplyElement(reply) {
-            const div = document.createElement('div');
-            div.className = 'reply-item';
-            div.dataset.commentId = reply.id;
-
-            const timeAgo = getTimeAgo(reply.createdAt);
-            const canDelete = currentUserId === reply.userId;
-
-            // Extract emoji/image before template literal to avoid Unicode issues
-            let profileImg;
-            if (reply.profileImage) {
-                profileImg = `<img src="${reply.profileImage}" alt="프로필">`;
-            } else {
-                const emoji = getDefaultEmoji(reply.username);
-                profileImg = `<span>${emoji}</span>`;
-            }
-
-            div.innerHTML = `
-                <div class="comment-header">
-                    <div class="comment-user-info">
-                        <div class="comment-avatar">${profileImg}</div>
-                        <div class="comment-user-details">
-                            <span class="comment-username">${reply.displayName}</span>
-                            <span class="comment-time">${timeAgo}</span>
-                        </div>
-                    </div>
-                    ${canDelete ? `
-                        <div class="comment-actions-menu">
-                            <button class="btn-comment-action" data-action="delete" data-comment-id="${reply.id}">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </div>
-                    ` : ''}
-                </div>
-                <div class="comment-content">${escapeHtml(reply.content)}</div>
-                ${reply.imageUrl ? `<img src="${reply.imageUrl}" class="comment-image" alt="첨부 이미지">` : ''}
-                <div class="comment-actions">
-                    <button class="btn-like ${reply.likedUserIds && reply.likedUserIds.includes(currentUserId) ? 'liked' : ''}"
-                            data-action="like" data-comment-id="${reply.id}">
-                        <i class="bi ${reply.likedUserIds && reply.likedUserIds.includes(currentUserId) ? 'bi-heart-fill' : 'bi-heart'}"></i>
-                        <span>${reply.likesCount || 0}</span>
-                    </button>
-                </div>
-            `;
-
-            // Add event listeners
-            const deleteBtn = div.querySelector('[data-action="delete"]');
-            if (deleteBtn) {
-                deleteBtn.addEventListener('click', function() {
-                    deleteComment(reply.id);
-                });
-            }
-
-            const likeBtn = div.querySelector('[data-action="like"]');
-            if (likeBtn) {
-                likeBtn.addEventListener('click', function() {
-                    toggleLike(reply.id);
-                });
-            }
-
-            return div;
-        }
-
-        // Submit comment
-        window.submitComment = function() {
-            const content = document.getElementById('commentInput').value.trim();
-            if (!content && !selectedCommentImage) {
-                showToast('⚠️ 댓글 내용을 입력하세요');
-                return;
-            }
-
-            const formData = new FormData();
-            formData.append('content', content || '');
-            if (selectedCommentImage) {
-                formData.append('image', selectedCommentImage);
-            }
-
-            fetch('/api/comments', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => {
-                if (response.status === 401) {
-                    window.location.href = '/login';
-                    return;
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (!data) return;
-
-                if (data.success) {
-                    document.getElementById('commentInput').value = '';
-                    document.getElementById('commentImagePreview').style.display = 'none';
-                    document.getElementById('commentImageInput').value = '';
-                    selectedCommentImage = null;
-                    loadComments();
-                    showToast('✅ 댓글이 작성되었습니다!');
-                } else {
-                    showToast('❌ ' + (data.error || '댓글 작성에 실패했습니다'));
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showToast('❌ 댓글 작성 중 오류가 발생했습니다');
-            });
-        };
-
-        // Submit reply
-        window.submitReply = function(parentId) {
-            const replyWrapper = document.getElementById(`reply-input-${parentId}`);
-            const textarea = replyWrapper.querySelector('textarea');
-            const content = textarea.value.trim();
-
-            if (!content) {
-                showToast('⚠️ 답글 내용을 입력하세요');
-                return;
-            }
-
-            const formData = new FormData();
-            formData.append('content', content);
-            formData.append('parentCommentId', parentId);
-
-            fetch('/api/comments', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => {
-                if (response.status === 401) {
-                    window.location.href = '/login';
-                    return;
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (!data) return;
-
-                if (data.success) {
-                    textarea.value = '';
-                    replyWrapper.classList.remove('show');
-                    loadComments();
-                    showToast('✅ 답글이 작성되었습니다!');
-                } else {
-                    showToast('❌ ' + (data.error || '답글 작성에 실패했습니다'));
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showToast('❌ 답글 작성 중 오류가 발생했습니다');
-            });
-        };
-
-        // Toggle like
-        window.toggleLike = function(commentId) {
-            fetch(`/api/comments/${commentId}/like`, {
-                method: 'POST'
-            })
-            .then(response => {
-                if (response.status === 401) {
-                    window.location.href = '/login';
-                    return;
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data && data.success) {
-                    loadComments();
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showToast('❌ 좋아요 처리 중 오류가 발생했습니다');
-            });
-        };
-
-        // Delete comment
-        window.deleteComment = function(commentId) {
-            if (!confirm('정말로 이 댓글을 삭제하시겠습니까?')) {
-                return;
-            }
-
-            fetch(`/api/comments/${commentId}`, {
-                method: 'DELETE'
-            })
-            .then(response => {
-                if (response.status === 401) {
-                    window.location.href = '/login';
-                    return;
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (!data) return;
-
-                if (data.success) {
-                    loadComments();
-                    showToast('✅ 댓글이 삭제되었습니다');
-                } else {
-                    showToast('❌ ' + (data.error || '삭제에 실패했습니다'));
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showToast('❌ 삭제 중 오류가 발생했습니다');
-            });
-        };
-
-        // Show reply input
-        window.showReplyInput = function(commentId) {
-            const replyWrapper = document.getElementById(`reply-input-${commentId}`);
-            replyWrapper.classList.toggle('show');
-            if (replyWrapper.classList.contains('show')) {
-                replyWrapper.querySelector('textarea').focus();
-            }
-        };
-
-        // Helper functions
-        function getTimeAgo(dateString) {
-            const date = new Date(dateString);
-            const now = new Date();
-            const seconds = Math.floor((now - date) / 1000);
-
-            if (seconds < 60) return '방금 전';
-            if (seconds < 3600) return Math.floor(seconds / 60) + '분 전';
-            if (seconds < 86400) return Math.floor(seconds / 3600) + '시간 전';
-            if (seconds < 604800) return Math.floor(seconds / 86400) + '일 전';
-
-            return date.toLocaleDateString('ko-KR');
-        }
-
-        function getDefaultEmoji(username) {
-            if (username === 'father') return '👨';
-            if (username === 'admin') return '⚙️';
-            if (username === 'family') return '👨\u200d👩\u200d👧';
-            return '👤';
-        }
-
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        // Meal Check Functions
-        let currentMealDate = new Date();
-
-        // 점수에 따른 색상 클래스 반환
-        function getScoreColorClass(score) {
-            if (score >= 80) return 'score-excellent';      // 80-100: 초록
-            else if (score >= 60) return 'score-good';      // 60-79: 파랑
-            else if (score >= 40) return 'score-average';   // 40-59: 노랑
-            else if (score >= 20) return 'score-poor';      // 20-39: 주황
-            else return 'score-bad';                        // 0-19: 빨강
-        }
-
-        // 전역 함수로 정의
-        window.openMealUpload = function(mealType) {
-            document.getElementById(mealType + '-image').click();
-        };
-
-        window.uploadMealImage = function(mealType) {
-            const fileInput = document.getElementById(mealType + '-image');
-            const file = fileInput.files[0];
-
-            if (!file) {
-                return;
-            }
-
-            showLoading();
-
-            const formData = new FormData();
-            formData.append('date', formatDateForAPI(selectedDate));
-            formData.append('mealType', mealType);
-            formData.append('image', file);
-
-            fetch('/api/meal/upload', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => {
-                if (response.status === 401) {
-                    window.location.href = '/login';
-                    return;
-                }
-                return response.json();
-            })
-            .then(data => {
-                hideLoading();
-
-                if (!data) return;
-
-                if (data.success) {
-                    showToast('✅ 식단이 업로드되고 AI 분석이 완료되었습니다!');
-                    loadMealData(selectedDate);
-                    loadCalendar(); // 달력도 새로고침
-                } else {
-                    showToast('❌ ' + (data.error || '업로드에 실패했습니다'));
-                }
-
-                // Reset file input
-                fileInput.value = '';
-            })
-            .catch(error => {
-                hideLoading();
-                console.error('Error uploading meal:', error);
-                showToast('❌ 업로드 중 오류가 발생했습니다');
-                fileInput.value = '';
-            });
-        };
-
-        window.loadMealData = function(date) {
-            const dateStr = formatDateForAPI(date);
-
-            fetch(`/api/meal/date/${dateStr}`)
-                .then(response => {
-                    if (response.status === 401) {
-                        window.location.href = '/login';
-                        return;
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data && data.success) {
-                        renderMealData(data.meals, data.stats);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error loading meal data:', error);
-                });
-        };
-
-        window.renderMealData = function(meals, stats) {
-            // Update stats display
-            const averageScore = stats.averageScore || 0;
-            const emoji = stats.emoji || '-';
-
-            const scoreElement = document.getElementById('mealStatsScore');
-            scoreElement.textContent = averageScore > 0 ? averageScore + '점' : '-';
-            document.getElementById('mealStatsEmoji').textContent = emoji;
-
-            // Apply color class to score
-            const mealStatsCard = document.querySelector('.meal-stats');
-            const scoreColorClass = getScoreColorClass(averageScore);
-
-            // Remove all score classes
-            mealStatsCard.classList.remove('score-excellent', 'score-good', 'score-average', 'score-poor', 'score-bad');
-
-            // Add new color class
-            if (averageScore > 0) {
-                mealStatsCard.classList.add(scoreColorClass);
-            }
-
-            // Reset meal items
-            ['breakfast', 'lunch', 'dinner'].forEach(type => {
-                const mealItem = document.getElementById('meal-' + type);
-                const container = mealItem.querySelector('.meal-item-image-container');
-
-                // Remove has-meal and score classes
-                mealItem.classList.remove('has-meal', 'score-excellent', 'score-good', 'score-average', 'score-poor', 'score-bad');
-
-                // Reset to placeholder
-                container.innerHTML = getPlaceholderForMealType(type);
-
-                // Remove existing info, score, and evaluation elements
-                const existingInfo = mealItem.querySelector('.meal-item-info');
-                if (existingInfo) existingInfo.remove();
-
-                const existingScore = mealItem.querySelector('.meal-item-score');
-                if (existingScore) existingScore.remove();
-
-                const existingEvaluation = mealItem.querySelector('.meal-evaluation');
-                if (existingEvaluation) existingEvaluation.remove();
-            });
-
-            // Update with actual meals
-            if (meals && meals.length > 0) {
-                meals.forEach(meal => {
-                    const mealType = meal.mealType.toLowerCase();
-                    const mealItem = document.getElementById('meal-' + mealType);
-                    const container = mealItem.querySelector('.meal-item-image-container');
-
-                    // Add has-meal class
-                    mealItem.classList.add('has-meal');
-
-                    // Add score color class
-                    if (meal.score) {
-                        const mealScoreColorClass = getScoreColorClass(meal.score);
-                        mealItem.classList.add(mealScoreColorClass);
-                    }
-
-                    // Display image
-                    container.innerHTML = `
-                        <img src="${meal.imageUrl}" class="meal-item-image" alt="${meal.mealType}">
-                    `;
-
-                    // Remove existing info, score, and evaluation elements
-                    const existingInfo = mealItem.querySelector('.meal-item-info');
-                    if (existingInfo) {
-                        existingInfo.remove();
-                    }
-                    const existingScore = mealItem.querySelector('.meal-item-score');
-                    if (existingScore) {
-                        existingScore.remove();
-                    }
-                    const existingEvaluation = mealItem.querySelector('.meal-evaluation');
-                    if (existingEvaluation) {
-                        existingEvaluation.remove();
-                    }
-
-                    const uploadTime = new Date(meal.uploadedAt);
-                    const timeStr = uploadTime.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
-
-                    const infoDiv = document.createElement('div');
-                    infoDiv.className = 'meal-item-info';
-                    infoDiv.textContent = timeStr;
-                    mealItem.appendChild(infoDiv);
-
-                    if (meal.score) {
-                        const scoreDiv = document.createElement('div');
-                        scoreDiv.className = 'meal-item-score';
-                        const scoreColorClass = getScoreColorClass(meal.score);
-                        scoreDiv.classList.add(scoreColorClass);
-                        scoreDiv.textContent = meal.score + '점';
-                        mealItem.appendChild(scoreDiv);
-                    }
-
-                    // Add evaluation right after the meal image (append to mealItem, not container)
-                    if (meal.aiEvaluation) {
-                        const evalDiv = document.createElement('div');
-                        evalDiv.className = 'meal-evaluation';
-                        const scoreColorClass = getScoreColorClass(meal.score);
-                        evalDiv.classList.add(scoreColorClass);
-                        evalDiv.innerHTML = `
-                            <div class="meal-evaluation-title">AI 평가</div>
-                            <div class="meal-evaluation-content">${escapeHtml(meal.aiEvaluation)}</div>
-                        `;
-                        mealItem.appendChild(evalDiv);
-                    }
-                });
-            }
-        };
-
-        window.getPlaceholderForMealType = function(type) {
-            const placeholders = {
-                'breakfast': '<span class="meal-item-placeholder">🍳</span>',
-                'lunch': '<span class="meal-item-placeholder">🍱</span>',
-                'dinner': '<span class="meal-item-placeholder">🍽️</span>'
-            };
-            return placeholders[type] || '<span class="meal-item-placeholder">🍽️</span>';
-        };
-
-        window.getMealTypeName = function(type) {
-            const names = {
-                'BREAKFAST': '아침',
-                'LUNCH': '점심',
-                'DINNER': '저녁'
-            };
-            return names[type] || type;
-        };
-
-        window.formatDateForAPI = function(date) {
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            return `${year}-${month}-${day}`;
-        };
-
-        // Initialize comments on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            loadComments();
-
-            // Initialize medicine buttons
-            const morningBtn = document.getElementById('morningMedicineBtn');
-            if (morningBtn) {
-                morningBtn.addEventListener('click', function() {
-                    // Check if user has permission (not disabled by canTakeMedicine)
-                    const canTakeMedicine = /*[[${canTakeMedicine}]]*/ false;
-                    if (!canTakeMedicine) return;
-
-                    const isTaken = this.getAttribute('data-taken') === 'true';
-                    if (isTaken) {
-                        showCancelModal('morning');
-                    } else {
-                        showConfirmModal('morning');
-                    }
-                });
-            }
-
-            const eveningBtn = document.getElementById('eveningMedicineBtn');
-            if (eveningBtn) {
-                eveningBtn.addEventListener('click', function() {
-                    // Check if user has permission (not disabled by canTakeMedicine)
-                    const canTakeMedicine = /*[[${canTakeMedicine}]]*/ false;
-                    if (!canTakeMedicine) return;
-
-                    const isTaken = this.getAttribute('data-taken') === 'true';
-                    if (isTaken) {
-                        showCancelModal('evening');
-                    } else {
-                        showConfirmModal('evening');
-                    }
-                });
-            }
-
-            loadCalendar();
-
-            // Load meal data for today
-            loadMealData(selectedDate);
-
-            // Update UI based on selected date (today by default)
-            updateDateBasedUI();
-
-            // Attach event listeners for meal upload buttons (only if they exist)
-            const breakfastBtn = document.getElementById('breakfast-btn');
-            if (breakfastBtn) {
-                breakfastBtn.addEventListener('click', function() {
-                    openMealUpload('breakfast');
-                });
-            }
-            const lunchBtn = document.getElementById('lunch-btn');
-            if (lunchBtn) {
-                lunchBtn.addEventListener('click', function() {
-                    openMealUpload('lunch');
-                });
-            }
-            const dinnerBtn = document.getElementById('dinner-btn');
-            if (dinnerBtn) {
-                dinnerBtn.addEventListener('click', function() {
-                    openMealUpload('dinner');
-                });
-            }
-
-            // Attach event listeners for file inputs
-            const breakfastImage = document.getElementById('breakfast-image');
-            if (breakfastImage) {
-                breakfastImage.addEventListener('change', function() {
-                    uploadMealImage('breakfast');
-                });
-            }
-            const lunchImage = document.getElementById('lunch-image');
-            if (lunchImage) {
-                lunchImage.addEventListener('change', function() {
-                    uploadMealImage('lunch');
-                });
-            }
-            const dinnerImage = document.getElementById('dinner-image');
-            if (dinnerImage) {
-                dinnerImage.addEventListener('change', function() {
-                    uploadMealImage('dinner');
-                });
-            }
-
-            // Attach event listener for submit comment button
-            document.getElementById('submitCommentBtn').addEventListener('click', function() {
-                submitComment();
-            });
-
-            // Attach event listeners for calendar navigation
-            document.getElementById('prevMonthBtn').addEventListener('click', function() {
-                changeMonth(-1);
-            });
-            document.getElementById('nextMonthBtn').addEventListener('click', function() {
-                changeMonth(1);
-            });
-
-            // Attach event listeners for modal buttons
-            document.getElementById('cancelModalBtn').addEventListener('click', function() {
-                closeConfirmModal();
-            });
-            document.getElementById('confirmModalBtn').addEventListener('click', function() {
-                confirmTakeMedicine();
-            });
-
-            // Attach event listeners for cancel modal buttons
-            document.getElementById('cancelCancelModalBtn').addEventListener('click', function() {
-                closeCancelModal();
-            });
-            document.getElementById('confirmCancelModalBtn').addEventListener('click', function() {
-                confirmCancelMedicine();
-            });
-
-            // Close modal on background click
-            document.getElementById('confirmModal').addEventListener('click', function(e) {
-                if (e.target === this) {
-                    closeConfirmModal();
-                }
-            });
-
-            document.getElementById('cancelModal').addEventListener('click', function(e) {
-                if (e.target === this) {
-                    closeCancelModal();
-                }
-            });
-
-            // Image upload handler for comments
-            document.getElementById('commentImageInput').addEventListener('change', function(e) {
-                const file = e.target.files[0];
-                if (file) {
-                    selectedCommentImage = file;
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        const preview = document.getElementById('commentImagePreview');
-                        preview.src = e.target.result;
-                        preview.style.display = 'block';
-                    };
-                    reader.readAsDataURL(file);
-                }
-            });
-
-            // Show all comments button
-            document.getElementById('showAllCommentsBtn').addEventListener('click', function() {
-                showAllComments();
-            });
-
-            // PWA: Service Worker 등록 (푸시 알림 설정은 프로필 페이지에서)
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('/service-worker.js')
-                    .then(function(registration) {
-                        console.log('✅ Service Worker registered with scope:', registration.scope);
-                    })
-                    .catch(function(error) {
-                        console.error('❌ Service Worker registration failed:', error);
-                    });
-            }
-        });
-    </script>
+            </div>
+        </div>
+    </div>
+</div>
+<nav class="bottom-nav">
+    <div class="nav-item active" data-tab="homeTab"><i class="bi bi-house-door-fill"></i><span>홈</span></div>
+    <div class="nav-item" data-tab="medicineTab"><i class="bi bi-capsule-pill"></i><span>약복용</span></div>
+    <div class="nav-item" data-tab="mealTab"><i class="bi bi-egg-fried"></i><span>식단관리</span></div>
+    <div class="nav-item" data-tab="pointTab"><i class="bi bi-trophy"></i><span>포인트</span></div>
+    <div class="nav-item" data-tab="settingsTab"><i class="bi bi-gear"></i><span>설정</span></div>
+</nav>
+<div class="modal-overlay" id="profileModal" onclick="closeProfileModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <div class="modal-title" id="profileModalTitle">프로필</div>
+            <button class="modal-close" onclick="closeProfileModal()"><i class="bi bi-x"></i></button>
+        </div>
+        <img class="modal-image" id="profileModalImage" src="" alt="프로필">
+    </div>
+</div>
+<div class="modal-overlay" id="profileSettingsModal" onclick="closeModal('profileSettingsModal')">
+    <div class="modal-content" onclick="event.stopPropagation()" style="max-width:400px">
+        <div class="modal-header">
+            <div class="modal-title">프로필 변경</div>
+            <button class="modal-close" onclick="closeModal('profileSettingsModal')"><i class="bi bi-x"></i></button>
+        </div>
+        <div style="margin-bottom:16px">
+            <label style="display:block;margin-bottom:8px;font-weight:600">표시 이름</label>
+            <input type="text" id="displayNameInput" class="comment-input" style="width:100%" th:value="${user.displayName}" placeholder="표시 이름을 입력하세요">
+        </div>
+        <div style="margin-bottom:16px">
+            <label style="display:block;margin-bottom:8px;font-weight:600">프로필 사진</label>
+            <input type="file" id="profileImageInput" accept="image/*" style="width:100%">
+        </div>
+        <button class="comment-submit-btn" style="width:100%" onclick="updateProfile()">저장</button>
+    </div>
+</div>
+<div class="modal-overlay" id="passwordSettingsModal" onclick="closeModal('passwordSettingsModal')">
+    <div class="modal-content" onclick="event.stopPropagation()" style="max-width:400px">
+        <div class="modal-header">
+            <div class="modal-title">비밀번호 변경</div>
+            <button class="modal-close" onclick="closeModal('passwordSettingsModal')"><i class="bi bi-x"></i></button>
+        </div>
+        <div style="margin-bottom:16px">
+            <label style="display:block;margin-bottom:8px;font-weight:600">현재 비밀번호</label>
+            <input type="password" id="currentPassword" class="comment-input" style="width:100%" placeholder="현재 비밀번호">
+        </div>
+        <div style="margin-bottom:16px">
+            <label style="display:block;margin-bottom:8px;font-weight:600">새 비밀번호</label>
+            <input type="password" id="newPassword" class="comment-input" style="width:100%" placeholder="새 비밀번호">
+        </div>
+        <div style="margin-bottom:16px">
+            <label style="display:block;margin-bottom:8px;font-weight:600">새 비밀번호 확인</label>
+            <input type="password" id="confirmPassword" class="comment-input" style="width:100%" placeholder="새 비밀번호 확인">
+        </div>
+        <button class="comment-submit-btn" style="width:100%" onclick="updatePassword()">변경</button>
+    </div>
+</div>
+<div class="toast-container" id="toastContainer"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+const currentUserId='[[${user.id}]]';
+const canTakeMedicine=[[${canTakeMedicine}]];
+let currentTab='homeTab',currentPage=1,commentsPerPage=10,allComments=[],currentMealType=null,currentCalendarDate=new Date();
+document.addEventListener('DOMContentLoaded',function(){initializeNavigation();loadComments();initializeMedicineStatus();initializeCalendar();initializeMealStatus();checkPushNotificationStatus()});
+function initializeNavigation(){document.querySelectorAll('.nav-item').forEach(item=>{item.addEventListener('click',function(){switchTab(this.getAttribute('data-tab'))})})}
+function switchTab(tabId){document.querySelectorAll('.tab-content-wrapper').forEach(tab=>tab.classList.remove('active'));document.querySelectorAll('.nav-item').forEach(item=>item.classList.remove('active'));document.getElementById(tabId).classList.add('active');document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');currentTab=tabId;if(tabId==='medicineTab'){initializeCalendar()}else if(tabId==='mealTab'){initializeMealStatus()}}
+async function loadComments(){try{const response=await fetch('/api/comments');allComments=await response.json();renderComments()}catch(error){console.error('댓글 로드 실패:',error);showToast('댓글을 불러오는데 실패했습니다.','error')}}
+function renderComments(){const commentList=document.getElementById('commentList');const totalPages=Math.ceil(allComments.length/commentsPerPage);const startIndex=(currentPage-1)*commentsPerPage;const pageComments=allComments.slice(startIndex,startIndex+commentsPerPage);if(!pageComments.length){commentList.innerHTML='<div class="empty-state"><div class="empty-state-icon"><i class="bi bi-chat"></i></div><div class="empty-state-title">댓글이 없습니다</div><div class="empty-state-text">첫 번째 댓글을 남겨보세요!</div></div>';return}const oneDayAgo=new Date(Date.now()-864e5);commentList.innerHTML=pageComments.map(comment=>{const createdAt=new Date(comment.createdAt);const isNew=createdAt>oneDayAgo;return`<div class="comment-item ${isNew?'new':''}"><div class="comment-header"><div class="comment-avatar" onclick="showProfileModal('${comment.profileImage||''}','${comment.displayName}')">${comment.profileImage?`<img src="${comment.profileImage}" alt="${comment.displayName}">`:comment.displayName.substring(0,1)}</div><div class="comment-user-info"><div class="comment-username">${comment.displayName}</div><div class="comment-time">${formatTimeAgo(createdAt)}</div></div></div><div class="comment-content">${escapeHtml(comment.content)}</div>${comment.imageUrl?`<img class="comment-image" src="${comment.imageUrl}" onclick="showImageModal('${comment.imageUrl}')">`:''}<div class="comment-actions"><button class="comment-action-btn ${comment.likedUserIds&&comment.likedUserIds.includes(parseInt(currentUserId))?'liked':''}" onclick="toggleLike(${comment.id})"><i class="bi bi-heart-fill"></i><span>${comment.likesCount||0}</span></button></div></div>`}).join('');renderPagination(totalPages)}
+function renderPagination(totalPages){const paginationWrapper=document.getElementById('commentPagination');if(totalPages<=1){paginationWrapper.innerHTML='';return}let html='<div class="pagination">';if(currentPage>1)html+=`<button class="page-btn" onclick="changePage(${currentPage-1})"><i class="bi bi-chevron-left"></i></button>`;for(let i=1;i<=totalPages;i++){if(i===1||i===totalPages||(i>=currentPage-1&&i<=currentPage+1))html+=`<button class="page-btn ${i===currentPage?'active':''}" onclick="changePage(${i})">${i}</button>`;else if(i===currentPage-2||i===currentPage+2)html+='<span style="padding:8px">...</span>'}if(currentPage<totalPages)html+=`<button class="page-btn" onclick="changePage(${currentPage+1})"><i class="bi bi-chevron-right"></i></button>`;paginationWrapper.innerHTML=html+'</div>'}
+function changePage(page){currentPage=page;renderComments();window.scrollTo({top:0,behavior:'smooth'})}
+async function submitComment(){const input=document.getElementById('commentInput');const content=input.value.trim();if(!content){showToast('댓글 내용을 입력해주세요.','error');return}try{const response=await fetch('/api/comments',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({content})});if(response.ok){input.value='';showToast('댓글이 등록되었습니다.','success');await loadComments()}else throw new Error('댓글 등록 실패')}catch(error){console.error('댓글 등록 실패:',error);showToast('댓글 등록에 실패했습니다.','error')}}
+async function toggleLike(commentId){try{const response=await fetch(`/api/comments/${commentId}/like`,{method:'POST'});if(response.ok)await loadComments();else throw new Error('좋아요 실패')}catch(error){console.error('좋아요 실패:',error);showToast('좋아요에 실패했습니다.','error')}}
+function initializeMedicineStatus(){const morningTaken=[[${morningRecord.taken}]];const eveningTaken=[[${eveningRecord.taken}]];if(morningTaken)document.getElementById('morningBtn').classList.add('taken');if(eveningTaken)document.getElementById('eveningBtn').classList.add('taken')}
+async function toggleMedicine(type){if(!canTakeMedicine){showToast('약 복용 권한이 없습니다.','error');return}const btn=type==='MORNING'?document.getElementById('morningBtn'):document.getElementById('eveningBtn');const isTaken=btn.classList.contains('taken');try{const response=await fetch(isTaken?'/api/medicine/cancel':'/api/medicine/take',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:`medicineType=${type}`});if(response.ok){btn.classList.toggle('taken');document.getElementById(type.toLowerCase()+'Status').textContent=isTaken?'미복용':'복용완료';showToast(isTaken?'약 복용이 취소되었습니다.':'약 복용이 기록되었습니다.','success')}else throw new Error('약 복용 처리 실패')}catch(error){console.error('약 복용 처리 실패:',error);showToast('약 복용 처리에 실패했습니다.','error')}}
+function initializeCalendar(){renderCalendar()}
+function renderCalendar(){const year=currentCalendarDate.getFullYear(),month=currentCalendarDate.getMonth();document.getElementById('calendarTitle').textContent=`${year}년 ${month+1}월`;const firstDay=new Date(year,month,1).getDay(),daysInMonth=new Date(year,month+1,0).getDate(),today=new Date();let html='';['일','월','화','수','목','금','토'].forEach(day=>html+=`<div class="calendar-day-header">${day}</div>`);for(let i=0;i<firstDay;i++)html+='<div></div>';for(let day=1;day<=daysInMonth;day++){const date=new Date(year,month,day);html+=`<div class="calendar-day ${date.toDateString()===today.toDateString()?'today':''}" onclick="selectDate('${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}')">${day}</div>`}document.getElementById('calendarGrid').innerHTML=html}
+function changeMonth(delta){currentCalendarDate.setMonth(currentCalendarDate.getMonth()+delta);renderCalendar()}
+function selectDate(dateStr){showToast(`${dateStr} 선택됨`,'info')}
+async function initializeMealStatus(){try{const today=new Date().toISOString().split('T')[0];const response=await fetch(`/api/meals/date/${today}`);const meals=await response.json();meals.forEach(meal=>{const mealElement=document.getElementById(meal.mealType.toLowerCase()+'Meal');if(mealElement&&meal.imageUrl){mealElement.classList.add('has-image');mealElement.innerHTML=`<img src="${meal.imageUrl}" alt="${meal.mealType}">`}})}catch(error){console.error('식단 조회 실패:',error)}}
+function uploadMeal(mealType){currentMealType=mealType;document.getElementById('mealImageInput').click()}
+async function handleMealImageUpload(){const input=document.getElementById('mealImageInput'),file=input.files[0];if(!file)return;const formData=new FormData();formData.append('file',file);formData.append('mealType',currentMealType);try{showToast('식단을 업로드하는 중...','info');const response=await fetch('/api/meals/upload',{method:'POST',body:formData});if(response.ok){const result=await response.json();showToast('식단이 업로드되었습니다.','success');await initializeMealStatus();if(result.aiEvaluation){document.getElementById('mealEvaluationSection').style.display='block';document.getElementById('mealEvaluationContent').innerHTML=`<p style="margin:0;line-height:1.6">${escapeHtml(result.aiEvaluation)}</p>${result.score?`<p style="margin-top:12px;font-weight:700;color:var(--primary)">점수: ${result.score}점</p>`:''}`}}else throw new Error('식단 업로드 실패')}catch(error){console.error('식단 업로드 실패:',error);showToast('식단 업로드에 실패했습니다.','error')}input.value=''}
+function showProfileSettings(){document.getElementById('profileSettingsModal').classList.add('active')}
+function showPasswordSettings(){document.getElementById('passwordSettingsModal').classList.add('active')}
+async function updateProfile(){const displayName=document.getElementById('displayNameInput').value.trim(),file=document.getElementById('profileImageInput').files[0],formData=new FormData();if(displayName)formData.append('displayName',displayName);if(file)formData.append('profileImage',file);try{const response=await fetch('/api/profile/update',{method:'POST',body:formData});if(response.ok){showToast('프로필이 업데이트되었습니다.','success');closeModal('profileSettingsModal');setTimeout(()=>location.reload(),1e3)}else throw new Error('프로필 업데이트 실패')}catch(error){console.error('프로필 업데이트 실패:',error);showToast('프로필 업데이트에 실패했습니다.','error')}}
+async function updatePassword(){const currentPassword=document.getElementById('currentPassword').value,newPassword=document.getElementById('newPassword').value,confirmPassword=document.getElementById('confirmPassword').value;if(!currentPassword||!newPassword||!confirmPassword){showToast('모든 필드를 입력해주세요.','error');return}if(newPassword!==confirmPassword){showToast('새 비밀번호가 일치하지 않습니다.','error');return}try{const response=await fetch('/api/profile/password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({currentPassword,newPassword})});if(response.ok){showToast('비밀번호가 변경되었습니다.','success');closeModal('passwordSettingsModal');document.getElementById('currentPassword').value='';document.getElementById('newPassword').value='';document.getElementById('confirmPassword').value=''}else throw new Error('비밀번호 변경 실패')}catch(error){console.error('비밀번호 변경 실패:',error);showToast('비밀번호 변경에 실패했습니다.','error')}}
+async function checkPushNotificationStatus(){}
+async function togglePushNotification(){const isEnabled=document.getElementById('pushNotificationSwitch').checked;showToast(isEnabled?'Push 알림이 활성화되었습니다.':'Push 알림이 비활성화되었습니다.','success')}
+function logout(){if(confirm('로그아웃하시겠습니까?'))location.href='/logout'}
+function showProfileModal(imageUrl,displayName){if(!imageUrl){showToast('프로필 이미지가 없습니다.','info');return}document.getElementById('profileModalTitle').textContent=displayName||'프로필';document.getElementById('profileModalImage').src=imageUrl;document.getElementById('profileModal').classList.add('active')}
+function closeProfileModal(){document.getElementById('profileModal').classList.remove('active')}
+function closeModal(modalId){document.getElementById(modalId).classList.remove('active')}
+function showToast(message,type='info'){const container=document.getElementById('toastContainer'),toast=document.createElement('div');toast.className=`toast ${type}`;toast.innerHTML=`<i class="bi bi-${type==='success'?'check-circle':type==='error'?'exclamation-circle':'info-circle'}"></i><span style="margin-left:8px">${message}</span>`;container.appendChild(toast);setTimeout(()=>toast.remove(),3e3)}
+function formatTimeAgo(date){const seconds=Math.floor((new Date()-date)/1e3);if(seconds<60)return'방금 전';if(seconds<3600)return`${Math.floor(seconds/60)}분 전`;if(seconds<86400)return`${Math.floor(seconds/3600)}시간 전`;if(seconds<604800)return`${Math.floor(seconds/86400)}일 전`;return date.toLocaleDateString('ko-KR')}
+function escapeHtml(text){const div=document.createElement('div');div.textContent=text;return div.innerHTML}
+</script>
 </body>
 </html>

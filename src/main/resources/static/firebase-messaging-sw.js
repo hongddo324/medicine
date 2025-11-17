@@ -50,19 +50,20 @@ self.addEventListener('notificationclick', (event) => {
 
     event.notification.close();
 
-    // 알림 클릭 시 이동할 URL
-    const urlToOpen = event.notification.data?.url || '/medicine';
+    // 알림 클릭 시 이동할 URL (절대 경로로 변경하여 404 방지)
+    const targetUrl = event.notification.data?.url || '/medicine';
+    const urlToOpen = targetUrl.startsWith('http') ? targetUrl : 'https://www.hongddo.top' + targetUrl;
 
     // 클라이언트 창 열기 또는 포커스
     event.waitUntil(
         clients.matchAll({ type: 'window', includeUncontrolled: true })
             .then((clientList) => {
-                // 이미 열려있는 창이 있으면 포커스
+                // 이미 열려있는 창이 있으면 해당 창으로 이동
                 for (const client of clientList) {
-                    if (client.url.includes(self.location.origin) && 'focus' in client) {
-                        return client.focus().then(client => {
-                            if ('navigate' in client) {
-                                return client.navigate(urlToOpen);
+                    if (client.url.includes('hongddo.top') && 'focus' in client) {
+                        return client.focus().then(focusedClient => {
+                            if ('navigate' in focusedClient) {
+                                return focusedClient.navigate(urlToOpen);
                             }
                         });
                     }

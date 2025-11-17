@@ -1,11 +1,9 @@
 package com.medicine.model;
 
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.redis.core.RedisHash;
-import org.springframework.data.redis.core.index.Indexed;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -15,40 +13,48 @@ import java.util.Set;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@RedisHash("Comment")
+@Entity
+@Table(name = "comments", indexes = {
+    @Index(name = "idx_user_id", columnList = "user_id"),
+    @Index(name = "idx_created_at", columnList = "created_at")
+})
 public class Comment implements Serializable {
 
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String content;  // 댓글 내용
 
+    @Column(columnDefinition = "TEXT")
     private String imageUrl;  // 첨부 이미지 (Base64)
 
-    @Indexed
-    private String userId;  // 작성자 ID
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;  // 작성자
 
-    private String username;  // 작성자 아이디
-
-    private String displayName;  // 작성자 표시 이름
-
-    private String profileImage;  // 작성자 프로필 사진
-
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;  // 작성 시간
 
-    private String parentCommentId;  // 대댓글인 경우 부모 댓글 ID
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_comment_id")
+    private Comment parentComment;  // 대댓글인 경우 부모 댓글
 
-    private Set<String> likedUserIds = new HashSet<>();  // 좋아요 누른 사용자 ID 목록
+    @ElementCollection
+    @CollectionTable(name = "comment_likes", joinColumns = @JoinColumn(name = "comment_id"))
+    @Column(name = "user_id")
+    private Set<Long> likedUserIds = new HashSet<>();  // 좋아요 누른 사용자 ID 목록
 
     public int getLikesCount() {
         return likedUserIds != null ? likedUserIds.size() : 0;
     }
 
-    public boolean isLikedBy(String userId) {
+    public boolean isLikedBy(Long userId) {
         return likedUserIds != null && likedUserIds.contains(userId);
     }
 
-    public void toggleLike(String userId) {
+    public void toggleLike(Long userId) {
         if (likedUserIds == null) {
             likedUserIds = new HashSet<>();
         }
@@ -57,6 +63,13 @@ public class Comment implements Serializable {
             likedUserIds.remove(userId);
         } else {
             likedUserIds.add(userId);
+        }
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
         }
     }
 }
