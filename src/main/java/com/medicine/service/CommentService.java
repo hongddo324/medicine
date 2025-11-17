@@ -33,34 +33,29 @@ public class CommentService {
 
         // 부모 댓글만 필터링
         List<Comment> parentComments = allComments.stream()
-                .filter(c -> c.getParentCommentId() == null)
+                .filter(c -> c.getParentComment() == null)
                 .collect(Collectors.toList());
-
-        // 대댓글 그룹핑
-        Map<String, List<Comment>> repliesMap = allComments.stream()
-                .filter(c -> c.getParentCommentId() != null)
-                .collect(Collectors.groupingBy(Comment::getParentCommentId));
 
         Map<String, List<Comment>> result = new LinkedHashMap<>();
         result.put("comments", parentComments);
         result.put("replies", allComments.stream()
-                .filter(c -> c.getParentCommentId() != null)
+                .filter(c -> c.getParentComment() != null)
                 .collect(Collectors.toList()));
 
         return result;
     }
 
-    public Comment createComment(String content, String imageData, User user, String parentCommentId) {
+    public Comment createComment(String content, String imageData, User user, Long parentCommentId) {
         Comment comment = new Comment();
-        comment.setId(UUID.randomUUID().toString());
         comment.setContent(content);
         comment.setImageUrl(imageData);
-        comment.setUserId(user.getId());
-        comment.setUsername(user.getUsername());
-        comment.setDisplayName(user.getDisplayName());
-        comment.setProfileImage(user.getProfileImage());
-        comment.setCreatedAt(LocalDateTime.now());
-        comment.setParentCommentId(parentCommentId);
+        comment.setUser(user);
+
+        // 부모 댓글 설정 (대댓글인 경우)
+        if (parentCommentId != null) {
+            commentRepository.findById(parentCommentId).ifPresent(comment::setParentComment);
+        }
+
         comment.setLikedUserIds(new HashSet<>());
 
         Comment saved = commentRepository.save(comment);
@@ -68,11 +63,11 @@ public class CommentService {
         return saved;
     }
 
-    public Optional<Comment> findById(String commentId) {
+    public Optional<Comment> findById(Long commentId) {
         return commentRepository.findById(commentId);
     }
 
-    public Comment toggleLike(String commentId, String userId) {
+    public Comment toggleLike(Long commentId, Long userId) {
         Optional<Comment> optComment = commentRepository.findById(commentId);
         if (optComment.isPresent()) {
             Comment comment = optComment.get();
@@ -82,20 +77,22 @@ public class CommentService {
         return null;
     }
 
-    public void deleteComment(String commentId) {
+    public void deleteComment(Long commentId) {
         // 대댓글도 함께 삭제
-        List<Comment> allComments = getAllComments();
-        List<String> commentIdsToDelete = new ArrayList<>();
-        commentIdsToDelete.add(commentId);
+        Optional<Comment> optComment = commentRepository.findById(commentId);
+        if (optComment.isPresent()) {
+            Comment comment = optComment.get();
 
-        // 해당 댓글의 모든 대댓글 찾기
-        allComments.stream()
-                .filter(c -> commentId.equals(c.getParentCommentId()))
-                .forEach(c -> commentIdsToDelete.add(c.getId()));
+            // 해당 댓글의 모든 대댓글 찾기 및 삭제
+            List<Comment> replies = commentRepository.findByParentCommentOrderByCreatedAtAsc(comment);
+            replies.forEach(reply -> {
+                commentRepository.deleteById(reply.getId());
+                log.debug("Reply deleted: {}", reply.getId());
+            });
 
-        commentIdsToDelete.forEach(id -> {
-            commentRepository.deleteById(id);
-            log.debug("Comment deleted: {}", id);
-        });
+            // 부모 댓글 삭제
+            commentRepository.deleteById(commentId);
+            log.debug("Comment deleted: {}", commentId);
+        }
     }
 }

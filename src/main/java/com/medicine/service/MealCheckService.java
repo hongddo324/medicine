@@ -1,6 +1,7 @@
 package com.medicine.service;
 
 import com.medicine.model.MealCheck;
+import com.medicine.model.User;
 import com.medicine.repository.MealCheckRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,14 +30,14 @@ public class MealCheckService {
      * 식단 이미지 업로드 및 AI 분석
      */
     public MealCheck uploadMealImage(LocalDate date, MealCheck.MealType mealType,
-                                     MultipartFile image, String userId) throws IOException {
+                                     MultipartFile image, User user) throws IOException {
 
         // 해당 날짜/식사타입에 기존 기록이 있는지 확인
-        MealCheck existingMeal = mealCheckRepository.findByDateAndMealType(date, mealType);
+        Optional<MealCheck> existingMealOpt = mealCheckRepository.findByDateAndMealType(date, mealType);
 
         // 기존 이미지가 있다면 삭제
-        if (existingMeal != null && existingMeal.getImageUrl() != null) {
-            fileStorageService.deleteFile(existingMeal.getImageUrl());
+        if (existingMealOpt.isPresent() && existingMealOpt.get().getImageUrl() != null) {
+            fileStorageService.deleteFile(existingMealOpt.get().getImageUrl());
         }
 
         // 새 이미지 저장
@@ -66,20 +67,19 @@ public class MealCheckService {
 
         // MealCheck 객체 생성 또는 업데이트
         MealCheck mealCheck;
-        if (existingMeal != null) {
-            mealCheck = existingMeal;
+        if (existingMealOpt.isPresent()) {
+            mealCheck = existingMealOpt.get();
             mealCheck.setImageUrl(imageUrl);
             mealCheck.setUploadedAt(LocalDateTime.now());
             mealCheck.setAiEvaluation(fullResponse);
             mealCheck.setScore(score);
         } else {
             mealCheck = new MealCheck();
-            mealCheck.setId(UUID.randomUUID().toString());
             mealCheck.setDate(date);
             mealCheck.setMealType(mealType);
             mealCheck.setImageUrl(imageUrl);
             mealCheck.setUploadedAt(LocalDateTime.now());
-            mealCheck.setUploadedBy(userId);
+            mealCheck.setUploadedBy(user);
             mealCheck.setAiEvaluation(fullResponse);
             mealCheck.setScore(score);
         }
@@ -110,14 +110,14 @@ public class MealCheckService {
      * 특정 날짜의 모든 식단 조회
      */
     public List<MealCheck> getMealsByDate(LocalDate date) {
-        return mealCheckRepository.findByDate(date);
+        return mealCheckRepository.findByDateOrderByMealTypeAsc(date);
     }
 
     /**
      * 특정 날짜의 평균 점수 계산
      */
     public Map<String, Object> getDailyStats(LocalDate date) {
-        List<MealCheck> meals = mealCheckRepository.findByDate(date);
+        List<MealCheck> meals = mealCheckRepository.findByDateOrderByMealTypeAsc(date);
 
         Map<String, Object> stats = new HashMap<>();
 
@@ -170,13 +170,8 @@ public class MealCheckService {
         LocalDate startDate = LocalDate.of(year, month, 1);
         LocalDate endDate = startDate.plusMonths(1).minusDays(1);
 
-        // Redis doesn't support BETWEEN queries, so fetch all and filter in Java
-        List<MealCheck> allMeals = new ArrayList<>();
-        mealCheckRepository.findAll().forEach(allMeals::add);
-
-        List<MealCheck> meals = allMeals.stream()
-                .filter(meal -> !meal.getDate().isBefore(startDate) && !meal.getDate().isAfter(endDate))
-                .collect(Collectors.toList());
+        // JPA를 사용하여 날짜 범위로 조회
+        List<MealCheck> meals = mealCheckRepository.findByDateBetweenOrderByDateDescMealTypeAsc(startDate, endDate);
 
         // 날짜별로 그룹화
         Map<LocalDate, List<MealCheck>> mealsByDate = meals.stream()
@@ -215,7 +210,7 @@ public class MealCheckService {
     /**
      * 식단 삭제
      */
-    public void deleteMeal(String mealId) {
+    public void deleteMeal(Long mealId) {
         Optional<MealCheck> mealOpt = mealCheckRepository.findById(mealId);
 
         if (mealOpt.isPresent()) {
