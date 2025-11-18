@@ -83,7 +83,7 @@ public class ProfileController {
                 }
 
                 // Store new profile image
-                String imagePath = fileStorageService.storeProfileImage(profileImage, user.getId());
+                String imagePath = fileStorageService.storeProfileImage(profileImage, user.getId().toString());
                 updatedUser.setProfileImage(imagePath);
                 log.info("Profile image updated - User: {}, Path: {}, Size: {} bytes",
                         user.getUsername(), imagePath, profileImage.getSize());
