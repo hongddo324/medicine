@@ -95,7 +95,6 @@ public class AdminController {
 
             // 새 사용자 생성
             User newUser = new User();
-            newUser.setId(UUID.randomUUID().toString());
             newUser.setUsername(username);
             newUser.setPassword(password);
             newUser.setDisplayName(displayName);
