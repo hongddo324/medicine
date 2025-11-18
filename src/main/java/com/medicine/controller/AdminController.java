@@ -116,7 +116,7 @@ public class AdminController {
 
     @DeleteMapping("/users/{userId}")
     @ResponseBody
-    public String deleteUser(@PathVariable String userId, HttpSession session) {
+    public String deleteUser(@PathVariable Long userId, HttpSession session) {
         User currentUser = (User) session.getAttribute("user");
 
         if (currentUser == null || currentUser.getRole() != Role.ADMIN) {
