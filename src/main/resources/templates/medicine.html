@@ -167,7 +167,10 @@
             </div>
             <div class="user-header">
                 <div class="user-info">
-                    <div class="user-avatar" id="headerUserAvatar" th:onclick="|showProfileModal('[[${user.profileImage}]]','[[${user.displayName}]]')|">
+                    <div class="user-avatar" id="headerUserAvatar"
+                         th:data-profile-image="${user.profileImage}"
+                         th:data-display-name="${user.displayName}"
+                         onclick="showProfileModalFromData(this)">
                         <img th:if="${user.profileImage!=null}" th:src="${user.profileImage}" alt="프로필">
                         <span th:if="${user.profileImage==null}" th:text="${user.displayName!=null?user.displayName.substring(0,1):user.username.substring(0,1)}"></span>
                     </div>
@@ -440,6 +443,7 @@ async function checkPushNotificationStatus(){}
 async function togglePushNotification(){const isEnabled=document.getElementById('pushNotificationSwitch').checked;showToast(isEnabled?'Push 알림이 활성화되었습니다.':'Push 알림이 비활성화되었습니다.','success')}
 function logout(){if(confirm('로그아웃하시겠습니까?'))location.href='/logout'}
 function showProfileModal(imageUrl,displayName){if(!imageUrl){showToast('프로필 이미지가 없습니다.','info');return}document.getElementById('profileModalTitle').textContent=displayName||'프로필';document.getElementById('profileModalImage').src=imageUrl;document.getElementById('profileModal').classList.add('active')}
+function showProfileModalFromData(element){const imageUrl=element.getAttribute('data-profile-image');const displayName=element.getAttribute('data-display-name');showProfileModal(imageUrl,displayName)}
 function closeProfileModal(){document.getElementById('profileModal').classList.remove('active')}
 function closeModal(modalId){document.getElementById(modalId).classList.remove('active')}
 function showToast(message,type='info'){const container=document.getElementById('toastContainer'),toast=document.createElement('div');toast.className=`toast ${type}`;toast.innerHTML=`<i class="bi bi-${type==='success'?'check-circle':type==='error'?'exclamation-circle':'info-circle'}"></i><span style="margin-left:8px">${message}</span>`;container.appendChild(toast);setTimeout(()=>toast.remove(),3e3)}
