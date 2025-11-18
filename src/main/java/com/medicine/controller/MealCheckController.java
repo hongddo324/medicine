@@ -53,7 +53,7 @@ public class MealCheckController {
             log.info("Meal upload request - User: {}, Date: {}, Type: {}",
                     user.getUsername(), date, type);
 
-            MealCheck mealCheck = mealCheckService.uploadMealImage(date, type, image, user.getId());
+            MealCheck mealCheck = mealCheckService.uploadMealImage(date, type, image, user);
 
             log.info("Meal uploaded successfully - ID: {}, Score: {}",
                     mealCheck.getId(), mealCheck.getScore());
@@ -152,7 +152,7 @@ public class MealCheckController {
      */
     @DeleteMapping("/{mealId}")
     public ResponseEntity<?> deleteMeal(
-            @PathVariable String mealId,
+            @PathVariable Long mealId,
             HttpSession session) {
 
         User user = (User) session.getAttribute("user");
