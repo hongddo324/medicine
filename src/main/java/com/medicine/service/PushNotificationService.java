@@ -42,20 +42,29 @@ public class PushNotificationService {
             return;
         }
 
-        // 기존 토큰 삭제 (같은 사용자의 이전 토큰 제거)
+        // 기존 토큰 모두 삭제 (같은 사용자의 모든 이전 토큰 제거)
         List<FcmToken> existingTokens = fcmTokenRepository.findByUserId(userId);
-        for (FcmToken existingToken : existingTokens) {
-            // 같은 토큰이면 스킵 (덮어쓰기만 함)
-            if (!existingToken.getToken().equals(fcmToken)) {
+        if (!existingTokens.isEmpty()) {
+            log.info("🔍 Found {} existing token(s) for user: {}", existingTokens.size(), userId);
+            for (FcmToken existingToken : existingTokens) {
                 fcmTokenRepository.delete(existingToken.getToken());
-                log.info("🗑️ Removed old FCM token for user: {}", userId);
+                log.info("🗑️ Removed old FCM token for user: {} (token: {}...)",
+                    userId, existingToken.getToken().substring(0, Math.min(20, existingToken.getToken().length())));
             }
         }
 
-        // 새 토큰 저장
+        // 새 토큰 저장 (사용자당 정확히 하나의 토큰만 유지)
         FcmToken token = new FcmToken(userId, fcmToken);
         fcmTokenRepository.save(token);
-        log.info("✅ FCM token registered for user: {} (Total: 1)", userId);
+
+        // 등록 확인
+        int currentTokenCount = fcmTokenRepository.findByUserId(userId).size();
+        log.info("✅ FCM token registered for user: {} (Current count: {})", userId, currentTokenCount);
+
+        if (currentTokenCount > 1) {
+            log.error("⚠️ WARNING: User {} still has {} tokens after cleanup! This should not happen!",
+                userId, currentTokenCount);
+        }
     }
 
     /**
@@ -193,23 +202,44 @@ public class PushNotificationService {
      */
     private void sendToToken(String fcmToken, String title, String body, String url, Map<String, String> customData) {
         try {
-            // 알림 페이로드 구성
-            WebpushNotification notification = WebpushNotification.builder()
+            // 알림 페이로드 구성 (Android용 기본 Notification)
+            Notification notification = Notification.builder()
+                    .setTitle(title)
+                    .setBody(body)
+                    .build();
+
+            // 웹푸시 설정 (클릭 시 이동할 URL 포함)
+            WebpushNotification webpushNotification = WebpushNotification.builder()
                     .setTitle(title)
                     .setBody(body)
                     .setIcon("/icons/icon-192x192.png")
                     .setBadge("/icons/badge-72x72.png")
                     .build();
 
-            // 웹푸시 설정 (클릭 시 이동할 URL 포함)
             WebpushConfig.Builder webpushConfigBuilder = WebpushConfig.builder()
-                    .setNotification(notification);
+                    .setNotification(webpushNotification);
 
             if (url != null && !url.isEmpty()) {
                 webpushConfigBuilder.setFcmOptions(WebpushFcmOptions.builder()
                         .setLink(url)
                         .build());
             }
+
+            // iOS용 APNS 설정 (iOS 푸시 알림 지원)
+            Aps aps = Aps.builder()
+                    .setAlert(ApsAlert.builder()
+                            .setTitle(title)
+                            .setBody(body)
+                            .build())
+                    .setSound("default")
+                    .setBadge(1)
+                    .setContentAvailable(true)
+                    .build();
+
+            ApnsConfig apnsConfig = ApnsConfig.builder()
+                    .setAps(aps)
+                    .putHeader("apns-priority", "10")
+                    .build();
 
             // 데이터 페이로드 구성
             Map<String, String> data = new HashMap<>();
@@ -222,10 +252,12 @@ public class PushNotificationService {
                 data.putAll(customData);
             }
 
-            // FCM 메시지 구성
+            // FCM 메시지 구성 (모든 플랫폼 지원)
             Message message = Message.builder()
                     .setToken(fcmToken)
-                    .setWebpushConfig(webpushConfigBuilder.build())
+                    .setNotification(notification)  // Android/Web용 기본 알림
+                    .setWebpushConfig(webpushConfigBuilder.build())  // Web용
+                    .setApnsConfig(apnsConfig)  // iOS용
                     .putAllData(data)
                     .build();
 

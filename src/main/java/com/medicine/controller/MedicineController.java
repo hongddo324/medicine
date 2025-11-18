@@ -87,6 +87,23 @@ public class MedicineController {
             log.info("Medicine taken - User: {}, Type: {}, Date: {}, Time: {}",
                 user.getUsername(), type, record.getDate(), record.getTakenTime());
 
+            // 약복용 알림 전송 (본인 제외)
+            String notificationTitle = "💊 약 복용 알림";
+            String notificationBody = user.getDisplayName() + "님이 " + type.getDisplayName() + " 약을 복용했습니다";
+            Map<String, String> notificationData = Map.of(
+                    "type", "medicine",
+                    "medicineType", type.name(),
+                    "userId", user.getUsername()
+            );
+            pushNotificationService.sendNotificationToAllUsersExcept(
+                    user.getUsername(),
+                    notificationTitle,
+                    notificationBody,
+                    "/medicine",
+                    notificationData
+            );
+            log.info("FCM notification sent for medicine - User: {}, Type: {}", user.getUsername(), type);
+
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
             response.put("taken", true);
