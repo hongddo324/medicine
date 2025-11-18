@@ -265,7 +265,7 @@
                     <i class="bi bi-moon-fill"></i>
                 </div>
             </div>
-            <div class="points-display">
+            <div class="points-display" style="position:relative">
                 <div class="points-label">월곡아버님이 모은포인트는?</div>
                 <div class="points-content">
                     <i class="bi bi-trophy-fill points-icon"></i>
@@ -273,6 +273,9 @@
                         <span class="points-value" id="userPoints" th:text="${user.points != null ? user.points : 0}">0</span>
                         <span class="points-unit">P</span>
                     </div>
+                </div>
+                <div class="dark-mode-toggle" onclick="showPointShop()" style="position:absolute;top:16px;right:16px" title="포인트 상점">
+                    <i class="bi bi-shop"></i>
                 </div>
             </div>
 
@@ -422,24 +425,19 @@
         </div>
     </div>
 </div>
-<div id="pointTab" class="tab-content-wrapper">
+<div id="dailyTab" class="tab-content-wrapper">
     <div class="app-container">
         <div class="custom-card">
-            <h5 style="margin-bottom:20px;font-weight:700"><i class="bi bi-shop"></i> 포인트 상점</h5>
-            <div class="points-display" style="margin-bottom:24px">
-                <div class="points-label">보유 포인트</div>
-                <div class="points-content">
-                    <i class="bi bi-trophy-fill points-icon"></i>
-                    <div>
-                        <span class="points-value" id="currentPoints" th:text="${user.points != null ? user.points : 0}">0</span>
-                        <span class="points-unit">pt</span>
-                    </div>
-                </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+                <h5 style="margin:0;font-weight:700"><i class="bi bi-images"></i> 일상</h5>
+                <button class="comment-submit-btn" onclick="showDailyPostModal()">
+                    <i class="bi bi-plus-lg"></i> 게시물 작성
+                </button>
             </div>
-            <div class="point-items-grid" id="pointItemsGrid">
+            <div id="dailyPostsGrid" style="display:flex;flex-direction:column;gap:20px">
                 <div class="loading">
                     <div class="loading-spinner"></div>
-                    <p style="margin-top:12px;color:var(--gray-600)">상품을 불러오는 중...</p>
+                    <p style="margin-top:12px;color:var(--gray-600)">일상을 불러오는 중...</p>
                 </div>
             </div>
         </div>
@@ -524,7 +522,7 @@
     <div class="nav-item active" data-tab="homeTab"><i class="bi bi-house-door-fill"></i><span>홈</span></div>
     <div class="nav-item" data-tab="medicineTab"><i class="bi bi-capsule-pill"></i><span>약복용</span></div>
     <div class="nav-item" data-tab="mealTab"><i class="bi bi-egg-fried"></i><span>식단관리</span></div>
-    <div class="nav-item" data-tab="pointTab"><i class="bi bi-trophy"></i><span>포인트</span></div>
+    <div class="nav-item" data-tab="dailyTab"><i class="bi bi-images"></i><span>일상</span></div>
     <div class="nav-item" data-tab="settingsTab"><i class="bi bi-gear"></i><span>설정</span></div>
 </nav>
 <div class="modal-overlay" id="profileModal" onclick="closeProfileModal()">
@@ -643,6 +641,52 @@
         </div>
     </div>
 </div>
+<div class="modal-overlay" id="pointShopModal" onclick="closeModal('pointShopModal')">
+    <div class="modal-content" onclick="event.stopPropagation()" style="max-width:800px;max-height:90vh;overflow-y:auto">
+        <div class="modal-header">
+            <div class="modal-title">포인트 상점</div>
+            <button class="modal-close" onclick="closeModal('pointShopModal')"><i class="bi bi-x"></i></button>
+        </div>
+        <div class="points-display" style="margin-bottom:24px">
+            <div class="points-label">보유 포인트</div>
+            <div class="points-content">
+                <i class="bi bi-trophy-fill points-icon"></i>
+                <div>
+                    <span class="points-value" id="modalCurrentPoints" th:text="${user.points != null ? user.points : 0}">0</span>
+                    <span class="points-unit">pt</span>
+                </div>
+            </div>
+        </div>
+        <div class="point-items-grid" id="modalPointItemsGrid">
+            <div class="loading">
+                <div class="loading-spinner"></div>
+                <p style="margin-top:12px;color:var(--gray-600)">상품을 불러오는 중...</p>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal-overlay" id="dailyPostModal" onclick="closeModal('dailyPostModal')">
+    <div class="modal-content" onclick="event.stopPropagation()" style="max-width:600px">
+        <div class="modal-header">
+            <div class="modal-title">일상 게시물 작성</div>
+            <button class="modal-close" onclick="closeModal('dailyPostModal')"><i class="bi bi-x"></i></button>
+        </div>
+        <form id="dailyPostForm" onsubmit="submitDailyPost(event)">
+            <div style="margin-bottom:16px">
+                <label style="display:block;margin-bottom:8px;font-weight:600">내용</label>
+                <textarea id="dailyContent" class="comment-input" style="width:100%;min-height:120px;border-radius:12px;resize:vertical" placeholder="오늘의 일상을 공유해주세요..." required></textarea>
+            </div>
+            <div style="margin-bottom:16px">
+                <label style="display:block;margin-bottom:8px;font-weight:600">사진/영상 (선택)</label>
+                <input type="file" id="dailyMedia" accept="image/*,video/*" style="width:100%">
+                <div id="dailyMediaPreview" style="margin-top:12px;display:none"></div>
+            </div>
+            <button type="submit" class="comment-submit-btn" style="width:100%">
+                <i class="bi bi-send-fill"></i> 게시하기
+            </button>
+        </form>
+    </div>
+</div>
 <div class="toast-container" id="toastContainer"></div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -658,7 +702,7 @@ function initializeDarkMode(){const darkMode=localStorage.getItem('darkMode')===
 function toggleDarkMode(){const isDark=document.body.classList.toggle('dark-mode');localStorage.setItem('darkMode',isDark);updateDarkModeUI(isDark);showToast(isDark?'다크 모드가 활성화되었습니다.':'라이트 모드가 활성화되었습니다.','success')}
 function updateDarkModeUI(isDark){const homeToggle=document.getElementById('homeDarkModeToggle');const settingsSwitch=document.getElementById('darkModeSwitch');if(homeToggle){homeToggle.innerHTML=isDark?'<i class="bi bi-sun-fill"></i>':'<i class="bi bi-moon-fill"></i>'}if(settingsSwitch){settingsSwitch.checked=isDark}}
 function initializeNavigation(){document.querySelectorAll('.nav-item').forEach(item=>{item.addEventListener('click',function(){switchTab(this.getAttribute('data-tab'))})})}
-function switchTab(tabId){document.querySelectorAll('.tab-content-wrapper').forEach(tab=>tab.classList.remove('active'));document.querySelectorAll('.nav-item').forEach(item=>item.classList.remove('active'));document.getElementById(tabId).classList.add('active');document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');currentTab=tabId;if(tabId==='medicineTab'){initializeCalendar()}else if(tabId==='mealTab'){initializeMealStatus();renderMealCalendar()}else if(tabId==='pointTab'){loadPointItems()}}
+function switchTab(tabId){document.querySelectorAll('.tab-content-wrapper').forEach(tab=>tab.classList.remove('active'));document.querySelectorAll('.nav-item').forEach(item=>item.classList.remove('active'));document.getElementById(tabId).classList.add('active');document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');currentTab=tabId;if(tabId==='medicineTab'){initializeCalendar()}else if(tabId==='mealTab'){initializeMealStatus();renderMealCalendar()}else if(tabId==='dailyTab'){loadDailies()}}
 async function loadComments(){try{const response=await fetch('/api/comments');allComments=await response.json();renderComments()}catch(error){console.error('댓글 로드 실패:',error);showToast('댓글을 불러오는데 실패했습니다.','error')}}
 let commentImageData=null;
 function handleCommentImageSelect(event){const file=event.target.files[0];if(!file)return;if(file.size>5*1024*1024){showToast('이미지 크기는 5MB 이하여야 합니다.','error');return}const reader=new FileReader();reader.onload=function(e){commentImageData=e.target.result;document.getElementById('commentImagePreview').src=commentImageData;document.getElementById('commentImagePreviewWrapper').style.display='block';document.querySelector('.comment-image-btn').classList.add('active')};reader.readAsDataURL(file)}
@@ -717,6 +761,21 @@ async function showPointItemManagement(){document.getElementById('pointItemManag
 async function loadAdminItems(){try{const response=await fetch('/api/points/admin/items');if(!response.ok){showToast('상품 목록 로드 실패','error');return}const items=await response.json();const container=document.getElementById('adminItemsList');if(!items||items.length===0){container.innerHTML='<div class="empty-state"><p>등록된 상품이 없습니다.</p></div>';return}container.innerHTML=items.map(item=>`<div style="background:white;border:1px solid var(--gray-300);border-radius:12px;padding:16px"><div style="display:flex;justify-content:space-between;align-items:start"><div style="flex:1"><h6 style="font-weight:700;margin-bottom:4px">${item.name}</h6><p style="font-size:14px;color:var(--gray-600);margin-bottom:8px">${item.description||''}</p><div style="display:flex;gap:12px;font-size:14px"><span><i class="bi bi-coin"></i> ${item.points}pt</span><span style="color:${item.available?'var(--success)':'var(--danger)}'}">${item.available?'판매중':'판매중지'}</span></div></div><div style="display:flex;gap:8px"><button class="comment-submit-btn" style="padding:8px 12px;background:var(--danger)" onclick="deleteAdminItem(${item.id})"><i class="bi bi-trash"></i></button></div></div>${item.imageUrl?`<img src="${item.imageUrl}" style="width:100%;max-height:200px;object-fit:cover;border-radius:8px;margin-top:12px">`:''}  </div>`).join('')}catch(error){console.error('상품 목록 로드 실패:',error);showToast('상품 목록 로드에 실패했습니다.','error')}}
 async function submitPointItem(event){event.preventDefault();const formData=new FormData();formData.append('name',document.getElementById('itemName').value);formData.append('description',document.getElementById('itemDescription').value);formData.append('points',document.getElementById('itemPoints').value);const icon=document.getElementById('itemIcon').value;const color=document.getElementById('itemColor').value;if(icon)formData.append('icon',icon);if(color)formData.append('color',color);const imageFile=document.getElementById('itemImage').files[0];if(imageFile)formData.append('image',imageFile);try{const response=await fetch('/api/points/admin/items',{method:'POST',body:formData});if(response.ok){showToast('상품이 등록되었습니다.','success');document.getElementById('pointItemForm').reset();await loadAdminItems()}else{const error=await response.json();showToast(error.error||'상품 등록에 실패했습니다.','error')}}catch(error){console.error('상품 등록 실패:',error);showToast('상품 등록에 실패했습니다.','error')}}
 async function deleteAdminItem(itemId){if(!confirm('이 상품을 삭제하시겠습니까?'))return;try{const response=await fetch(`/api/points/admin/items/${itemId}`,{method:'DELETE'});if(response.ok){showToast('상품이 삭제되었습니다.','success');await loadAdminItems();await loadPointItems()}else{const error=await response.json();showToast(error.error||'상품 삭제에 실패했습니다.','error')}}catch(error){console.error('상품 삭제 실패:',error);showToast('상품 삭제에 실패했습니다.','error')}}
+function showPointShop(){document.getElementById('pointShopModal').classList.add('active');loadPointItemsToModal()}
+async function loadPointItemsToModal(){try{const response=await fetch('/api/points/items');const items=await response.json();renderPointItemsInModal(items)}catch(error){console.error('포인트 상품 로드 실패:',error);showToast('상품을 불러오는데 실패했습니다.','error')}}
+function renderPointItemsInModal(items){const grid=document.getElementById('modalPointItemsGrid');const userRole='[[${user.role.name()}]]';const isFather=userRole==='FATHER';if(!items||items.length===0){grid.innerHTML='<div class="empty-state"><div class="empty-state-icon"><i class="bi bi-shop"></i></div><div class="empty-state-title">등록된 상품이 없습니다</div></div>';return}grid.innerHTML=items.map(item=>{const canPurchase=isFather&&item.available&&parseInt(document.getElementById('userPoints').textContent)>=item.points;return`<div class="point-item-card ${canPurchase?'':'disabled'}" onclick="${canPurchase?`purchaseItemFromModal(${item.id})`:''}"><div class="point-item-icon-wrapper" style="background:${item.color||'#e5e7eb'}">${item.icon?`<i class="bi bi-${item.icon}"></i>`:'🎁'}</div><div class="point-item-name">${item.name}</div><div class="point-item-desc">${item.description||''}</div><div class="point-item-price"><span class="point-item-price-value">${item.points}</span><span class="point-item-price-unit">pt</span>${!isFather?'<span style="font-size:12px;color:var(--danger);margin-left:auto">아버지만 구매 가능</span>':''}</div></div>`}).join('')}
+async function purchaseItemFromModal(itemId){if(!confirm('이 상품을 구매하시겠습니까?'))return;try{const response=await fetch(`/api/points/purchase/${itemId}`,{method:'POST'});if(response.ok){const result=await response.json();document.getElementById('modalCurrentPoints').textContent=result.remainingPoints;document.getElementById('userPoints').textContent=result.remainingPoints;showToast('상품을 구매했습니다!','success');await loadPointItemsToModal()}else{const error=await response.json();showToast(error.message||'구매에 실패했습니다.','error')}}catch(error){console.error('상품 구매 실패:',error);showToast('상품 구매에 실패했습니다.','error')}}
+function showDailyPostModal(){document.getElementById('dailyPostModal').classList.add('active')}
+async function submitDailyPost(event){event.preventDefault();const content=document.getElementById('dailyContent').value.trim();const mediaFile=document.getElementById('dailyMedia').files[0];if(!content){showToast('내용을 입력해주세요.','error');return}const formData=new FormData();formData.append('content',content);if(mediaFile)formData.append('media',mediaFile);try{const response=await fetch('/api/daily',{method:'POST',body:formData});if(response.ok){showToast('게시물이 작성되었습니다.','success');closeModal('dailyPostModal');document.getElementById('dailyPostForm').reset();document.getElementById('dailyMediaPreview').style.display='none';await loadDailies()}else throw new Error('게시물 작성 실패')}catch(error){console.error('게시물 작성 실패:',error);showToast('게시물 작성에 실패했습니다.','error')}}
+async function loadDailies(){try{const response=await fetch('/api/daily');const dailies=await response.json();renderDailies(dailies)}catch(error){console.error('일상 로드 실패:',error);showToast('일상을 불러오는데 실패했습니다.','error')}}
+function renderDailies(dailies){const grid=document.getElementById('dailyPostsGrid');if(!dailies||dailies.length===0){grid.innerHTML='<div class="empty-state"><div class="empty-state-icon"><i class="bi bi-images"></i></div><div class="empty-state-title">아직 게시물이 없습니다</div><div class="empty-state-text">첫 번째 일상을 공유해보세요!</div></div>';return}grid.innerHTML=dailies.map(daily=>`<div class="comment-item" style="padding:20px"><div class="comment-header"><div class="comment-avatar" onclick="showProfileModal('${daily.user.profileImage}','${daily.user.displayName}')">${daily.user.profileImage?`<img src="${daily.user.profileImage}" alt="${daily.user.displayName}">`:daily.user.displayName.substring(0,1)}</div><div class="comment-user-info"><div class="comment-username">${daily.user.displayName}</div><div class="comment-time">${formatTimeAgo(new Date(daily.createdAt))}</div></div>${daily.user.id==currentUserId?`<button class="comment-delete-btn" onclick="deleteDaily(${daily.id})"><i class="bi bi-trash"></i></button>`:''}</div><div class="comment-content" style="margin-bottom:${daily.mediaUrl?'16px':'12px'}">${escapeHtml(daily.content)}</div>${daily.mediaUrl?(daily.mediaType==='VIDEO'?`<video controls class="comment-image" style="max-height:500px"><source src="${daily.mediaUrl}">Your browser does not support the video tag.</video>`:`<img class="comment-image" src="${daily.mediaUrl}" onclick="showImageModal('${daily.mediaUrl}')" style="cursor:pointer">`):''}  <div class="comment-actions"><button class="comment-action-btn ${daily.isLiked?'liked':''}" onclick="toggleDailyLike(${daily.id})"><i class="bi bi-heart-fill"></i><span>${daily.likesCount||0}</span></button><button class="comment-action-btn" onclick="showDailyComments(${daily.id})"><i class="bi bi-chat-fill"></i> 댓글</button></div><div id="dailyComments-${daily.id}" style="display:none;margin-top:16px;padding-top:16px;border-top:1px solid var(--gray-200)"></div></div>`).join('')}
+async function toggleDailyLike(dailyId){try{const response=await fetch(`/api/daily/${dailyId}/like`,{method:'POST'});if(response.ok){await loadDailies()}else throw new Error('좋아요 실패')}catch(error){console.error('좋아요 실패:',error);showToast('좋아요에 실패했습니다.','error')}}
+async function deleteDaily(dailyId){if(!confirm('게시물을 삭제하시겠습니까?'))return;try{const response=await fetch(`/api/daily/${dailyId}`,{method:'DELETE'});if(response.ok){showToast('게시물이 삭제되었습니다.','success');await loadDailies()}else throw new Error('삭제 실패')}catch(error){console.error('삭제 실패:',error);showToast('게시물 삭제에 실패했습니다.','error')}}
+async function showDailyComments(dailyId){const commentsDiv=document.getElementById(`dailyComments-${dailyId}`);if(commentsDiv.style.display==='none'){try{const response=await fetch(`/api/daily/${dailyId}/comments`);const comments=await response.json();renderDailyComments(dailyId,comments);commentsDiv.style.display='block'}catch(error){console.error('댓글 로드 실패:',error);showToast('댓글을 불러오는데 실패했습니다.','error')}}else{commentsDiv.style.display='none'}}
+function renderDailyComments(dailyId,comments){const commentsDiv=document.getElementById(`dailyComments-${dailyId}`);const parentComments=comments.filter(c=>!c.parentCommentId);let html=`<div class="comment-input-row" style="margin-bottom:12px"><input type="text" id="dailyCommentInput-${dailyId}" class="comment-input" placeholder="댓글을 입력하세요..."><button class="comment-submit-btn" onclick="addDailyComment(${dailyId})"><i class="bi bi-send-fill"></i></button></div>`;if(parentComments.length>0){html+='<div style="display:flex;flex-direction:column;gap:12px">';parentComments.forEach(comment=>{html+=`<div style="background:var(--gray-100);padding:12px;border-radius:8px"><div class="comment-header" style="margin-bottom:8px"><div class="comment-avatar" style="width:32px;height:32px;font-size:14px">${comment.user.profileImage?`<img src="${comment.user.profileImage}" alt="${comment.user.displayName}">`:comment.user.displayName.substring(0,1)}</div><div class="comment-user-info"><div class="comment-username" style="font-size:13px">${comment.user.displayName}</div><div class="comment-time" style="font-size:11px">${formatTimeAgo(new Date(comment.createdAt))}</div></div>${comment.user.id==currentUserId?`<button class="comment-delete-btn" onclick="deleteDailyComment(${comment.id},${dailyId})"><i class="bi bi-trash"></i></button>`:''}</div><div style="font-size:14px;line-height:1.5">${escapeHtml(comment.content)}</div><button class="comment-action-btn" style="font-size:12px;margin-top:8px" onclick="showDailyReplyInput(${comment.id},${dailyId})"><i class="bi bi-reply-fill"></i> 답글</button><div id="dailyReply-${comment.id}" style="display:none;margin-top:12px"></div>`;const replies=comments.filter(r=>r.parentCommentId===comment.id);if(replies.length>0){replies.forEach(reply=>{html+=`<div style="margin-left:20px;margin-top:8px;padding:8px;background:var(--white);border-radius:6px"><div class="comment-header" style="margin-bottom:6px"><div class="comment-avatar" style="width:24px;height:24px;font-size:12px">${reply.user.profileImage?`<img src="${reply.user.profileImage}" alt="${reply.user.displayName}">`:reply.user.displayName.substring(0,1)}</div><div class="comment-user-info"><div class="comment-username" style="font-size:12px">${reply.user.displayName}</div><div class="comment-time" style="font-size:10px">${formatTimeAgo(new Date(reply.createdAt))}</div></div>${reply.user.id==currentUserId?`<button class="comment-delete-btn" onclick="deleteDailyComment(${reply.id},${dailyId})"><i class="bi bi-trash"></i></button>`:''}</div><div style="font-size:13px">${escapeHtml(reply.content)}</div></div>`})}html+='</div>'}); html+='</div>'}commentsDiv.innerHTML=html}
+function showDailyReplyInput(commentId,dailyId){const replyDiv=document.getElementById(`dailyReply-${commentId}`);if(replyDiv.style.display==='none'){replyDiv.innerHTML=`<div class="comment-input-row"><input type="text" id="dailyReplyInput-${commentId}" class="comment-input" placeholder="답글을 입력하세요..."><button class="comment-submit-btn" onclick="addDailyComment(${dailyId},${commentId})"><i class="bi bi-send-fill"></i></button><button class="comment-submit-btn" style="background:var(--gray-600)" onclick="document.getElementById('dailyReply-${commentId}').style.display='none'">취소</button></div>`;replyDiv.style.display='block';document.getElementById(`dailyReplyInput-${commentId}`).focus()}else{replyDiv.style.display='none'}}
+async function addDailyComment(dailyId,parentCommentId){const inputId=parentCommentId?`dailyReplyInput-${parentCommentId}`:`dailyCommentInput-${dailyId}`;const input=document.getElementById(inputId);const content=input.value.trim();if(!content){showToast('댓글 내용을 입력해주세요.','error');return}const formData=new FormData();formData.append('content',content);if(parentCommentId)formData.append('parentCommentId',parentCommentId);try{const response=await fetch(`/api/daily/${dailyId}/comments`,{method:'POST',body:formData});if(response.ok){input.value='';if(parentCommentId)document.getElementById(`dailyReply-${parentCommentId}`).style.display='none';showToast('댓글이 등록되었습니다.','success');const commentsResponse=await fetch(`/api/daily/${dailyId}/comments`);const comments=await commentsResponse.json();renderDailyComments(dailyId,comments)}else throw new Error('댓글 등록 실패')}catch(error){console.error('댓글 등록 실패:',error);showToast('댓글 등록에 실패했습니다.','error')}}
+async function deleteDailyComment(commentId,dailyId){if(!confirm('댓글을 삭제하시겠습니까?'))return;try{const response=await fetch(`/api/daily/comments/${commentId}`,{method:'DELETE'});if(response.ok){showToast('댓글이 삭제되었습니다.','success');const commentsResponse=await fetch(`/api/daily/${dailyId}/comments`);const comments=await commentsResponse.json();renderDailyComments(dailyId,comments)}else throw new Error('삭제 실패')}catch(error){console.error('삭제 실패:',error);showToast('댓글 삭제에 실패했습니다.','error')}}
 </script>
 </body>
 </html>

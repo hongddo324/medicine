@@ -4,6 +4,7 @@ public enum Role {
     ADMIN("관리자"),
     FATHER("아버지"),
     FAMILY("가족"),
+    WOLKOC_FAMILY("월곡가족"),
     OTHER("기타");
 
     private final String displayName;
