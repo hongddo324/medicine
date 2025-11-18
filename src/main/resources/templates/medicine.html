@@ -439,6 +439,16 @@
                         <span class="switch-slider"></span>
                     </label>
                 </div>
+                <div class="settings-item" th:if="${user.role.name() == 'ADMIN'}" onclick="showPointItemManagement()">
+                    <div class="settings-item-content">
+                        <div class="settings-item-icon" style="color:var(--primary)"><i class="bi bi-shop"></i></div>
+                        <div class="settings-item-text">
+                            <h6>포인트 상품 관리</h6>
+                            <p>포인트 상품 등록 및 삭제</p>
+                        </div>
+                    </div>
+                    <i class="bi bi-chevron-right"></i>
+                </div>
                 <div class="settings-item" onclick="logout()">
                     <div class="settings-item-content">
                         <div class="settings-item-icon" style="color:var(--danger)"><i class="bi bi-box-arrow-right"></i></div>
@@ -527,6 +537,55 @@
         <img class="modal-image" id="imageModalImage" src="" alt="이미지">
     </div>
 </div>
+<div class="modal-overlay" id="pointItemManagementModal" onclick="closeModal('pointItemManagementModal')">
+    <div class="modal-content" onclick="event.stopPropagation()" style="max-width:800px;max-height:90vh;overflow-y:auto">
+        <div class="modal-header">
+            <div class="modal-title">포인트 상품 관리</div>
+            <button class="modal-close" onclick="closeModal('pointItemManagementModal')"><i class="bi bi-x"></i></button>
+        </div>
+        <div style="margin-bottom:20px">
+            <h6 style="font-weight:700;margin-bottom:12px">새 상품 등록</h6>
+            <form id="pointItemForm" onsubmit="submitPointItem(event)">
+                <input type="hidden" id="editItemId" value="">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+                    <div>
+                        <label style="display:block;margin-bottom:4px;font-weight:600;font-size:14px">상품명 *</label>
+                        <input type="text" id="itemName" class="comment-input" style="width:100%" placeholder="상품명" required>
+                    </div>
+                    <div>
+                        <label style="display:block;margin-bottom:4px;font-weight:600;font-size:14px">필요 포인트 *</label>
+                        <input type="number" id="itemPoints" class="comment-input" style="width:100%" placeholder="1000" required>
+                    </div>
+                </div>
+                <div style="margin-bottom:12px">
+                    <label style="display:block;margin-bottom:4px;font-weight:600;font-size:14px">상세 설명</label>
+                    <textarea id="itemDescription" class="comment-input" style="width:100%;min-height:80px;border-radius:12px" placeholder="상품 설명을 입력하세요"></textarea>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+                    <div>
+                        <label style="display:block;margin-bottom:4px;font-weight:600;font-size:14px">아이콘 (Bootstrap)</label>
+                        <input type="text" id="itemIcon" class="comment-input" style="width:100%" placeholder="gift">
+                    </div>
+                    <div>
+                        <label style="display:block;margin-bottom:4px;font-weight:600;font-size:14px">색상 (HEX)</label>
+                        <input type="text" id="itemColor" class="comment-input" style="width:100%" placeholder="#4A90E2">
+                    </div>
+                </div>
+                <div style="margin-bottom:12px">
+                    <label style="display:block;margin-bottom:4px;font-weight:600;font-size:14px">상품 이미지</label>
+                    <input type="file" id="itemImage" accept="image/*" style="width:100%">
+                </div>
+                <button type="submit" class="comment-submit-btn" style="width:100%">
+                    <i class="bi bi-plus-circle"></i> 상품 등록
+                </button>
+            </form>
+        </div>
+        <div>
+            <h6 style="font-weight:700;margin-bottom:12px">등록된 상품 목록</h6>
+            <div id="adminItemsList" style="display:flex;flex-direction:column;gap:12px"></div>
+        </div>
+    </div>
+</div>
 <div class="toast-container" id="toastContainer"></div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -594,6 +653,10 @@ function showAiEvaluation(mealType,evaluation,score){const titles={breakfast:'�
 async function initializeFirebase(){try{const firebaseConfig={apiKey:"AIzaSyC4oP4zGjT1W5gVsWu0kyOoHVpbieOtVpM",authDomain:"mdedicine.firebaseapp.com",projectId:"mdedicine",storageBucket:"mdedicine.firebasestorage.app",messagingSenderId:"659585584078",appId:"1:659585584078:web:bf9f90d5a2fdcd42f5b99f",measurementId:"G-GETB4S7XM4"};firebase.initializeApp(firebaseConfig);messaging=firebase.messaging();console.log('✅ Firebase initialized');await requestNotificationPermission()}catch(error){console.error('❌ Firebase 초기화 실패:',error)}}
 async function requestNotificationPermission(){try{const permission=await Notification.requestPermission();if(permission==='granted'){console.log('✅ 알림 권한 허용됨');await registerFcmToken()}else{console.log('⚠️ 알림 권한 거부됨')}}catch(error){console.error('❌ 알림 권한 요청 실패:',error)}}
 async function registerFcmToken(){try{const VAPID_KEY='BFkmMV5OmNvF6_j5hblhJD9L-y3v3BDaUWcbXr-y0fJrMOi4gGPD1jA4SkBVk4LWqaJvV8gB2qHY5VZL3gW-GyY';if('serviceWorker' in navigator){await navigator.serviceWorker.register('/firebase-messaging-sw.js');console.log('✅ Service Worker 등록 완료')}const fcmToken=await messaging.getToken({vapidKey:VAPID_KEY});if(!fcmToken){console.error('❌ FCM 토큰 생성 실패');return}currentFcmToken=fcmToken;console.log('✅ FCM Token:',fcmToken.substring(0,50)+'...');const response=await fetch('/api/push/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:fcmToken})});if(response.ok){console.log('✅ FCM 토큰 서버 등록 완료')}else{console.error('❌ FCM 토큰 서버 등록 실패')}messaging.onMessage((payload)=>{console.log('📨 포그라운드 메시지 수신:',payload);const title=payload.data?.title||payload.notification?.title||'알림';const body=payload.data?.body||payload.notification?.body||'';showToast(body,'info')})}catch(error){console.error('❌ FCM 토큰 등록 실패:',error)}}
+async function showPointItemManagement(){document.getElementById('pointItemManagementModal').classList.add('active');await loadAdminItems()}
+async function loadAdminItems(){try{const response=await fetch('/api/points/admin/items');if(!response.ok){showToast('상품 목록 로드 실패','error');return}const items=await response.json();const container=document.getElementById('adminItemsList');if(!items||items.length===0){container.innerHTML='<div class="empty-state"><p>등록된 상품이 없습니다.</p></div>';return}container.innerHTML=items.map(item=>`<div style="background:white;border:1px solid var(--gray-300);border-radius:12px;padding:16px"><div style="display:flex;justify-content:space-between;align-items:start"><div style="flex:1"><h6 style="font-weight:700;margin-bottom:4px">${item.name}</h6><p style="font-size:14px;color:var(--gray-600);margin-bottom:8px">${item.description||''}</p><div style="display:flex;gap:12px;font-size:14px"><span><i class="bi bi-coin"></i> ${item.points}pt</span><span style="color:${item.available?'var(--success)':'var(--danger)}'}">${item.available?'판매중':'판매중지'}</span></div></div><div style="display:flex;gap:8px"><button class="comment-submit-btn" style="padding:8px 12px;background:var(--danger)" onclick="deleteAdminItem(${item.id})"><i class="bi bi-trash"></i></button></div></div>${item.imageUrl?`<img src="${item.imageUrl}" style="width:100%;max-height:200px;object-fit:cover;border-radius:8px;margin-top:12px">`:''}  </div>`).join('')}catch(error){console.error('상품 목록 로드 실패:',error);showToast('상품 목록 로드에 실패했습니다.','error')}}
+async function submitPointItem(event){event.preventDefault();const formData=new FormData();formData.append('name',document.getElementById('itemName').value);formData.append('description',document.getElementById('itemDescription').value);formData.append('points',document.getElementById('itemPoints').value);const icon=document.getElementById('itemIcon').value;const color=document.getElementById('itemColor').value;if(icon)formData.append('icon',icon);if(color)formData.append('color',color);const imageFile=document.getElementById('itemImage').files[0];if(imageFile)formData.append('image',imageFile);try{const response=await fetch('/api/points/admin/items',{method:'POST',body:formData});if(response.ok){showToast('상품이 등록되었습니다.','success');document.getElementById('pointItemForm').reset();await loadAdminItems()}else{const error=await response.json();showToast(error.error||'상품 등록에 실패했습니다.','error')}}catch(error){console.error('상품 등록 실패:',error);showToast('상품 등록에 실패했습니다.','error')}}
+async function deleteAdminItem(itemId){if(!confirm('이 상품을 삭제하시겠습니까?'))return;try{const response=await fetch(`/api/points/admin/items/${itemId}`,{method:'DELETE'});if(response.ok){showToast('상품이 삭제되었습니다.','success');await loadAdminItems();await loadPointItems()}else{const error=await response.json();showToast(error.error||'상품 삭제에 실패했습니다.','error')}}catch(error){console.error('상품 삭제 실패:',error);showToast('상품 삭제에 실패했습니다.','error')}}
 </script>
 </body>
 </html>

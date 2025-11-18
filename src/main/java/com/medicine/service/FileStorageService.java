@@ -18,6 +18,7 @@ public class FileStorageService {
     private final Path profileStorageLocation;
     private final Path imageStorageLocation;
     private final Path mealStorageLocation;
+    private final Path pointItemStorageLocation;
 
     public FileStorageService() {
         // Get the directory where the JAR is running
@@ -26,15 +27,18 @@ public class FileStorageService {
         this.profileStorageLocation = Paths.get(baseDir, "profile").toAbsolutePath().normalize();
         this.imageStorageLocation = Paths.get(baseDir, "image").toAbsolutePath().normalize();
         this.mealStorageLocation = Paths.get(baseDir, "meal").toAbsolutePath().normalize();
+        this.pointItemStorageLocation = Paths.get(baseDir, "pointitem").toAbsolutePath().normalize();
 
         try {
             Files.createDirectories(this.profileStorageLocation);
             Files.createDirectories(this.imageStorageLocation);
             Files.createDirectories(this.mealStorageLocation);
+            Files.createDirectories(this.pointItemStorageLocation);
             log.info("Storage directories created/verified:");
             log.info("  Profile: {}", this.profileStorageLocation);
             log.info("  Image: {}", this.imageStorageLocation);
             log.info("  Meal: {}", this.mealStorageLocation);
+            log.info("  PointItem: {}", this.pointItemStorageLocation);
         } catch (Exception ex) {
             log.error("Could not create storage directories", ex);
             throw new RuntimeException("Could not create storage directories", ex);
@@ -72,6 +76,17 @@ public class FileStorageService {
      */
     public String storeMealImage(MultipartFile file, String mealId) throws IOException {
         return storeFile(file, mealStorageLocation, "meal", mealId);
+    }
+
+    /**
+     * Store point item image
+     *
+     * @param file the file to store
+     * @return the relative path to the stored file (e.g., "/files/pointitem/item_timestamp_uuid.jpg")
+     */
+    public String storePointItemImage(MultipartFile file) throws IOException {
+        String itemId = "item";
+        return storeFile(file, pointItemStorageLocation, "pointitem", itemId);
     }
 
     /**
@@ -139,6 +154,8 @@ public class FileStorageService {
                 fileLocation = imageStorageLocation.resolve(filename);
             } else if ("meal".equals(type)) {
                 fileLocation = mealStorageLocation.resolve(filename);
+            } else if ("pointitem".equals(type)) {
+                fileLocation = pointItemStorageLocation.resolve(filename);
             } else {
                 log.warn("Unknown file type: {}", type);
                 return;
@@ -161,6 +178,8 @@ public class FileStorageService {
             return imageStorageLocation.resolve(filename);
         } else if ("meal".equals(type)) {
             return mealStorageLocation.resolve(filename);
+        } else if ("pointitem".equals(type)) {
+            return pointItemStorageLocation.resolve(filename);
         }
         throw new IllegalArgumentException("Unknown file type: " + type);
     }
