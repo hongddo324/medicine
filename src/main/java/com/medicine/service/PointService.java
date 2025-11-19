@@ -49,12 +49,19 @@ public class PointService {
             throw new IllegalArgumentException("구매할 수 없는 상품입니다.");
         }
 
-        if (user.getPoints() < item.getPoints()) {
+        // Null-safe: points가 null인 경우 0으로 처리
+        Integer currentPoints = user.getPoints();
+        if (currentPoints == null) {
+            currentPoints = 0;
+            log.warn("User points was null during purchase, initialized to 0 - User: {}", user.getUsername());
+        }
+
+        if (currentPoints < item.getPoints()) {
             throw new IllegalArgumentException("포인트가 부족합니다.");
         }
 
         // 포인트 차감
-        user.setPoints(user.getPoints() - item.getPoints());
+        user.setPoints(currentPoints - item.getPoints());
         userRepository.save(user);
 
         // 히스토리 기록
@@ -75,7 +82,13 @@ public class PointService {
      */
     @Transactional
     public void addPoints(User user, Integer points, PointHistory.PointType type, String description) {
-        user.setPoints(user.getPoints() + points);
+        // Null-safe: points가 null인 경우 0으로 초기화
+        Integer currentPoints = user.getPoints();
+        if (currentPoints == null) {
+            currentPoints = 0;
+            log.warn("User points was null, initialized to 0 - User: {}", user.getUsername());
+        }
+        user.setPoints(currentPoints + points);
         userRepository.save(user);
 
         PointHistory history = new PointHistory();

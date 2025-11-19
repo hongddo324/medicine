@@ -49,7 +49,8 @@ public class Activity implements Serializable {
         DAILY_COMMENT,     // 일상 댓글
         DAILY_LIKE,        // 일상 좋아요
         WISH_ADDED,        // 위시 추가
-        SCHEDULE_ADDED     // 일정 추가
+        SCHEDULE_ADDED,    // 일정 추가
+        PROFILE_UPDATED    // 프로필 업데이트
     }
 
     @PrePersist

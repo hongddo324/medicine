@@ -246,6 +246,8 @@
         .dark-mode-toggle:active{transform:scale(0.95)}
         body.dark-mode .shop-icon-btn{color:#ffffff;border-color:#4a4a4a}
         body.dark-mode .shop-icon-btn:hover{background:rgba(255,255,255,0.1)}
+        .shop-icon-btn{position:relative}
+        .shop-icon-btn::before{content:'';position:absolute;inset:-12px;border-radius:50%;z-index:-1}
     </style>
 </head>
 <body>

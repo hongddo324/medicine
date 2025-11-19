@@ -1,6 +1,8 @@
 package com.medicine.controller;
 
+import com.medicine.model.Activity;
 import com.medicine.model.User;
+import com.medicine.service.ActivityService;
 import com.medicine.service.FileStorageService;
 import com.medicine.service.UserService;
 import jakarta.servlet.http.HttpSession;
@@ -22,6 +24,7 @@ public class ProfileController {
 
     private final UserService userService;
     private final FileStorageService fileStorageService;
+    private final ActivityService activityService;
 
     @GetMapping("/profile")
     public String profilePage(HttpSession session, Model model) {
@@ -76,6 +79,7 @@ public class ProfileController {
             }
 
             // Update profile image
+            boolean profileImageChanged = false;
             if (profileImage != null && !profileImage.isEmpty()) {
                 // Delete old profile image if exists
                 if (oldProfileImage != null && !oldProfileImage.isEmpty()
@@ -87,6 +91,7 @@ public class ProfileController {
                 String imagePath = fileStorageService.storeProfileImage(profileImage, user.getId().toString());
                 updatedUser.setProfileImage(imagePath);
                 updatedUser.setProfileImageUpdatedAt(LocalDateTime.now());  // 프로필 사진 업데이트 시각 기록
+                profileImageChanged = true;
                 log.info("Profile image updated - User: {}, Path: {}, Size: {} bytes",
                         user.getUsername(), imagePath, profileImage.getSize());
             }
@@ -117,6 +122,17 @@ public class ProfileController {
             }
             changeLog.append("]");
             log.info(changeLog.toString());
+
+            // 프로필 사진 변경 시 활동 기록 생성
+            if (profileImageChanged) {
+                try {
+                    String message = updatedUser.getDisplayName() + "님이 프로필 사진을 변경하였습니다";
+                    activityService.createActivity(updatedUser, Activity.ActivityType.PROFILE_UPDATED, message, updatedUser.getId());
+                    log.info("Activity created for profile image update - User: {}", updatedUser.getUsername());
+                } catch (Exception e) {
+                    log.error("Failed to create activity for profile image update", e);
+                }
+            }
 
             return ResponseEntity.ok(Map.of("success", true, "user", updatedUser));
 

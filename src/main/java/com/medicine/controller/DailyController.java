@@ -34,8 +34,9 @@ public class DailyController {
         }
 
         List<Daily> dailies = dailyService.getAllDailies();
+        java.time.LocalDateTime threeDaysAgo = java.time.LocalDateTime.now().minusDays(3);
 
-        // 각 게시물에 현재 사용자의 좋아요 여부 추가
+        // 각 게시물에 현재 사용자의 좋아요 여부 및 NEW 뱃지 추가
         List<Map<String, Object>> dailyList = dailies.stream().map(daily -> {
             Map<String, Object> dailyMap = new HashMap<>();
             dailyMap.put("id", daily.getId());
@@ -44,11 +45,14 @@ public class DailyController {
             dailyMap.put("mediaType", daily.getMediaType());
             dailyMap.put("likesCount", daily.getLikesCount());
             dailyMap.put("createdAt", daily.getCreatedAt());
+            dailyMap.put("isNew", daily.getCreatedAt().isAfter(threeDaysAgo));
+            dailyMap.put("commentsCount", daily.getComments().size());
             dailyMap.put("user", Map.of(
                 "id", daily.getUser().getId(),
                 "username", daily.getUser().getUsername(),
                 "displayName", daily.getUser().getDisplayName() != null ? daily.getUser().getDisplayName() : daily.getUser().getUsername(),
-                "profileImage", daily.getUser().getProfileImage() != null ? daily.getUser().getProfileImage() : ""
+                "profileImage", daily.getUser().getProfileImage() != null ? daily.getUser().getProfileImage() : "",
+                "profileImageUpdatedAt", daily.getUser().getProfileImageUpdatedAt() != null ? daily.getUser().getProfileImageUpdatedAt() : null
             ));
             dailyMap.put("isLiked", dailyService.isLikedByUser(daily.getId(), user.getId()));
             return dailyMap;
@@ -152,17 +156,20 @@ public class DailyController {
 
         try {
             List<DailyComment> comments = dailyService.getComments(dailyId);
+            java.time.LocalDateTime threeDaysAgo = java.time.LocalDateTime.now().minusDays(3);
 
             List<Map<String, Object>> commentList = comments.stream().map(comment -> {
                 Map<String, Object> commentMap = new HashMap<>();
                 commentMap.put("id", comment.getId());
                 commentMap.put("content", comment.getContent());
                 commentMap.put("createdAt", comment.getCreatedAt());
+                commentMap.put("isNew", comment.getCreatedAt().isAfter(threeDaysAgo));
                 commentMap.put("user", Map.of(
                     "id", comment.getUser().getId(),
                     "username", comment.getUser().getUsername(),
                     "displayName", comment.getUser().getDisplayName() != null ? comment.getUser().getDisplayName() : comment.getUser().getUsername(),
-                    "profileImage", comment.getUser().getProfileImage() != null ? comment.getUser().getProfileImage() : ""
+                    "profileImage", comment.getUser().getProfileImage() != null ? comment.getUser().getProfileImage() : "",
+                    "profileImageUpdatedAt", comment.getUser().getProfileImageUpdatedAt() != null ? comment.getUser().getProfileImageUpdatedAt() : null
                 ));
                 commentMap.put("parentCommentId", comment.getParentComment() != null ? comment.getParentComment().getId() : null);
                 return commentMap;
