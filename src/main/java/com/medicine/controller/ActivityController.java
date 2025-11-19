@@ -23,7 +23,7 @@ public class ActivityController {
     private final ActivityService activityService;
 
     /**
-     * 최근 활동 조회
+     * 최근 활동 조회 (사용자별 읽음 상태 포함)
      */
     @GetMapping
     public ResponseEntity<?> getRecentActivities(HttpSession session) {
@@ -33,39 +33,22 @@ public class ActivityController {
         }
 
         try {
-            List<Activity> activities = activityService.getRecentActivities();
-
-            List<Map<String, Object>> activityList = activities.stream().map(activity -> {
-                Map<String, Object> activityMap = new HashMap<>();
-                activityMap.put("id", activity.getId());
-                activityMap.put("activityType", activity.getActivityType().name());
-                activityMap.put("message", activity.getMessage());
-                activityMap.put("referenceId", activity.getReferenceId());
-                activityMap.put("isRead", activity.getIsRead());
-                activityMap.put("createdAt", activity.getCreatedAt());
-                activityMap.put("user", Map.of(
-                    "id", activity.getUser().getId(),
-                    "username", activity.getUser().getUsername(),
-                    "displayName", activity.getUser().getDisplayName() != null ? activity.getUser().getDisplayName() : activity.getUser().getUsername(),
-                    "profileImage", activity.getUser().getProfileImage() != null ? activity.getUser().getProfileImage() : ""
-                ));
-                return activityMap;
-            }).toList();
-
-            long unreadCount = activityService.getUnreadCount();
+            // 사용자별 읽음 상태를 포함한 활동 조회
+            List<Map<String, Object>> activities = activityService.getRecentActivitiesForUser(user);
+            long unreadCount = activityService.getUnreadCount(user);
 
             return ResponseEntity.ok(Map.of(
-                "activities", activityList,
+                "activities", activities,
                 "unreadCount", unreadCount
             ));
         } catch (Exception e) {
-            log.error("Failed to get activities", e);
+            log.error("Failed to get activities for user {}", user.getUsername(), e);
             return ResponseEntity.status(500).body(Map.of("error", "활동 조회에 실패했습니다."));
         }
     }
 
     /**
-     * 활동 읽음 처리
+     * 사용자별 활동 읽음 처리
      */
     @PostMapping("/{activityId}/read")
     public ResponseEntity<?> markAsRead(
@@ -78,16 +61,21 @@ public class ActivityController {
         }
 
         try {
-            activityService.markAsRead(activityId);
-            return ResponseEntity.ok(Map.of("success", true));
+            activityService.markAsRead(user, activityId);
+            long unreadCount = activityService.getUnreadCount(user);
+
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "unreadCount", unreadCount
+            ));
         } catch (Exception e) {
-            log.error("Failed to mark activity as read", e);
+            log.error("Failed to mark activity {} as read for user {}", activityId, user.getUsername(), e);
             return ResponseEntity.status(500).body(Map.of("error", "활동 읽음 처리에 실패했습니다."));
         }
     }
 
     /**
-     * 모든 활동 읽음 처리
+     * 사용자별 모든 활동 읽음 처리
      */
     @PostMapping("/read-all")
     public ResponseEntity<?> markAllAsRead(HttpSession session) {
@@ -97,16 +85,19 @@ public class ActivityController {
         }
 
         try {
-            activityService.markAllAsRead();
-            return ResponseEntity.ok(Map.of("success", true));
+            activityService.markAllAsRead(user);
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "unreadCount", 0
+            ));
         } catch (Exception e) {
-            log.error("Failed to mark all activities as read", e);
+            log.error("Failed to mark all activities as read for user {}", user.getUsername(), e);
             return ResponseEntity.status(500).body(Map.of("error", "모든 활동 읽음 처리에 실패했습니다."));
         }
     }
 
     /**
-     * 읽지 않은 활동 개수 조회
+     * 사용자별 읽지 않은 활동 개수 조회
      */
     @GetMapping("/unread-count")
     public ResponseEntity<?> getUnreadCount(HttpSession session) {
@@ -116,10 +107,10 @@ public class ActivityController {
         }
 
         try {
-            long unreadCount = activityService.getUnreadCount();
+            long unreadCount = activityService.getUnreadCount(user);
             return ResponseEntity.ok(Map.of("unreadCount", unreadCount));
         } catch (Exception e) {
-            log.error("Failed to get unread count", e);
+            log.error("Failed to get unread count for user {}", user.getUsername(), e);
             return ResponseEntity.status(500).body(Map.of("error", "읽지 않은 활동 개수 조회에 실패했습니다."));
         }
     }
