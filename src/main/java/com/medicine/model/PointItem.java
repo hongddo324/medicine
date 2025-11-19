@@ -36,6 +36,9 @@ public class PointItem implements Serializable {
     @Column(length = 20)
     private String color;  // 색상 (CSS color)
 
+    @Column(columnDefinition = "TEXT")
+    private String imageUrl;  // 상품 이미지 URL
+
     @Column(nullable = false)
     private Boolean available = true;  // 구매 가능 여부
 

@@ -15,20 +15,42 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <style>
         *{-webkit-tap-highlight-color:transparent;margin:0;padding:0;box-sizing:border-box}
-        :root{--primary:#4A90E2;--success:#5cb85c;--danger:#d9534f;--warning:#f0ad4e;--info:#5bc0de;--gray-100:#f8f9fa;--gray-200:#e9ecef;--gray-300:#dee2e6;--gray-600:#6c757d;--gray-900:#212529;--nav-height:65px}
-        body{background:linear-gradient(135deg,#f0f9ff 0%,#e0f2fe 40%,#dbeafe 100%);min-height:100vh;padding-bottom:var(--nav-height);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;overflow-x:hidden}
+        :root{
+            --primary:#4A90E2;--success:#5cb85c;--danger:#d9534f;--warning:#f0ad4e;--info:#5bc0de;
+            --gray-100:#f8f9fa;--gray-200:#e9ecef;--gray-300:#dee2e6;--gray-600:#6c757d;--gray-900:#212529;
+            --nav-height:65px;
+            --bg-gradient-start:#f0f9ff;--bg-gradient-mid:#e0f2fe;--bg-gradient-end:#dbeafe;
+            --card-bg:rgba(255,255,255,.95);--card-border:rgba(0,0,0,.04);
+            --text-primary:#212529;--text-secondary:#6c757d;
+            --white:#ffffff;--hover-bg:#f8f9fa;
+        }
+        body.dark-mode{
+            --primary:#6ba3e8;--success:#72c472;--danger:#e06b67;--warning:#f3ba65;--info:#6fcce4;
+            --gray-100:#2a2a2a;--gray-200:#3a3a3a;--gray-300:#4a4a4a;--gray-600:#b0b0b0;--gray-900:#e5e5e5;
+            --bg-gradient-start:#0f1419;--bg-gradient-mid:#1a1f26;--bg-gradient-end:#141922;
+            --card-bg:rgba(30,35,42,.95);--card-border:rgba(255,255,255,.08);
+            --text-primary:#e5e5e5;--text-secondary:#b0b0b0;
+            --white:#1e232a;--hover-bg:#2a2a2a;
+        }
+        body{
+            background:linear-gradient(135deg,var(--bg-gradient-start) 0%,var(--bg-gradient-mid) 40%,var(--bg-gradient-end) 100%);
+            min-height:100vh;padding-bottom:var(--nav-height);
+            font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;overflow-x:hidden;
+            color:var(--text-primary);transition:background .3s,color .3s;
+        }
         .tab-content-wrapper{display:none;animation:fadeIn .3s ease-in}
         .tab-content-wrapper.active{display:block}
         @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
         .app-container{max-width:600px;margin:0 auto;padding:20px 16px}
-        .custom-card{background:rgba(255,255,255,.95);backdrop-filter:blur(20px);border-radius:16px;box-shadow:0 2px 16px rgba(0,0,0,.06);padding:20px;margin-bottom:16px;border:1px solid rgba(0,0,0,.04)}
+        .custom-card{background:var(--card-bg);backdrop-filter:blur(20px);border-radius:16px;box-shadow:0 2px 16px rgba(0,0,0,.06);padding:20px;margin-bottom:16px;border:1px solid var(--card-border)}
         .user-header{display:flex;justify-content:space-between;align-items:center;padding-bottom:16px;border-bottom:1px solid var(--gray-200)}
         .user-info{display:flex;align-items:center;gap:12px}
         .user-avatar{width:48px;height:48px;background:linear-gradient(135deg,var(--primary) 0%,#0284c7 100%);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:0 4px 12px rgba(74,144,226,.3);overflow:hidden;cursor:pointer}
         .user-avatar img{width:100%;height:100%;object-fit:cover}
-        .user-details h5{margin:0;font-size:16px;font-weight:700;color:var(--gray-900)}
+        .user-details h5{margin:0;font-size:16px;font-weight:700;color:var(--text-primary)}
         .role-badge{display:inline-block;padding:4px 12px;background:linear-gradient(135deg,#cffafe 0%,#a5f3fc 100%);color:#0369a1;border-radius:12px;font-size:12px;font-weight:600}
-        .bottom-nav{position:fixed;bottom:0;left:0;right:0;height:var(--nav-height);background:rgba(255,255,255,.98);backdrop-filter:blur(20px);border-top:1px solid rgba(0,0,0,.06);box-shadow:0 -2px 16px rgba(0,0,0,.06);display:flex;justify-content:space-around;align-items:center;z-index:1000}
+        body.dark-mode .role-badge{background:linear-gradient(135deg,#164e63 0%,#155e75 100%);color:#a5f3fc}
+        .bottom-nav{position:fixed;bottom:0;left:0;right:0;height:var(--nav-height);background:var(--card-bg);backdrop-filter:blur(20px);border-top:1px solid var(--card-border);box-shadow:0 -2px 16px rgba(0,0,0,.06);display:flex;justify-content:space-around;align-items:center;z-index:1000}
         .nav-item{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;height:100%;color:var(--gray-600);text-decoration:none;transition:all .3s;cursor:pointer;user-select:none}
         .nav-item i{font-size:24px;margin-bottom:4px;transition:transform .3s}
         .nav-item span{font-size:11px;font-weight:500}
@@ -37,10 +59,10 @@
         .comment-section{margin-top:20px}
         .comment-input-wrapper{display:flex;flex-direction:column;gap:12px;margin-bottom:20px}
         .comment-input-row{display:flex;gap:8px}
-        .comment-input{flex:1;padding:12px 16px;border:1px solid var(--gray-300);border-radius:24px;font-size:14px;outline:none;transition:all .3s}
+        .comment-input{flex:1;padding:12px 16px;border:1px solid var(--gray-300);border-radius:24px;font-size:14px;outline:none;transition:all .3s;background:var(--white);color:var(--text-primary)}
         .comment-input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(74,144,226,.1)}
-        .comment-image-btn{padding:12px;background:white;color:var(--gray-600);border:1px solid var(--gray-300);border-radius:50%;cursor:pointer;transition:all .3s;width:48px;height:48px;display:flex;align-items:center;justify-content:center}
-        .comment-image-btn:hover{background:var(--gray-100);color:var(--primary)}
+        .comment-image-btn{padding:12px;background:var(--white);color:var(--text-secondary);border:1px solid var(--gray-300);border-radius:50%;cursor:pointer;transition:all .3s;width:48px;height:48px;display:flex;align-items:center;justify-content:center}
+        .comment-image-btn:hover{background:var(--hover-bg);color:var(--primary)}
         .comment-image-btn.active{background:var(--primary);color:white}
         .comment-submit-btn{padding:12px 24px;background:var(--primary);color:white;border:none;border-radius:24px;font-weight:600;cursor:pointer;transition:all .3s}
         .comment-submit-btn:hover{background:#357abd;transform:scale(1.05)}
@@ -50,7 +72,8 @@
         .reply-input-wrapper{margin-left:52px;margin-top:12px;display:none}
         .reply-input-wrapper.active{display:block}
         .comment-list{display:flex;flex-direction:column;gap:16px}
-        .comment-item{background:white;border-radius:12px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.05);position:relative}
+        .comment-item{background:var(--white);border-radius:12px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.05);position:relative}
+        body.dark-mode .comment-item{box-shadow:0 1px 4px rgba(0,0,0,.3)}
         .comment-item.new::before{content:'NEW';position:absolute;top:-8px;right:12px;background:#ef4444;color:white;padding:2px 8px;border-radius:8px;font-size:10px;font-weight:700}
         .comment-item.reply{margin-left:52px;background:var(--gray-100);border-left:3px solid var(--primary)}
         .comment-header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
@@ -58,9 +81,9 @@
         .comment-avatar:hover{transform:scale(1.1)}
         .comment-avatar img{width:100%;height:100%;object-fit:cover}
         .comment-user-info{flex:1}
-        .comment-username{font-weight:600;color:var(--gray-900);font-size:14px}
-        .comment-time{font-size:12px;color:var(--gray-600)}
-        .comment-content{margin-bottom:12px;line-height:1.5;color:var(--gray-900)}
+        .comment-username{font-weight:600;color:var(--text-primary);font-size:14px}
+        .comment-time{font-size:12px;color:var(--text-secondary)}
+        .comment-content{margin-bottom:12px;line-height:1.5;color:var(--text-primary)}
         .comment-image{width:100%;border-radius:8px;margin-bottom:12px;cursor:pointer}
         .comment-actions{display:flex;gap:16px;padding-top:12px;border-top:1px solid var(--gray-200)}
         .comment-action-btn{display:flex;align-items:center;gap:4px;background:none;border:none;color:var(--gray-600);cursor:pointer;font-size:14px;transition:all .3s}
@@ -68,59 +91,61 @@
         .comment-action-btn.liked{color:#ef4444}
         .pagination-wrapper{display:flex;justify-content:center;margin-top:24px}
         .pagination{display:flex;gap:8px}
-        .page-btn{padding:8px 12px;border:1px solid var(--gray-300);background:white;border-radius:8px;cursor:pointer;transition:all .3s}
-        .page-btn:hover{background:var(--gray-100)}
+        .page-btn{padding:8px 12px;border:1px solid var(--gray-300);background:var(--white);border-radius:8px;cursor:pointer;transition:all .3s}
+        .page-btn:hover{background:var(--hover-bg)}
         .page-btn.active{background:var(--primary);color:white;border-color:var(--primary)}
         .medicine-buttons{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
-        .medicine-btn{padding:32px 16px;border:2px solid var(--gray-300);background:white;border-radius:16px;cursor:pointer;transition:all .3s;text-align:center}
+        .medicine-btn{padding:32px 16px;border:2px solid var(--gray-300);background:var(--white);border-radius:16px;cursor:pointer;transition:all .3s;text-align:center}
         .medicine-btn:hover{transform:translateY(-4px);box-shadow:0 8px 20px rgba(0,0,0,.1)}
         .medicine-btn.taken{background:linear-gradient(135deg,#dcfce7 0%,#bbf7d0 100%);border-color:var(--success)}
+        body.dark-mode .medicine-btn.taken{background:linear-gradient(135deg,#064e3b 0%,#065f46 100%);color:#a7f3d0}
         .medicine-btn.disabled{opacity:.6;cursor:not-allowed}
         .medicine-icon{font-size:48px;margin-bottom:12px}
-        .medicine-label{font-size:18px;font-weight:700;margin-bottom:8px;color:var(--gray-900)}
-        .medicine-status{font-size:14px;color:var(--gray-600)}
+        .medicine-label{font-size:18px;font-weight:700;margin-bottom:8px;color:var(--text-primary)}
+        .medicine-status{font-size:14px;color:var(--text-secondary)}
         .calendar-wrapper{margin-top:20px}
         .calendar-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
-        .calendar-title{font-size:18px;font-weight:700}
-        .calendar-nav-btn{padding:8px 12px;background:white;border:1px solid var(--gray-300);border-radius:8px;cursor:pointer;transition:all .3s}
-        .calendar-nav-btn:hover{background:var(--gray-100)}
+        .calendar-title{font-size:18px;font-weight:700;color:var(--text-primary)}
+        .calendar-nav-btn{padding:8px 12px;background:var(--white);border:1px solid var(--gray-300);border-radius:8px;cursor:pointer;transition:all .3s}
+        .calendar-nav-btn:hover{background:var(--hover-bg)}
         .calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
-        .calendar-day-header{text-align:center;font-size:12px;font-weight:600;color:var(--gray-600);padding:8px 0}
-        .calendar-day{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;background:white;border-radius:8px;cursor:pointer;transition:all .3s;position:relative}
-        .calendar-day:hover{background:var(--gray-100)}
+        .calendar-day-header{text-align:center;font-size:12px;font-weight:600;color:var(--text-secondary);padding:8px 0}
+        .calendar-day{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--white);border-radius:8px;cursor:pointer;transition:all .3s;position:relative;color:var(--text-primary)}
+        .calendar-day:hover{background:var(--hover-bg)}
         .calendar-day.today{background:var(--primary);color:white}
         .calendar-day.has-record::after{content:'';position:absolute;bottom:4px;width:6px;height:6px;background:var(--success);border-radius:50%}
         .meal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
-        .meal-item{aspect-ratio:1;background:white;border-radius:12px;padding:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .3s;border:2px dashed var(--gray-300)}
+        .meal-item{aspect-ratio:1;background:var(--white);border-radius:12px;padding:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .3s;border:2px dashed var(--gray-300)}
         .meal-item:hover{transform:scale(1.05);box-shadow:0 4px 12px rgba(0,0,0,.1)}
         .meal-item.has-image{border:2px solid var(--success);padding:0;overflow:hidden}
         .meal-item img{width:100%;height:100%;object-fit:cover}
         .meal-placeholder{font-size:32px;margin-bottom:8px}
-        .meal-label{font-size:12px;font-weight:600;color:var(--gray-600)}
+        .meal-label{font-size:12px;font-weight:600;color:var(--text-secondary)}
         .settings-list{display:flex;flex-direction:column;gap:12px}
-        .settings-item{background:white;border-radius:12px;padding:16px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:all .3s}
-        .settings-item:hover{background:var(--gray-100)}
+        .settings-item{background:var(--white);border-radius:12px;padding:16px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:all .3s}
+        .settings-item:hover{background:var(--hover-bg)}
         .settings-item-content{display:flex;align-items:center;gap:12px}
         .settings-item-icon{font-size:24px;color:var(--primary)}
-        .settings-item-text h6{margin:0;font-size:16px;font-weight:600}
-        .settings-item-text p{margin:0;font-size:12px;color:var(--gray-600)}
+        .settings-item-text h6{margin:0;font-size:16px;font-weight:600;color:var(--text-primary)}
+        .settings-item-text p{margin:0;font-size:12px;color:var(--text-secondary)}
         .empty-state{text-align:center;padding:60px 20px}
         .empty-state-icon{font-size:64px;color:var(--gray-300);margin-bottom:16px}
-        .empty-state-title{font-size:18px;font-weight:700;color:var(--gray-600);margin-bottom:8px}
-        .empty-state-text{font-size:14px;color:var(--gray-600)}
+        .empty-state-title{font-size:18px;font-weight:700;color:var(--text-secondary);margin-bottom:8px}
+        .empty-state-text{font-size:14px;color:var(--text-secondary)}
         .modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.75);z-index:2000;align-items:center;justify-content:center;animation:fadeIn .3s}
+        body.dark-mode .modal-overlay{background:rgba(0,0,0,.85)}
         .modal-overlay.active{display:flex}
-        .modal-content{background:white;border-radius:16px;padding:24px;max-width:90%;max-height:90vh;overflow:auto;animation:slideUp .3s}
+        .modal-content{background:var(--card-bg);border-radius:16px;padding:24px;max-width:90%;max-height:90vh;overflow:auto;animation:slideUp .3s;color:var(--text-primary)}
         @keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
         .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
-        .modal-title{font-size:20px;font-weight:700}
-        .modal-close{background:none;border:none;font-size:24px;cursor:pointer;color:var(--gray-600)}
+        .modal-title{font-size:20px;font-weight:700;color:var(--text-primary)}
+        .modal-close{background:none;border:none;font-size:24px;cursor:pointer;color:var(--text-secondary)}
         .modal-image{width:100%;border-radius:12px}
         .loading{text-align:center;padding:20px}
         .loading-spinner{width:40px;height:40px;border:4px solid var(--gray-200);border-top-color:var(--primary);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto}
         @keyframes spin{to{transform:rotate(360deg)}}
         .toast-container{position:fixed;top:20px;right:20px;z-index:3000}
-        .toast{background:white;border-radius:12px;padding:16px 24px;box-shadow:0 4px 16px rgba(0,0,0,.2);margin-bottom:12px;animation:slideInRight .3s}
+        .toast{background:var(--card-bg);border-radius:12px;padding:16px 24px;box-shadow:0 4px 16px rgba(0,0,0,.2);margin-bottom:12px;animation:slideInRight .3s;color:var(--text-primary)}
         @keyframes slideInRight{from{transform:translateX(400px);opacity:0}to{transform:translateX(0);opacity:1}}
         .toast.success{border-left:4px solid var(--success)}
         .toast.error{border-left:4px solid var(--danger)}
@@ -133,28 +158,37 @@
         input:checked+.switch-slider{background-color:var(--success)}
         input:checked+.switch-slider:before{transform:translateX(23px)}
         .points-display{text-align:center;padding:24px 16px;margin:16px 0;background:linear-gradient(135deg,#fef3c7 0%,#fde68a 50%,#fcd34d 100%);border-radius:16px;box-shadow:0 4px 12px rgba(252,211,77,.3);position:relative;overflow:hidden}
+        body.dark-mode .points-display{background:linear-gradient(135deg,#422006 0%,#713f12 50%,#854d0e 100%);box-shadow:0 4px 12px rgba(133,77,14,.3)}
         .points-display::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle,rgba(255,255,255,.3) 0%,transparent 70%);animation:shimmer 3s infinite}
         @keyframes shimmer{0%,100%{transform:translate(-50%,-50%) rotate(0deg)}50%{transform:translate(-50%,-50%) rotate(180deg)}}
         .points-label{font-size:14px;font-weight:600;color:#92400e;margin-bottom:12px;position:relative;z-index:1}
+        body.dark-mode .points-label{color:#fef3c7}
         .points-content{display:flex;align-items:center;justify-content:center;gap:12px;position:relative;z-index:1}
         .points-icon{font-size:48px;color:#fbbf24;filter:drop-shadow(0 2px 4px rgba(251,191,36,.4));animation:bounce 2s infinite}
         @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
         .points-value{font-size:36px;font-weight:900;color:#78350f;text-shadow:2px 2px 4px rgba(120,53,15,.2)}
+        body.dark-mode .points-value{color:#fde68a;text-shadow:2px 2px 4px rgba(0,0,0,.3)}
         .points-unit{font-size:24px;font-weight:700;color:#92400e;margin-left:4px}
+        body.dark-mode .points-unit{color:#fde68a}
         .point-items-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
-        .point-item-card{background:white;border-radius:16px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.08);transition:all .3s;cursor:pointer;border:2px solid transparent}
+        .point-item-card{background:var(--white);border-radius:16px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.08);transition:all .3s;cursor:pointer;border:2px solid transparent}
+        body.dark-mode .point-item-card{box-shadow:0 2px 8px rgba(0,0,0,.3)}
         .point-item-card:hover{transform:translateY(-4px);box-shadow:0 8px 20px rgba(0,0,0,.15);border-color:var(--primary)}
+        body.dark-mode .point-item-card:hover{box-shadow:0 8px 20px rgba(0,0,0,.5)}
         .point-item-card.disabled{opacity:.6;cursor:not-allowed}
         .point-item-card.disabled:hover{transform:none;box-shadow:0 2px 8px rgba(0,0,0,.08)}
         .point-item-icon-wrapper{width:64px;height:64px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:32px;margin-bottom:16px}
-        .point-item-name{font-size:18px;font-weight:700;margin-bottom:8px;color:var(--gray-900)}
-        .point-item-desc{font-size:14px;color:var(--gray-600);margin-bottom:16px;min-height:40px}
+        .point-item-name{font-size:18px;font-weight:700;margin-bottom:8px;color:var(--text-primary)}
+        .point-item-desc{font-size:14px;color:var(--text-secondary);margin-bottom:16px;min-height:40px}
         .point-item-price{display:flex;align-items:center;gap:8px;padding-top:16px;border-top:1px solid var(--gray-200)}
         .point-item-price-value{font-size:24px;font-weight:900;color:var(--primary)}
         .point-item-price-unit{font-size:16px;font-weight:600;color:var(--gray-600)}
         .expected-points-display{background:linear-gradient(135deg,#dcfce7 0%,#bbf7d0 100%);border-radius:16px;padding:20px;margin-bottom:20px;border:2px solid #86efac}
+        body.dark-mode .expected-points-display{background:linear-gradient(135deg,#064e3b 0%,#065f46 100%);border-color:#10b981}
         .expected-points-label{font-size:14px;font-weight:600;color:#166534;margin-bottom:8px}
+        body.dark-mode .expected-points-label{color:#d1fae5}
         .expected-points-value{font-size:28px;font-weight:900;color:#15803d}
+        body.dark-mode .expected-points-value{color:#6ee7b7}
         .meal-item-wrapper{display:flex;flex-direction:column}
         .meal-evaluation{font-size:13px;color:var(--gray-700);animation:fadeIn .3s ease-in}
         .meal-item img{cursor:pointer;transition:transform .2s}
@@ -171,14 +205,15 @@
         }
         .home-medicine-status{margin-top:20px}
         .medicine-status-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
-        .medicine-status-item{background:white;border-radius:12px;padding:16px;text-align:center;border:2px solid var(--gray-300)}
+        .medicine-status-item{background:var(--white);border-radius:12px;padding:16px;text-align:center;border:2px solid var(--gray-300)}
         .medicine-status-item.taken{background:linear-gradient(135deg,#dcfce7 0%,#bbf7d0 100%);border-color:var(--success)}
+        body.dark-mode .medicine-status-item.taken{background:linear-gradient(135deg,#064e3b 0%,#065f46 100%)}
         .medicine-status-icon{font-size:32px;margin-bottom:8px}
-        .medicine-status-label{font-size:14px;font-weight:600;color:var(--gray-700)}
-        .medicine-status-text{font-size:12px;color:var(--gray-600);margin-top:4px}
+        .medicine-status-label{font-size:14px;font-weight:600;color:var(--text-primary)}
+        .medicine-status-text{font-size:12px;color:var(--text-secondary);margin-top:4px}
         .home-meals-section{margin-top:20px}
         .home-meal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}
-        .home-meal-item{position:relative;aspect-ratio:1;background:white;border-radius:12px;overflow:hidden;border:2px dashed var(--gray-300)}
+        .home-meal-item{position:relative;aspect-ratio:1;background:var(--white);border-radius:12px;overflow:hidden;border:2px dashed var(--gray-300)}
         .home-meal-item.has-image{border:2px solid var(--success)}
         .home-meal-item img{width:100%;height:100%;object-fit:cover;cursor:pointer}
         .home-meal-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--gray-400)}
@@ -196,6 +231,12 @@
             .home-meal-grid{grid-template-columns:1fr;gap:16px}
             .home-meal-item{max-width:100%;aspect-ratio:16/9}
         }
+        .dark-mode-toggle{
+            width:40px;height:40px;border-radius:50%;background:var(--card-bg);border:2px solid var(--gray-300);
+            display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .3s;font-size:20px;
+        }
+        .dark-mode-toggle:hover{transform:scale(1.1);background:var(--hover-bg)}
+        .dark-mode-toggle:active{transform:scale(0.95)}
     </style>
 </head>
 <body>
@@ -220,8 +261,11 @@
                         <span class="role-badge" th:text="${user.role.displayName}">역할</span>
                     </div>
                 </div>
+                <div class="dark-mode-toggle" onclick="toggleDarkMode()" id="homeDarkModeToggle">
+                    <i class="bi bi-moon-fill"></i>
+                </div>
             </div>
-            <div class="points-display">
+            <div class="points-display" style="position:relative">
                 <div class="points-label">월곡아버님이 모은포인트는?</div>
                 <div class="points-content">
                     <i class="bi bi-trophy-fill points-icon"></i>
@@ -229,6 +273,9 @@
                         <span class="points-value" id="userPoints" th:text="${user.points != null ? user.points : 0}">0</span>
                         <span class="points-unit">P</span>
                     </div>
+                </div>
+                <div class="dark-mode-toggle" onclick="showPointShop()" style="position:absolute;top:16px;right:16px" title="포인트 상점">
+                    <i class="bi bi-shop"></i>
                 </div>
             </div>
 
@@ -378,24 +425,19 @@
         </div>
     </div>
 </div>
-<div id="pointTab" class="tab-content-wrapper">
+<div id="dailyTab" class="tab-content-wrapper">
     <div class="app-container">
         <div class="custom-card">
-            <h5 style="margin-bottom:20px;font-weight:700"><i class="bi bi-shop"></i> 포인트 상점</h5>
-            <div class="points-display" style="margin-bottom:24px">
-                <div class="points-label">보유 포인트</div>
-                <div class="points-content">
-                    <i class="bi bi-trophy-fill points-icon"></i>
-                    <div>
-                        <span class="points-value" id="currentPoints" th:text="${user.points != null ? user.points : 0}">0</span>
-                        <span class="points-unit">pt</span>
-                    </div>
-                </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+                <h5 style="margin:0;font-weight:700"><i class="bi bi-images"></i> 일상</h5>
+                <button class="comment-submit-btn" onclick="showDailyPostModal()">
+                    <i class="bi bi-plus-lg"></i> 게시물 작성
+                </button>
             </div>
-            <div class="point-items-grid" id="pointItemsGrid">
+            <div id="dailyPostsGrid" style="display:flex;flex-direction:column;gap:20px">
                 <div class="loading">
                     <div class="loading-spinner"></div>
-                    <p style="margin-top:12px;color:var(--gray-600)">상품을 불러오는 중...</p>
+                    <p style="margin-top:12px;color:var(--gray-600)">일상을 불러오는 중...</p>
                 </div>
             </div>
         </div>
@@ -428,6 +470,19 @@
                 </div>
                 <div class="settings-item">
                     <div class="settings-item-content">
+                        <div class="settings-item-icon"><i class="bi bi-moon-stars"></i></div>
+                        <div class="settings-item-text">
+                            <h6>다크 모드</h6>
+                            <p>화면 테마 변경</p>
+                        </div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="darkModeSwitch" onchange="toggleDarkMode()">
+                        <span class="switch-slider"></span>
+                    </label>
+                </div>
+                <div class="settings-item">
+                    <div class="settings-item-content">
                         <div class="settings-item-icon"><i class="bi bi-bell"></i></div>
                         <div class="settings-item-text">
                             <h6>Push 알림</h6>
@@ -438,6 +493,16 @@
                         <input type="checkbox" id="pushNotificationSwitch" onchange="togglePushNotification()">
                         <span class="switch-slider"></span>
                     </label>
+                </div>
+                <div class="settings-item" th:if="${user.role.name() == 'ADMIN'}" onclick="showPointItemManagement()">
+                    <div class="settings-item-content">
+                        <div class="settings-item-icon" style="color:var(--primary)"><i class="bi bi-shop"></i></div>
+                        <div class="settings-item-text">
+                            <h6>포인트 상품 관리</h6>
+                            <p>포인트 상품 등록 및 삭제</p>
+                        </div>
+                    </div>
+                    <i class="bi bi-chevron-right"></i>
                 </div>
                 <div class="settings-item" onclick="logout()">
                     <div class="settings-item-content">
@@ -457,7 +522,7 @@
     <div class="nav-item active" data-tab="homeTab"><i class="bi bi-house-door-fill"></i><span>홈</span></div>
     <div class="nav-item" data-tab="medicineTab"><i class="bi bi-capsule-pill"></i><span>약복용</span></div>
     <div class="nav-item" data-tab="mealTab"><i class="bi bi-egg-fried"></i><span>식단관리</span></div>
-    <div class="nav-item" data-tab="pointTab"><i class="bi bi-trophy"></i><span>포인트</span></div>
+    <div class="nav-item" data-tab="dailyTab"><i class="bi bi-images"></i><span>일상</span></div>
     <div class="nav-item" data-tab="settingsTab"><i class="bi bi-gear"></i><span>설정</span></div>
 </nav>
 <div class="modal-overlay" id="profileModal" onclick="closeProfileModal()">
@@ -527,6 +592,101 @@
         <img class="modal-image" id="imageModalImage" src="" alt="이미지">
     </div>
 </div>
+<div class="modal-overlay" id="pointItemManagementModal" onclick="closeModal('pointItemManagementModal')">
+    <div class="modal-content" onclick="event.stopPropagation()" style="max-width:800px;max-height:90vh;overflow-y:auto">
+        <div class="modal-header">
+            <div class="modal-title">포인트 상품 관리</div>
+            <button class="modal-close" onclick="closeModal('pointItemManagementModal')"><i class="bi bi-x"></i></button>
+        </div>
+        <div style="margin-bottom:20px">
+            <h6 style="font-weight:700;margin-bottom:12px">새 상품 등록</h6>
+            <form id="pointItemForm" onsubmit="submitPointItem(event)">
+                <input type="hidden" id="editItemId" value="">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+                    <div>
+                        <label style="display:block;margin-bottom:4px;font-weight:600;font-size:14px">상품명 *</label>
+                        <input type="text" id="itemName" class="comment-input" style="width:100%" placeholder="상품명" required>
+                    </div>
+                    <div>
+                        <label style="display:block;margin-bottom:4px;font-weight:600;font-size:14px">필요 포인트 *</label>
+                        <input type="number" id="itemPoints" class="comment-input" style="width:100%" placeholder="1000" required>
+                    </div>
+                </div>
+                <div style="margin-bottom:12px">
+                    <label style="display:block;margin-bottom:4px;font-weight:600;font-size:14px">상세 설명</label>
+                    <textarea id="itemDescription" class="comment-input" style="width:100%;min-height:80px;border-radius:12px" placeholder="상품 설명을 입력하세요"></textarea>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+                    <div>
+                        <label style="display:block;margin-bottom:4px;font-weight:600;font-size:14px">아이콘 (Bootstrap)</label>
+                        <input type="text" id="itemIcon" class="comment-input" style="width:100%" placeholder="gift">
+                    </div>
+                    <div>
+                        <label style="display:block;margin-bottom:4px;font-weight:600;font-size:14px">색상 (HEX)</label>
+                        <input type="text" id="itemColor" class="comment-input" style="width:100%" placeholder="#4A90E2">
+                    </div>
+                </div>
+                <div style="margin-bottom:12px">
+                    <label style="display:block;margin-bottom:4px;font-weight:600;font-size:14px">상품 이미지</label>
+                    <input type="file" id="itemImage" accept="image/*" style="width:100%">
+                </div>
+                <button type="submit" class="comment-submit-btn" style="width:100%">
+                    <i class="bi bi-plus-circle"></i> 상품 등록
+                </button>
+            </form>
+        </div>
+        <div>
+            <h6 style="font-weight:700;margin-bottom:12px">등록된 상품 목록</h6>
+            <div id="adminItemsList" style="display:flex;flex-direction:column;gap:12px"></div>
+        </div>
+    </div>
+</div>
+<div class="modal-overlay" id="pointShopModal" onclick="closeModal('pointShopModal')">
+    <div class="modal-content" onclick="event.stopPropagation()" style="max-width:800px;max-height:90vh;overflow-y:auto">
+        <div class="modal-header">
+            <div class="modal-title">포인트 상점</div>
+            <button class="modal-close" onclick="closeModal('pointShopModal')"><i class="bi bi-x"></i></button>
+        </div>
+        <div class="points-display" style="margin-bottom:24px">
+            <div class="points-label">보유 포인트</div>
+            <div class="points-content">
+                <i class="bi bi-trophy-fill points-icon"></i>
+                <div>
+                    <span class="points-value" id="modalCurrentPoints" th:text="${user.points != null ? user.points : 0}">0</span>
+                    <span class="points-unit">pt</span>
+                </div>
+            </div>
+        </div>
+        <div class="point-items-grid" id="modalPointItemsGrid">
+            <div class="loading">
+                <div class="loading-spinner"></div>
+                <p style="margin-top:12px;color:var(--gray-600)">상품을 불러오는 중...</p>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal-overlay" id="dailyPostModal" onclick="closeModal('dailyPostModal')">
+    <div class="modal-content" onclick="event.stopPropagation()" style="max-width:600px">
+        <div class="modal-header">
+            <div class="modal-title">일상 게시물 작성</div>
+            <button class="modal-close" onclick="closeModal('dailyPostModal')"><i class="bi bi-x"></i></button>
+        </div>
+        <form id="dailyPostForm" onsubmit="submitDailyPost(event)">
+            <div style="margin-bottom:16px">
+                <label style="display:block;margin-bottom:8px;font-weight:600">내용</label>
+                <textarea id="dailyContent" class="comment-input" style="width:100%;min-height:120px;border-radius:12px;resize:vertical" placeholder="오늘의 일상을 공유해주세요..." required></textarea>
+            </div>
+            <div style="margin-bottom:16px">
+                <label style="display:block;margin-bottom:8px;font-weight:600">사진/영상 (선택)</label>
+                <input type="file" id="dailyMedia" accept="image/*,video/*" style="width:100%">
+                <div id="dailyMediaPreview" style="margin-top:12px;display:none"></div>
+            </div>
+            <button type="submit" class="comment-submit-btn" style="width:100%">
+                <i class="bi bi-send-fill"></i> 게시하기
+            </button>
+        </form>
+    </div>
+</div>
 <div class="toast-container" id="toastContainer"></div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -537,9 +697,12 @@ const currentUsername='[[${user.username}]]';
 const canTakeMedicine=[[${canTakeMedicine}]];
 let currentTab='homeTab',currentPage=1,commentsPerPage=10,allComments=[],currentMealType=null,currentCalendarDate=new Date();
 let messaging=null,currentFcmToken=null,currentMealData={};
-document.addEventListener('DOMContentLoaded',function(){initializeNavigation();loadComments();initializeMedicineStatus();initializeCalendar();initializeMealStatus();initializeHomeMeals();checkPushNotificationStatus();calculateExpectedPoints();initializeFirebase()});
+document.addEventListener('DOMContentLoaded',function(){initializeDarkMode();initializeNavigation();loadComments();initializeMedicineStatus();initializeCalendar();initializeMealStatus();initializeHomeMeals();checkPushNotificationStatus();calculateExpectedPoints();initializeFirebase()});
+function initializeDarkMode(){const darkMode=localStorage.getItem('darkMode')==='true';if(darkMode){document.body.classList.add('dark-mode');updateDarkModeUI(true)}else{updateDarkModeUI(false)}}
+function toggleDarkMode(){const isDark=document.body.classList.toggle('dark-mode');localStorage.setItem('darkMode',isDark);updateDarkModeUI(isDark);showToast(isDark?'다크 모드가 활성화되었습니다.':'라이트 모드가 활성화되었습니다.','success')}
+function updateDarkModeUI(isDark){const homeToggle=document.getElementById('homeDarkModeToggle');const settingsSwitch=document.getElementById('darkModeSwitch');if(homeToggle){homeToggle.innerHTML=isDark?'<i class="bi bi-sun-fill"></i>':'<i class="bi bi-moon-fill"></i>'}if(settingsSwitch){settingsSwitch.checked=isDark}}
 function initializeNavigation(){document.querySelectorAll('.nav-item').forEach(item=>{item.addEventListener('click',function(){switchTab(this.getAttribute('data-tab'))})})}
-function switchTab(tabId){document.querySelectorAll('.tab-content-wrapper').forEach(tab=>tab.classList.remove('active'));document.querySelectorAll('.nav-item').forEach(item=>item.classList.remove('active'));document.getElementById(tabId).classList.add('active');document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');currentTab=tabId;if(tabId==='medicineTab'){initializeCalendar()}else if(tabId==='mealTab'){initializeMealStatus();renderMealCalendar()}else if(tabId==='pointTab'){loadPointItems()}}
+function switchTab(tabId){document.querySelectorAll('.tab-content-wrapper').forEach(tab=>tab.classList.remove('active'));document.querySelectorAll('.nav-item').forEach(item=>item.classList.remove('active'));document.getElementById(tabId).classList.add('active');document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');currentTab=tabId;if(tabId==='medicineTab'){initializeCalendar()}else if(tabId==='mealTab'){initializeMealStatus();renderMealCalendar()}else if(tabId==='dailyTab'){loadDailies()}}
 async function loadComments(){try{const response=await fetch('/api/comments');allComments=await response.json();renderComments()}catch(error){console.error('댓글 로드 실패:',error);showToast('댓글을 불러오는데 실패했습니다.','error')}}
 let commentImageData=null;
 function handleCommentImageSelect(event){const file=event.target.files[0];if(!file)return;if(file.size>5*1024*1024){showToast('이미지 크기는 5MB 이하여야 합니다.','error');return}const reader=new FileReader();reader.onload=function(e){commentImageData=e.target.result;document.getElementById('commentImagePreview').src=commentImageData;document.getElementById('commentImagePreviewWrapper').style.display='block';document.querySelector('.comment-image-btn').classList.add('active')};reader.readAsDataURL(file)}
@@ -594,6 +757,25 @@ function showAiEvaluation(mealType,evaluation,score){const titles={breakfast:'�
 async function initializeFirebase(){try{const firebaseConfig={apiKey:"AIzaSyC4oP4zGjT1W5gVsWu0kyOoHVpbieOtVpM",authDomain:"mdedicine.firebaseapp.com",projectId:"mdedicine",storageBucket:"mdedicine.firebasestorage.app",messagingSenderId:"659585584078",appId:"1:659585584078:web:bf9f90d5a2fdcd42f5b99f",measurementId:"G-GETB4S7XM4"};firebase.initializeApp(firebaseConfig);messaging=firebase.messaging();console.log('✅ Firebase initialized');await requestNotificationPermission()}catch(error){console.error('❌ Firebase 초기화 실패:',error)}}
 async function requestNotificationPermission(){try{const permission=await Notification.requestPermission();if(permission==='granted'){console.log('✅ 알림 권한 허용됨');await registerFcmToken()}else{console.log('⚠️ 알림 권한 거부됨')}}catch(error){console.error('❌ 알림 권한 요청 실패:',error)}}
 async function registerFcmToken(){try{const VAPID_KEY='BFkmMV5OmNvF6_j5hblhJD9L-y3v3BDaUWcbXr-y0fJrMOi4gGPD1jA4SkBVk4LWqaJvV8gB2qHY5VZL3gW-GyY';if('serviceWorker' in navigator){await navigator.serviceWorker.register('/firebase-messaging-sw.js');console.log('✅ Service Worker 등록 완료')}const fcmToken=await messaging.getToken({vapidKey:VAPID_KEY});if(!fcmToken){console.error('❌ FCM 토큰 생성 실패');return}currentFcmToken=fcmToken;console.log('✅ FCM Token:',fcmToken.substring(0,50)+'...');const response=await fetch('/api/push/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:fcmToken})});if(response.ok){console.log('✅ FCM 토큰 서버 등록 완료')}else{console.error('❌ FCM 토큰 서버 등록 실패')}messaging.onMessage((payload)=>{console.log('📨 포그라운드 메시지 수신:',payload);const title=payload.data?.title||payload.notification?.title||'알림';const body=payload.data?.body||payload.notification?.body||'';showToast(body,'info')})}catch(error){console.error('❌ FCM 토큰 등록 실패:',error)}}
+async function showPointItemManagement(){document.getElementById('pointItemManagementModal').classList.add('active');await loadAdminItems()}
+async function loadAdminItems(){try{const response=await fetch('/api/points/admin/items');if(!response.ok){showToast('상품 목록 로드 실패','error');return}const items=await response.json();const container=document.getElementById('adminItemsList');if(!items||items.length===0){container.innerHTML='<div class="empty-state"><p>등록된 상품이 없습니다.</p></div>';return}container.innerHTML=items.map(item=>`<div style="background:white;border:1px solid var(--gray-300);border-radius:12px;padding:16px"><div style="display:flex;justify-content:space-between;align-items:start"><div style="flex:1"><h6 style="font-weight:700;margin-bottom:4px">${item.name}</h6><p style="font-size:14px;color:var(--gray-600);margin-bottom:8px">${item.description||''}</p><div style="display:flex;gap:12px;font-size:14px"><span><i class="bi bi-coin"></i> ${item.points}pt</span><span style="color:${item.available?'var(--success)':'var(--danger)}'}">${item.available?'판매중':'판매중지'}</span></div></div><div style="display:flex;gap:8px"><button class="comment-submit-btn" style="padding:8px 12px;background:var(--danger)" onclick="deleteAdminItem(${item.id})"><i class="bi bi-trash"></i></button></div></div>${item.imageUrl?`<img src="${item.imageUrl}" style="width:100%;max-height:200px;object-fit:cover;border-radius:8px;margin-top:12px">`:''}  </div>`).join('')}catch(error){console.error('상품 목록 로드 실패:',error);showToast('상품 목록 로드에 실패했습니다.','error')}}
+async function submitPointItem(event){event.preventDefault();const formData=new FormData();formData.append('name',document.getElementById('itemName').value);formData.append('description',document.getElementById('itemDescription').value);formData.append('points',document.getElementById('itemPoints').value);const icon=document.getElementById('itemIcon').value;const color=document.getElementById('itemColor').value;if(icon)formData.append('icon',icon);if(color)formData.append('color',color);const imageFile=document.getElementById('itemImage').files[0];if(imageFile)formData.append('image',imageFile);try{const response=await fetch('/api/points/admin/items',{method:'POST',body:formData});if(response.ok){showToast('상품이 등록되었습니다.','success');document.getElementById('pointItemForm').reset();await loadAdminItems()}else{const error=await response.json();showToast(error.error||'상품 등록에 실패했습니다.','error')}}catch(error){console.error('상품 등록 실패:',error);showToast('상품 등록에 실패했습니다.','error')}}
+async function deleteAdminItem(itemId){if(!confirm('이 상품을 삭제하시겠습니까?'))return;try{const response=await fetch(`/api/points/admin/items/${itemId}`,{method:'DELETE'});if(response.ok){showToast('상품이 삭제되었습니다.','success');await loadAdminItems();await loadPointItems()}else{const error=await response.json();showToast(error.error||'상품 삭제에 실패했습니다.','error')}}catch(error){console.error('상품 삭제 실패:',error);showToast('상품 삭제에 실패했습니다.','error')}}
+function showPointShop(){document.getElementById('pointShopModal').classList.add('active');loadPointItemsToModal()}
+async function loadPointItemsToModal(){try{const response=await fetch('/api/points/items');const items=await response.json();renderPointItemsInModal(items)}catch(error){console.error('포인트 상품 로드 실패:',error);showToast('상품을 불러오는데 실패했습니다.','error')}}
+function renderPointItemsInModal(items){const grid=document.getElementById('modalPointItemsGrid');const userRole='[[${user.role.name()}]]';const isFather=userRole==='FATHER';if(!items||items.length===0){grid.innerHTML='<div class="empty-state"><div class="empty-state-icon"><i class="bi bi-shop"></i></div><div class="empty-state-title">등록된 상품이 없습니다</div></div>';return}grid.innerHTML=items.map(item=>{const canPurchase=isFather&&item.available&&parseInt(document.getElementById('userPoints').textContent)>=item.points;return`<div class="point-item-card ${canPurchase?'':'disabled'}" onclick="${canPurchase?`purchaseItemFromModal(${item.id})`:''}"><div class="point-item-icon-wrapper" style="background:${item.color||'#e5e7eb'}">${item.icon?`<i class="bi bi-${item.icon}"></i>`:'🎁'}</div><div class="point-item-name">${item.name}</div><div class="point-item-desc">${item.description||''}</div><div class="point-item-price"><span class="point-item-price-value">${item.points}</span><span class="point-item-price-unit">pt</span>${!isFather?'<span style="font-size:12px;color:var(--danger);margin-left:auto">아버지만 구매 가능</span>':''}</div></div>`}).join('')}
+async function purchaseItemFromModal(itemId){if(!confirm('이 상품을 구매하시겠습니까?'))return;try{const response=await fetch(`/api/points/purchase/${itemId}`,{method:'POST'});if(response.ok){const result=await response.json();document.getElementById('modalCurrentPoints').textContent=result.remainingPoints;document.getElementById('userPoints').textContent=result.remainingPoints;showToast('상품을 구매했습니다!','success');await loadPointItemsToModal()}else{const error=await response.json();showToast(error.message||'구매에 실패했습니다.','error')}}catch(error){console.error('상품 구매 실패:',error);showToast('상품 구매에 실패했습니다.','error')}}
+function showDailyPostModal(){document.getElementById('dailyPostModal').classList.add('active')}
+async function submitDailyPost(event){event.preventDefault();const content=document.getElementById('dailyContent').value.trim();const mediaFile=document.getElementById('dailyMedia').files[0];if(!content){showToast('내용을 입력해주세요.','error');return}const formData=new FormData();formData.append('content',content);if(mediaFile)formData.append('media',mediaFile);try{const response=await fetch('/api/daily',{method:'POST',body:formData});if(response.ok){showToast('게시물이 작성되었습니다.','success');closeModal('dailyPostModal');document.getElementById('dailyPostForm').reset();document.getElementById('dailyMediaPreview').style.display='none';await loadDailies()}else throw new Error('게시물 작성 실패')}catch(error){console.error('게시물 작성 실패:',error);showToast('게시물 작성에 실패했습니다.','error')}}
+async function loadDailies(){try{const response=await fetch('/api/daily');const dailies=await response.json();renderDailies(dailies)}catch(error){console.error('일상 로드 실패:',error);showToast('일상을 불러오는데 실패했습니다.','error')}}
+function renderDailies(dailies){const grid=document.getElementById('dailyPostsGrid');if(!dailies||dailies.length===0){grid.innerHTML='<div class="empty-state"><div class="empty-state-icon"><i class="bi bi-images"></i></div><div class="empty-state-title">아직 게시물이 없습니다</div><div class="empty-state-text">첫 번째 일상을 공유해보세요!</div></div>';return}grid.innerHTML=dailies.map(daily=>`<div class="comment-item" style="padding:20px"><div class="comment-header"><div class="comment-avatar" onclick="showProfileModal('${daily.user.profileImage}','${daily.user.displayName}')">${daily.user.profileImage?`<img src="${daily.user.profileImage}" alt="${daily.user.displayName}">`:daily.user.displayName.substring(0,1)}</div><div class="comment-user-info"><div class="comment-username">${daily.user.displayName}</div><div class="comment-time">${formatTimeAgo(new Date(daily.createdAt))}</div></div>${daily.user.id==currentUserId?`<button class="comment-delete-btn" onclick="deleteDaily(${daily.id})"><i class="bi bi-trash"></i></button>`:''}</div><div class="comment-content" style="margin-bottom:${daily.mediaUrl?'16px':'12px'}">${escapeHtml(daily.content)}</div>${daily.mediaUrl?(daily.mediaType==='VIDEO'?`<video controls class="comment-image" style="max-height:500px"><source src="${daily.mediaUrl}">Your browser does not support the video tag.</video>`:`<img class="comment-image" src="${daily.mediaUrl}" onclick="showImageModal('${daily.mediaUrl}')" style="cursor:pointer">`):''}  <div class="comment-actions"><button class="comment-action-btn ${daily.isLiked?'liked':''}" onclick="toggleDailyLike(${daily.id})"><i class="bi bi-heart-fill"></i><span>${daily.likesCount||0}</span></button><button class="comment-action-btn" onclick="showDailyComments(${daily.id})"><i class="bi bi-chat-fill"></i> 댓글</button></div><div id="dailyComments-${daily.id}" style="display:none;margin-top:16px;padding-top:16px;border-top:1px solid var(--gray-200)"></div></div>`).join('')}
+async function toggleDailyLike(dailyId){try{const response=await fetch(`/api/daily/${dailyId}/like`,{method:'POST'});if(response.ok){await loadDailies()}else throw new Error('좋아요 실패')}catch(error){console.error('좋아요 실패:',error);showToast('좋아요에 실패했습니다.','error')}}
+async function deleteDaily(dailyId){if(!confirm('게시물을 삭제하시겠습니까?'))return;try{const response=await fetch(`/api/daily/${dailyId}`,{method:'DELETE'});if(response.ok){showToast('게시물이 삭제되었습니다.','success');await loadDailies()}else throw new Error('삭제 실패')}catch(error){console.error('삭제 실패:',error);showToast('게시물 삭제에 실패했습니다.','error')}}
+async function showDailyComments(dailyId){const commentsDiv=document.getElementById(`dailyComments-${dailyId}`);if(commentsDiv.style.display==='none'){try{const response=await fetch(`/api/daily/${dailyId}/comments`);const comments=await response.json();renderDailyComments(dailyId,comments);commentsDiv.style.display='block'}catch(error){console.error('댓글 로드 실패:',error);showToast('댓글을 불러오는데 실패했습니다.','error')}}else{commentsDiv.style.display='none'}}
+function renderDailyComments(dailyId,comments){const commentsDiv=document.getElementById(`dailyComments-${dailyId}`);const parentComments=comments.filter(c=>!c.parentCommentId);let html=`<div class="comment-input-row" style="margin-bottom:12px"><input type="text" id="dailyCommentInput-${dailyId}" class="comment-input" placeholder="댓글을 입력하세요..."><button class="comment-submit-btn" onclick="addDailyComment(${dailyId})"><i class="bi bi-send-fill"></i></button></div>`;if(parentComments.length>0){html+='<div style="display:flex;flex-direction:column;gap:12px">';parentComments.forEach(comment=>{html+=`<div style="background:var(--gray-100);padding:12px;border-radius:8px"><div class="comment-header" style="margin-bottom:8px"><div class="comment-avatar" style="width:32px;height:32px;font-size:14px">${comment.user.profileImage?`<img src="${comment.user.profileImage}" alt="${comment.user.displayName}">`:comment.user.displayName.substring(0,1)}</div><div class="comment-user-info"><div class="comment-username" style="font-size:13px">${comment.user.displayName}</div><div class="comment-time" style="font-size:11px">${formatTimeAgo(new Date(comment.createdAt))}</div></div>${comment.user.id==currentUserId?`<button class="comment-delete-btn" onclick="deleteDailyComment(${comment.id},${dailyId})"><i class="bi bi-trash"></i></button>`:''}</div><div style="font-size:14px;line-height:1.5">${escapeHtml(comment.content)}</div><button class="comment-action-btn" style="font-size:12px;margin-top:8px" onclick="showDailyReplyInput(${comment.id},${dailyId})"><i class="bi bi-reply-fill"></i> 답글</button><div id="dailyReply-${comment.id}" style="display:none;margin-top:12px"></div>`;const replies=comments.filter(r=>r.parentCommentId===comment.id);if(replies.length>0){replies.forEach(reply=>{html+=`<div style="margin-left:20px;margin-top:8px;padding:8px;background:var(--white);border-radius:6px"><div class="comment-header" style="margin-bottom:6px"><div class="comment-avatar" style="width:24px;height:24px;font-size:12px">${reply.user.profileImage?`<img src="${reply.user.profileImage}" alt="${reply.user.displayName}">`:reply.user.displayName.substring(0,1)}</div><div class="comment-user-info"><div class="comment-username" style="font-size:12px">${reply.user.displayName}</div><div class="comment-time" style="font-size:10px">${formatTimeAgo(new Date(reply.createdAt))}</div></div>${reply.user.id==currentUserId?`<button class="comment-delete-btn" onclick="deleteDailyComment(${reply.id},${dailyId})"><i class="bi bi-trash"></i></button>`:''}</div><div style="font-size:13px">${escapeHtml(reply.content)}</div></div>`})}html+='</div>'}); html+='</div>'}commentsDiv.innerHTML=html}
+function showDailyReplyInput(commentId,dailyId){const replyDiv=document.getElementById(`dailyReply-${commentId}`);if(replyDiv.style.display==='none'){replyDiv.innerHTML=`<div class="comment-input-row"><input type="text" id="dailyReplyInput-${commentId}" class="comment-input" placeholder="답글을 입력하세요..."><button class="comment-submit-btn" onclick="addDailyComment(${dailyId},${commentId})"><i class="bi bi-send-fill"></i></button><button class="comment-submit-btn" style="background:var(--gray-600)" onclick="document.getElementById('dailyReply-${commentId}').style.display='none'">취소</button></div>`;replyDiv.style.display='block';document.getElementById(`dailyReplyInput-${commentId}`).focus()}else{replyDiv.style.display='none'}}
+async function addDailyComment(dailyId,parentCommentId){const inputId=parentCommentId?`dailyReplyInput-${parentCommentId}`:`dailyCommentInput-${dailyId}`;const input=document.getElementById(inputId);const content=input.value.trim();if(!content){showToast('댓글 내용을 입력해주세요.','error');return}const formData=new FormData();formData.append('content',content);if(parentCommentId)formData.append('parentCommentId',parentCommentId);try{const response=await fetch(`/api/daily/${dailyId}/comments`,{method:'POST',body:formData});if(response.ok){input.value='';if(parentCommentId)document.getElementById(`dailyReply-${parentCommentId}`).style.display='none';showToast('댓글이 등록되었습니다.','success');const commentsResponse=await fetch(`/api/daily/${dailyId}/comments`);const comments=await commentsResponse.json();renderDailyComments(dailyId,comments)}else throw new Error('댓글 등록 실패')}catch(error){console.error('댓글 등록 실패:',error);showToast('댓글 등록에 실패했습니다.','error')}}
+async function deleteDailyComment(commentId,dailyId){if(!confirm('댓글을 삭제하시겠습니까?'))return;try{const response=await fetch(`/api/daily/comments/${commentId}`,{method:'DELETE'});if(response.ok){showToast('댓글이 삭제되었습니다.','success');const commentsResponse=await fetch(`/api/daily/${dailyId}/comments`);const comments=await commentsResponse.json();renderDailyComments(dailyId,comments)}else throw new Error('삭제 실패')}catch(error){console.error('삭제 실패:',error);showToast('댓글 삭제에 실패했습니다.','error')}}
 </script>
 </body>
 </html>
