@@ -114,4 +114,45 @@ public class ActivityController {
             return ResponseEntity.status(500).body(Map.of("error", "읽지 않은 활동 개수 조회에 실패했습니다."));
         }
     }
+
+    /**
+     * 활동 삭제
+     */
+    @DeleteMapping("/{activityId}")
+    public ResponseEntity<?> deleteActivity(
+            @PathVariable Long activityId,
+            HttpSession session) {
+
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return ResponseEntity.status(401).body(Map.of("error", "인증되지 않은 사용자입니다."));
+        }
+
+        try {
+            activityService.deleteActivity(activityId);
+            return ResponseEntity.ok(Map.of("success", true));
+        } catch (Exception e) {
+            log.error("Failed to delete activity {} for user {}", activityId, user.getUsername(), e);
+            return ResponseEntity.status(500).body(Map.of("error", "활동 삭제에 실패했습니다."));
+        }
+    }
+
+    /**
+     * 모든 활동 삭제
+     */
+    @DeleteMapping("/delete-all")
+    public ResponseEntity<?> deleteAllActivities(HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return ResponseEntity.status(401).body(Map.of("error", "인증되지 않은 사용자입니다."));
+        }
+
+        try {
+            activityService.deleteAllActivities();
+            return ResponseEntity.ok(Map.of("success", true));
+        } catch (Exception e) {
+            log.error("Failed to delete all activities for user {}", user.getUsername(), e);
+            return ResponseEntity.status(500).body(Map.of("error", "모든 활동 삭제에 실패했습니다."));
+        }
+    }
 }
