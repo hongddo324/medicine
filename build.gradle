@@ -50,6 +50,13 @@ dependencies {
     // Firebase Admin SDK for FCM
     implementation 'com.google.firebase:firebase-admin:9.2.0'
 
+    // WebSocket for real-time features
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+
+    // SockJS and STOMP for WebSocket messaging
+    implementation 'org.webjars:sockjs-client:1.5.1'
+    implementation 'org.webjars:stomp-websocket:2.3.4'
+
     // Spring Boot DevTools
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 

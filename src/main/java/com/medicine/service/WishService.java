@@ -26,6 +26,7 @@ public class WishService {
     private final WishScheduleRepository wishScheduleRepository;
     private final FileStorageService fileStorageService;
     private final ActivityService activityService;
+    private final WebSocketService webSocketService;
 
     /**
      * 모든 위시리스트 조회
@@ -79,6 +80,13 @@ public class WishService {
             log.error("Failed to create activity for wish", e);
         }
 
+        // WebSocket 실시간 업데이트 전송
+        try {
+            webSocketService.broadcastWishUpdate(saved, "CREATE");
+        } catch (Exception e) {
+            log.error("Failed to broadcast wish create via WebSocket", e);
+        }
+
         return saved;
     }
 
@@ -113,7 +121,16 @@ public class WishService {
             wish.setImageUrl(imageUrl);
         }
 
-        return wishRepository.save(wish);
+        Wish updated = wishRepository.save(wish);
+
+        // WebSocket 실시간 업데이트 전송
+        try {
+            webSocketService.broadcastWishUpdate(updated, "UPDATE");
+        } catch (Exception e) {
+            log.error("Failed to broadcast wish update via WebSocket", e);
+        }
+
+        return updated;
     }
 
     /**
@@ -130,7 +147,16 @@ public class WishService {
         }
 
         wish.setCompleted(!wish.getCompleted());
-        return wishRepository.save(wish);
+        Wish updated = wishRepository.save(wish);
+
+        // WebSocket 실시간 업데이트 전송
+        try {
+            webSocketService.broadcastWishUpdate(updated, "UPDATE");
+        } catch (Exception e) {
+            log.error("Failed to broadcast wish completion toggle via WebSocket", e);
+        }
+
+        return updated;
     }
 
     /**
@@ -152,6 +178,13 @@ public class WishService {
         }
 
         wishRepository.delete(wish);
+
+        // WebSocket 실시간 업데이트 전송
+        try {
+            webSocketService.broadcastWishUpdate(wish, "DELETE");
+        } catch (Exception e) {
+            log.error("Failed to broadcast wish delete via WebSocket", e);
+        }
     }
 
     /**

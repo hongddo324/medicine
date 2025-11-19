@@ -17,6 +17,7 @@ import java.util.List;
 public class ActivityService {
 
     private final ActivityRepository activityRepository;
+    private final WebSocketService webSocketService;
 
     /**
      * 활동 생성
@@ -30,7 +31,16 @@ public class ActivityService {
         activity.setReferenceId(referenceId);
         activity.setIsRead(false);
 
-        return activityRepository.save(activity);
+        Activity saved = activityRepository.save(activity);
+
+        // WebSocket 실시간 알림 전송
+        try {
+            webSocketService.broadcastActivity(saved);
+        } catch (Exception e) {
+            log.error("Failed to broadcast activity via WebSocket", e);
+        }
+
+        return saved;
     }
 
     /**
