@@ -14,6 +14,9 @@ public interface ActivityRepository extends JpaRepository<Activity, Long> {
     // 최신 활동 조회 (최근 순)
     List<Activity> findTop20ByOrderByCreatedAtDesc();
 
+    // 최신 활동 조회 (최대 50개, 사용자별 읽음 상태 관리용)
+    List<Activity> findTop50ByOrderByCreatedAtDesc();
+
     // 읽지 않은 활동 개수
     long countByIsReadFalse();
 
