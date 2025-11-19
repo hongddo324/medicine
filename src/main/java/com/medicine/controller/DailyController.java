@@ -48,6 +48,21 @@ public class DailyController {
             dailyMap.put("isNew", daily.getCreatedAt().isAfter(threeDaysAgo));
             dailyMap.put("commentsCount", daily.getComments().size());
 
+            // 다중 이미지 정보 추가
+            if (daily.getImages() != null && !daily.getImages().isEmpty()) {
+                List<Map<String, Object>> imagesList = daily.getImages().stream().map(image -> {
+                    Map<String, Object> imageMap = new HashMap<>();
+                    imageMap.put("id", image.getId());
+                    imageMap.put("imageUrl", image.getImageUrl());
+                    imageMap.put("imageOrder", image.getImageOrder());
+                    imageMap.put("mediaType", image.getMediaType());
+                    return imageMap;
+                }).toList();
+                dailyMap.put("images", imagesList);
+            } else {
+                dailyMap.put("images", List.of());
+            }
+
             // User 정보 맵 생성 (profileImageUpdatedAt은 null일 수 있으므로 HashMap 사용)
             Map<String, Object> userMap = new HashMap<>();
             userMap.put("id", daily.getUser().getId());
@@ -65,12 +80,13 @@ public class DailyController {
     }
 
     /**
-     * 일상 게시물 작성
+     * 일상 게시물 작성 (다중 이미지 지원)
      */
     @PostMapping
     public ResponseEntity<?> createDaily(
             @RequestParam String content,
             @RequestParam(required = false) MultipartFile media,
+            @RequestParam(required = false) MultipartFile[] mediaFiles,
             HttpSession session) {
 
         User user = (User) session.getAttribute("user");
@@ -79,8 +95,24 @@ public class DailyController {
         }
 
         try {
-            Daily daily = dailyService.createDaily(user, content, media);
-            log.info("Daily post created - User: {}, ID: {}", user.getUsername(), daily.getId());
+            Daily daily;
+
+            // 다중 이미지가 제공된 경우
+            if (mediaFiles != null && mediaFiles.length > 0) {
+                daily = dailyService.createDailyWithMultipleImages(user, content, mediaFiles);
+                log.info("Daily post created with {} images - User: {}, ID: {}",
+                        mediaFiles.length, user.getUsername(), daily.getId());
+            }
+            // 단일 이미지가 제공된 경우 (하위 호환성)
+            else if (media != null && !media.isEmpty()) {
+                daily = dailyService.createDaily(user, content, media);
+                log.info("Daily post created - User: {}, ID: {}", user.getUsername(), daily.getId());
+            }
+            // 이미지 없이 텍스트만
+            else {
+                daily = dailyService.createDaily(user, content, null);
+                log.info("Daily text post created - User: {}, ID: {}", user.getUsername(), daily.getId());
+            }
 
             return ResponseEntity.ok(Map.of("success", true, "daily", daily));
         } catch (Exception e) {

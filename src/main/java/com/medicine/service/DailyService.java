@@ -3,6 +3,7 @@ package com.medicine.service;
 import com.medicine.model.Activity;
 import com.medicine.model.Daily;
 import com.medicine.model.DailyComment;
+import com.medicine.model.DailyImage;
 import com.medicine.model.DailyLike;
 import com.medicine.model.User;
 import com.medicine.repository.DailyCommentRepository;
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -52,32 +54,68 @@ public class DailyService {
     }
 
     /**
-     * 일상 게시물 작성
+     * 일상 게시물 작성 (단일 파일 - 하위 호환성 유지)
      */
     @Transactional
     public Daily createDaily(User user, String content, MultipartFile mediaFile) throws IOException {
+        MultipartFile[] mediaFiles = (mediaFile != null && !mediaFile.isEmpty())
+                ? new MultipartFile[]{mediaFile}
+                : new MultipartFile[0];
+        return createDailyWithMultipleImages(user, content, mediaFiles);
+    }
+
+    /**
+     * 일상 게시물 작성 (다중 이미지 지원)
+     */
+    @Transactional
+    public Daily createDailyWithMultipleImages(User user, String content, MultipartFile[] mediaFiles) throws IOException {
         Daily daily = new Daily();
         daily.setUser(user);
         daily.setContent(content);
 
-        // 미디어 파일 업로드 처리
-        if (mediaFile != null && !mediaFile.isEmpty()) {
-            String mediaUrl = fileStorageService.storeDailyMedia(mediaFile);
-            daily.setMediaUrl(mediaUrl);
+        // 다중 미디어 파일 업로드 처리
+        if (mediaFiles != null && mediaFiles.length > 0) {
+            List<DailyImage> images = new ArrayList<>();
 
-            // 파일 타입 확인
-            String contentType = mediaFile.getContentType();
-            if (contentType != null) {
-                if (contentType.startsWith("image/")) {
-                    daily.setMediaType(Daily.MediaType.IMAGE);
-                } else if (contentType.startsWith("video/")) {
-                    daily.setMediaType(Daily.MediaType.VIDEO);
+            for (int i = 0; i < mediaFiles.length; i++) {
+                MultipartFile file = mediaFiles[i];
+                if (file != null && !file.isEmpty()) {
+                    String mediaUrl = fileStorageService.storeDailyMedia(file);
+
+                    // DailyImage 엔티티 생성
+                    DailyImage dailyImage = new DailyImage();
+                    dailyImage.setDaily(daily);
+                    dailyImage.setImageUrl(mediaUrl);
+                    dailyImage.setImageOrder(i);
+
+                    // 파일 타입 확인
+                    String contentType = file.getContentType();
+                    if (contentType != null) {
+                        if (contentType.startsWith("image/")) {
+                            dailyImage.setMediaType(DailyImage.MediaType.IMAGE);
+                        } else if (contentType.startsWith("video/")) {
+                            dailyImage.setMediaType(DailyImage.MediaType.VIDEO);
+                        }
+                    }
+
+                    images.add(dailyImage);
+
+                    // 하위 호환성: 첫 번째 이미지를 mediaUrl에도 저장
+                    if (i == 0) {
+                        daily.setMediaUrl(mediaUrl);
+                        daily.setMediaType(contentType != null && contentType.startsWith("image/")
+                                ? Daily.MediaType.IMAGE
+                                : Daily.MediaType.VIDEO);
+                    }
                 }
             }
+
+            daily.setImages(images);
         }
 
         Daily saved = dailyRepository.save(daily);
-        log.info("Daily post created - User: {}, ID: {}", user.getUsername(), saved.getId());
+        log.info("Daily post created - User: {}, ID: {}, Images: {}", user.getUsername(), saved.getId(),
+                saved.getImages().size());
 
         // 활동 기록 생성
         try {
@@ -134,8 +172,15 @@ public class DailyService {
             throw new IllegalArgumentException("삭제 권한이 없습니다.");
         }
 
-        // 미디어 파일 삭제
-        if (daily.getMediaUrl() != null) {
+        // 다중 이미지 파일 삭제
+        if (daily.getImages() != null && !daily.getImages().isEmpty()) {
+            for (DailyImage image : daily.getImages()) {
+                if (image.getImageUrl() != null) {
+                    fileStorageService.deleteFile(image.getImageUrl());
+                }
+            }
+        } else if (daily.getMediaUrl() != null) {
+            // 하위 호환성: 단일 이미지 삭제
             fileStorageService.deleteFile(daily.getMediaUrl());
         }
 

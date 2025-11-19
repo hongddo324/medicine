@@ -45,6 +45,14 @@ public class Daily {
     @OneToMany(mappedBy = "daily", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DailyLike> likes = new ArrayList<>();
 
+    /**
+     * 다중 이미지 목록 (인스타그램 스타일)
+     * imageOrder로 정렬되어 슬라이드 순서 유지
+     */
+    @OneToMany(mappedBy = "daily", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("imageOrder ASC")
+    private List<DailyImage> images = new ArrayList<>();
+
     public enum MediaType {
         IMAGE,
         VIDEO
