@@ -225,4 +225,24 @@ public class ActivityService {
         activityReadStatusRepository.clearAllReadStatus(user.getId());
         log.info("Cleared all read status for user {}", user.getUsername());
     }
+
+    /**
+     * 활동 삭제
+     */
+    @Transactional
+    public void deleteActivity(Long activityId) {
+        activityRepository.deleteById(activityId);
+        // Redis에서도 삭제
+        activityReadStatusRepository.removeActivityFromAllUsers(activityId);
+        log.info("Activity {} deleted", activityId);
+    }
+
+    /**
+     * 모든 활동 삭제
+     */
+    @Transactional
+    public void deleteAllActivities() {
+        activityRepository.deleteAll();
+        log.info("All activities deleted");
+    }
 }

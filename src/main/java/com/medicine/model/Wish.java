@@ -45,6 +45,9 @@ public class Wish {
     @Column(nullable = false)
     private Boolean completed = false;  // 완료 여부
 
+    @Column(name = "daily_id")
+    private Long dailyId;  // 연관된 일상 게시물 ID
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 

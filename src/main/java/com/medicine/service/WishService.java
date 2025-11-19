@@ -54,7 +54,7 @@ public class WishService {
      */
     @Transactional
     public Wish createWish(User user, String title, String description, Wish.WishCategory category,
-                           Double latitude, Double longitude, String address, MultipartFile imageFile) throws IOException {
+                           Double latitude, Double longitude, String address, MultipartFile imageFile, Long dailyId) throws IOException {
         Wish wish = new Wish();
         wish.setUser(user);
         wish.setTitle(title);
@@ -63,6 +63,7 @@ public class WishService {
         wish.setLatitude(latitude);
         wish.setLongitude(longitude);
         wish.setAddress(address);
+        wish.setDailyId(dailyId);
 
         // 이미지 업로드
         if (imageFile != null && !imageFile.isEmpty()) {
@@ -95,7 +96,7 @@ public class WishService {
      */
     @Transactional
     public Wish updateWish(Long wishId, User user, String title, String description, Wish.WishCategory category,
-                           Double latitude, Double longitude, String address, MultipartFile imageFile) throws IOException {
+                           Double latitude, Double longitude, String address, MultipartFile imageFile, Long dailyId) throws IOException {
         Wish wish = wishRepository.findById(wishId)
                 .orElseThrow(() -> new IllegalArgumentException("위시를 찾을 수 없습니다."));
 
@@ -110,6 +111,7 @@ public class WishService {
         wish.setLatitude(latitude);
         wish.setLongitude(longitude);
         wish.setAddress(address);
+        wish.setDailyId(dailyId);
 
         // 이미지 업로드
         if (imageFile != null && !imageFile.isEmpty()) {
@@ -146,8 +148,17 @@ public class WishService {
             throw new IllegalArgumentException("수정 권한이 없습니다.");
         }
 
-        wish.setCompleted(!wish.getCompleted());
+        boolean newCompletedStatus = !wish.getCompleted();
+        wish.setCompleted(newCompletedStatus);
         Wish updated = wishRepository.save(wish);
+
+        // 연관된 모든 일정의 완료 상태도 함께 업데이트
+        List<WishSchedule> schedules = wishScheduleRepository.findByWishIdOrderByScheduledDateAsc(wishId);
+        for (WishSchedule schedule : schedules) {
+            schedule.setCompleted(newCompletedStatus);
+        }
+        wishScheduleRepository.saveAll(schedules);
+        log.info("Updated {} schedules for wish {}, completed: {}", schedules.size(), wishId, newCompletedStatus);
 
         // WebSocket 실시간 업데이트 전송
         try {

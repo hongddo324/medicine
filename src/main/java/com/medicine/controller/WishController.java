@@ -49,6 +49,7 @@ public class WishController {
                 wishMap.put("address", wish.getAddress());
                 wishMap.put("imageUrl", wish.getImageUrl());
                 wishMap.put("completed", wish.getCompleted());
+                wishMap.put("dailyId", wish.getDailyId());
                 wishMap.put("createdAt", wish.getCreatedAt());
                 wishMap.put("user", Map.of(
                     "id", wish.getUser().getId(),
@@ -77,6 +78,7 @@ public class WishController {
             @RequestParam(required = false) Double longitude,
             @RequestParam(required = false) String address,
             @RequestParam(required = false) MultipartFile image,
+            @RequestParam(required = false) Long dailyId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime scheduleDate,
             HttpSession session) {
 
@@ -87,7 +89,7 @@ public class WishController {
 
         try {
             Wish.WishCategory wishCategory = Wish.WishCategory.valueOf(category);
-            Wish wish = wishService.createWish(user, title, description, wishCategory, latitude, longitude, address, image);
+            Wish wish = wishService.createWish(user, title, description, wishCategory, latitude, longitude, address, image, dailyId);
 
             // 일정이 있으면 추가
             if (scheduleDate != null) {
@@ -115,6 +117,7 @@ public class WishController {
             @RequestParam(required = false) Double longitude,
             @RequestParam(required = false) String address,
             @RequestParam(required = false) MultipartFile image,
+            @RequestParam(required = false) Long dailyId,
             HttpSession session) {
 
         User user = (User) session.getAttribute("user");
@@ -124,7 +127,7 @@ public class WishController {
 
         try {
             Wish.WishCategory wishCategory = Wish.WishCategory.valueOf(category);
-            Wish wish = wishService.updateWish(wishId, user, title, description, wishCategory, latitude, longitude, address, image);
+            Wish wish = wishService.updateWish(wishId, user, title, description, wishCategory, latitude, longitude, address, image, dailyId);
 
             return ResponseEntity.ok(Map.of("success", true, "wish", wish));
         } catch (IllegalArgumentException e) {
