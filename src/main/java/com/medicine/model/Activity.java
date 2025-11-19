@@ -50,7 +50,9 @@ public class Activity implements Serializable {
         DAILY_LIKE,        // 일상 좋아요
         WISH_ADDED,        // 위시 추가
         SCHEDULE_ADDED,    // 일정 추가
-        PROFILE_UPDATED    // 프로필 업데이트
+        PROFILE_UPDATED,   // 프로필 업데이트
+        MEDICINE_TAKEN,    // 약 복용
+        MEAL_UPLOADED      // 식단 업로드
     }
 
     @PrePersist
