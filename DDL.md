@@ -172,3 +172,35 @@ CREATE TABLE wish_schedule (
 - **WishSchedule**: wish_id - 특정 위시의 일정 조회 최적화
 - **WishSchedule**: scheduled_date (오름차순) - 일정 순서대로 조회 최적화
 - **WishSchedule**: completed - 완료/미완료 필터링 최적화
+
+## 6. Activity 테이블 생성
+
+사용자 활동 알림을 저장하는 테이블입니다.
+
+```sql
+CREATE TABLE activity (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    activity_type VARCHAR(20) NOT NULL,
+    user_id BIGINT NOT NULL,
+    message TEXT,
+    reference_id BIGINT,
+    is_read BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE,
+    INDEX idx_created_at (created_at DESC),
+    INDEX idx_is_read (is_read)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+```
+
+### Activity 테이블
+- **id**: 활동 고유 ID (자동 증가)
+- **activity_type**: 활동 유형 (COMMENT, COMMENT_REPLY, DAILY_POST, DAILY_COMMENT, DAILY_LIKE, WISH_ADDED, SCHEDULE_ADDED)
+- **user_id**: 활동 수행자 ID (User 테이블 참조)
+- **message**: 활동 메시지
+- **reference_id**: 참조 ID (댓글, 일상, 위시 등의 ID)
+- **is_read**: 읽음 여부
+- **created_at**: 생성 시간
+
+### 인덱스
+- **Activity**: created_at (내림차순) - 최신 활동 조회 최적화
+- **Activity**: is_read - 읽지 않은 활동 조회 최적화

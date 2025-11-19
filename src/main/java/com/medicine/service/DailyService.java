@@ -1,5 +1,6 @@
 package com.medicine.service;
 
+import com.medicine.model.Activity;
 import com.medicine.model.Daily;
 import com.medicine.model.DailyComment;
 import com.medicine.model.DailyLike;
@@ -26,6 +27,7 @@ public class DailyService {
     private final DailyCommentRepository dailyCommentRepository;
     private final DailyLikeRepository dailyLikeRepository;
     private final FileStorageService fileStorageService;
+    private final ActivityService activityService;
 
     /**
      * 모든 일상 게시물 조회 (최신순)
@@ -75,6 +77,15 @@ public class DailyService {
 
         Daily saved = dailyRepository.save(daily);
         log.info("Daily post created - User: {}, ID: {}", user.getUsername(), saved.getId());
+
+        // 활동 기록 생성
+        try {
+            String message = user.getDisplayName() + "님이 일상을 남겼습니다";
+            activityService.createActivity(user, Activity.ActivityType.DAILY_POST, message, saved.getId());
+        } catch (Exception e) {
+            log.error("Failed to create activity for daily post", e);
+        }
+
         return saved;
     }
 
@@ -142,6 +153,15 @@ public class DailyService {
             daily.setLikesCount(daily.getLikesCount() + 1);
             dailyRepository.save(daily);
             log.info("Daily like added - User: {}, DailyId: {}", user.getUsername(), dailyId);
+
+            // 활동 기록 생성
+            try {
+                String message = user.getDisplayName() + "님이 일상에 좋아요를 눌렀습니다";
+                activityService.createActivity(user, Activity.ActivityType.DAILY_LIKE, message, dailyId);
+            } catch (Exception e) {
+                log.error("Failed to create activity for daily like", e);
+            }
+
             return true;
         }
     }
@@ -169,6 +189,15 @@ public class DailyService {
         DailyComment saved = dailyCommentRepository.save(comment);
         log.info("Daily comment added - User: {}, DailyId: {}, ParentCommentId: {}",
                 user.getUsername(), dailyId, parentCommentId);
+
+        // 활동 기록 생성
+        try {
+            String message = user.getDisplayName() + "님이 일상에 댓글을 남겼습니다";
+            activityService.createActivity(user, Activity.ActivityType.DAILY_COMMENT, message, dailyId);
+        } catch (Exception e) {
+            log.error("Failed to create activity for daily comment", e);
+        }
+
         return saved;
     }
 

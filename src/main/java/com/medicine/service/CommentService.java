@@ -1,5 +1,6 @@
 package com.medicine.service;
 
+import com.medicine.model.Activity;
 import com.medicine.model.Comment;
 import com.medicine.model.User;
 import com.medicine.repository.CommentRepository;
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
 public class CommentService {
 
     private final CommentRepository commentRepository;
+    private final ActivityService activityService;
 
     public List<Comment> getAllComments() {
         List<Comment> comments = new ArrayList<>();
@@ -60,6 +62,20 @@ public class CommentService {
 
         Comment saved = commentRepository.save(comment);
         log.debug("Comment created: {} by user: {}", saved.getId(), user.getUsername());
+
+        // 활동 기록 생성
+        try {
+            String message = parentCommentId != null
+                ? user.getDisplayName() + "님이 응원메시지에 답글을 남겼습니다"
+                : user.getDisplayName() + "님이 응원메시지를 남겼습니다";
+            Activity.ActivityType activityType = parentCommentId != null
+                ? Activity.ActivityType.COMMENT_REPLY
+                : Activity.ActivityType.COMMENT;
+            activityService.createActivity(user, activityType, message, saved.getId());
+        } catch (Exception e) {
+            log.error("Failed to create activity for comment", e);
+        }
+
         return saved;
     }
 
