@@ -47,13 +47,16 @@ public class DailyController {
             dailyMap.put("createdAt", daily.getCreatedAt());
             dailyMap.put("isNew", daily.getCreatedAt().isAfter(threeDaysAgo));
             dailyMap.put("commentsCount", daily.getComments().size());
-            dailyMap.put("user", Map.of(
-                "id", daily.getUser().getId(),
-                "username", daily.getUser().getUsername(),
-                "displayName", daily.getUser().getDisplayName() != null ? daily.getUser().getDisplayName() : daily.getUser().getUsername(),
-                "profileImage", daily.getUser().getProfileImage() != null ? daily.getUser().getProfileImage() : "",
-                "profileImageUpdatedAt", daily.getUser().getProfileImageUpdatedAt() != null ? daily.getUser().getProfileImageUpdatedAt() : null
-            ));
+
+            // User 정보 맵 생성 (profileImageUpdatedAt은 null일 수 있으므로 HashMap 사용)
+            Map<String, Object> userMap = new HashMap<>();
+            userMap.put("id", daily.getUser().getId());
+            userMap.put("username", daily.getUser().getUsername());
+            userMap.put("displayName", daily.getUser().getDisplayName() != null ? daily.getUser().getDisplayName() : daily.getUser().getUsername());
+            userMap.put("profileImage", daily.getUser().getProfileImage() != null ? daily.getUser().getProfileImage() : "");
+            userMap.put("profileImageUpdatedAt", daily.getUser().getProfileImageUpdatedAt());
+            dailyMap.put("user", userMap);
+
             dailyMap.put("isLiked", dailyService.isLikedByUser(daily.getId(), user.getId()));
             return dailyMap;
         }).toList();
@@ -164,13 +167,16 @@ public class DailyController {
                 commentMap.put("content", comment.getContent());
                 commentMap.put("createdAt", comment.getCreatedAt());
                 commentMap.put("isNew", comment.getCreatedAt().isAfter(threeDaysAgo));
-                commentMap.put("user", Map.of(
-                    "id", comment.getUser().getId(),
-                    "username", comment.getUser().getUsername(),
-                    "displayName", comment.getUser().getDisplayName() != null ? comment.getUser().getDisplayName() : comment.getUser().getUsername(),
-                    "profileImage", comment.getUser().getProfileImage() != null ? comment.getUser().getProfileImage() : "",
-                    "profileImageUpdatedAt", comment.getUser().getProfileImageUpdatedAt() != null ? comment.getUser().getProfileImageUpdatedAt() : null
-                ));
+
+                // User 정보 맵 생성 (profileImageUpdatedAt은 null일 수 있으므로 HashMap 사용)
+                Map<String, Object> userMap = new HashMap<>();
+                userMap.put("id", comment.getUser().getId());
+                userMap.put("username", comment.getUser().getUsername());
+                userMap.put("displayName", comment.getUser().getDisplayName() != null ? comment.getUser().getDisplayName() : comment.getUser().getUsername());
+                userMap.put("profileImage", comment.getUser().getProfileImage() != null ? comment.getUser().getProfileImage() : "");
+                userMap.put("profileImageUpdatedAt", comment.getUser().getProfileImageUpdatedAt());
+                commentMap.put("user", userMap);
+
                 commentMap.put("parentCommentId", comment.getParentComment() != null ? comment.getParentComment().getId() : null);
                 return commentMap;
             }).toList();
