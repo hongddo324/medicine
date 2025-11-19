@@ -94,3 +94,81 @@ CREATE TABLE daily_like (
 - **DailyComment**: parent_comment_id - 대댓글 조회 최적화
 - **DailyComment**: created_at (오름차순) - 댓글 순서대로 조회 최적화
 - **DailyLike**: daily_id, user_id - 좋아요 조회 및 중복 방지 최적화
+
+## 4. Wish 테이블 생성
+
+위시리스트 아이템을 저장하는 테이블입니다.
+
+```sql
+CREATE TABLE wish (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    title VARCHAR(200) NOT NULL,
+    description TEXT,
+    category VARCHAR(20) NOT NULL,
+    latitude DECIMAL(10, 7),
+    longitude DECIMAL(10, 7),
+    address VARCHAR(500),
+    image_url TEXT,
+    completed BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE,
+    INDEX idx_user_id (user_id),
+    INDEX idx_created_at (created_at DESC),
+    INDEX idx_category (category),
+    INDEX idx_completed (completed)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+```
+
+## 5. WishSchedule 테이블 생성
+
+위시리스트와 연결된 일정을 저장하는 테이블입니다.
+
+```sql
+CREATE TABLE wish_schedule (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    wish_id BIGINT NOT NULL,
+    scheduled_date TIMESTAMP NOT NULL,
+    title VARCHAR(200),
+    description TEXT,
+    completed BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (wish_id) REFERENCES wish(id) ON DELETE CASCADE,
+    INDEX idx_wish_id (wish_id),
+    INDEX idx_scheduled_date (scheduled_date ASC),
+    INDEX idx_completed (completed)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+```
+
+### Wish 테이블
+- **id**: 위시 고유 ID (자동 증가)
+- **user_id**: 작성자 ID (User 테이블 참조)
+- **title**: 위시 제목
+- **description**: 위시 설명
+- **category**: 카테고리 (RESTAURANT, TRAVEL, SHOPPING, CAFE, ACTIVITY, OTHER)
+- **latitude**: 위도 (Naver Map API)
+- **longitude**: 경도 (Naver Map API)
+- **address**: 주소
+- **image_url**: 이미지 파일 경로
+- **completed**: 완료 여부
+- **created_at**: 생성 시간
+- **updated_at**: 수정 시간
+
+### WishSchedule 테이블
+- **id**: 일정 고유 ID (자동 증가)
+- **wish_id**: 위시 ID (Wish 테이블 참조)
+- **scheduled_date**: 일정 날짜 및 시간
+- **title**: 일정 제목
+- **description**: 메모
+- **completed**: 완료 여부
+- **created_at**: 생성 시간
+
+### 인덱스
+- **Wish**: user_id - 특정 사용자 위시리스트 조회 최적화
+- **Wish**: created_at (내림차순) - 최신 위시 조회 최적화
+- **Wish**: category - 카테고리별 조회 최적화
+- **Wish**: completed - 완료/미완료 필터링 최적화
+- **WishSchedule**: wish_id - 특정 위시의 일정 조회 최적화
+- **WishSchedule**: scheduled_date (오름차순) - 일정 순서대로 조회 최적화
+- **WishSchedule**: completed - 완료/미완료 필터링 최적화

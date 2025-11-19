@@ -20,6 +20,7 @@ public class FileStorageService {
     private final Path mealStorageLocation;
     private final Path pointItemStorageLocation;
     private final Path dailyStorageLocation;
+    private final Path wishStorageLocation;
 
     public FileStorageService() {
         // Get the directory where the JAR is running
@@ -30,6 +31,7 @@ public class FileStorageService {
         this.mealStorageLocation = Paths.get(baseDir, "meal").toAbsolutePath().normalize();
         this.pointItemStorageLocation = Paths.get(baseDir, "pointitem").toAbsolutePath().normalize();
         this.dailyStorageLocation = Paths.get(baseDir, "daily").toAbsolutePath().normalize();
+        this.wishStorageLocation = Paths.get(baseDir, "wish").toAbsolutePath().normalize();
 
         try {
             Files.createDirectories(this.profileStorageLocation);
@@ -37,12 +39,14 @@ public class FileStorageService {
             Files.createDirectories(this.mealStorageLocation);
             Files.createDirectories(this.pointItemStorageLocation);
             Files.createDirectories(this.dailyStorageLocation);
+            Files.createDirectories(this.wishStorageLocation);
             log.info("Storage directories created/verified:");
             log.info("  Profile: {}", this.profileStorageLocation);
             log.info("  Image: {}", this.imageStorageLocation);
             log.info("  Meal: {}", this.mealStorageLocation);
             log.info("  PointItem: {}", this.pointItemStorageLocation);
             log.info("  Daily: {}", this.dailyStorageLocation);
+            log.info("  Wish: {}", this.wishStorageLocation);
         } catch (Exception ex) {
             log.error("Could not create storage directories", ex);
             throw new RuntimeException("Could not create storage directories", ex);
@@ -102,6 +106,17 @@ public class FileStorageService {
     public String storeDailyMedia(MultipartFile file) throws IOException {
         String dailyId = "daily";
         return storeFile(file, dailyStorageLocation, "daily", dailyId);
+    }
+
+    /**
+     * Store wish image
+     *
+     * @param file the file to store
+     * @return the relative path to the stored file (e.g., "/files/wish/wish_timestamp_uuid.jpg")
+     */
+    public String storeWishImage(MultipartFile file) throws IOException {
+        String wishId = "wish";
+        return storeFile(file, wishStorageLocation, "wish", wishId);
     }
 
     /**
@@ -173,6 +188,8 @@ public class FileStorageService {
                 fileLocation = pointItemStorageLocation.resolve(filename);
             } else if ("daily".equals(type)) {
                 fileLocation = dailyStorageLocation.resolve(filename);
+            } else if ("wish".equals(type)) {
+                fileLocation = wishStorageLocation.resolve(filename);
             } else {
                 log.warn("Unknown file type: {}", type);
                 return;
@@ -199,6 +216,8 @@ public class FileStorageService {
             return pointItemStorageLocation.resolve(filename);
         } else if ("daily".equals(type)) {
             return dailyStorageLocation.resolve(filename);
+        } else if ("wish".equals(type)) {
+            return wishStorageLocation.resolve(filename);
         }
         throw new IllegalArgumentException("Unknown file type: " + type);
     }
