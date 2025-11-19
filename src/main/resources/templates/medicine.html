@@ -346,8 +346,9 @@
         </div>
     </div>
 </div>
-<div id="medicineTab" class="tab-content-wrapper">
+<div id="healthTab" class="tab-content-wrapper">
     <div class="app-container">
+        <!-- 약복용 섹션 -->
         <div class="custom-card">
             <h5 style="margin-bottom:20px;font-weight:700"><i class="bi bi-capsule"></i> 오늘의 약 복용</h5>
             <div class="medicine-buttons">
@@ -381,10 +382,8 @@
                 <div class="calendar-grid" id="calendarGrid"></div>
             </div>
         </div>
-    </div>
-</div>
-<div id="mealTab" class="tab-content-wrapper">
-    <div class="app-container">
+
+        <!-- 식단관리 섹션 -->
         <div class="custom-card">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
                 <h5 style="margin:0;font-weight:700"><i class="bi bi-egg-fried"></i> 오늘의 식단</h5>
@@ -440,6 +439,39 @@
                     <p style="margin-top:12px;color:var(--gray-600)">일상을 불러오는 중...</p>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+<div id="wishTab" class="tab-content-wrapper">
+    <div class="app-container">
+        <div class="custom-card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+                <h5 style="margin:0;font-weight:700"><i class="bi bi-star-fill"></i> 위시리스트</h5>
+                <button class="comment-submit-btn" onclick="showWishModal()">
+                    <i class="bi bi-plus-lg"></i> 위시 추가
+                </button>
+            </div>
+            <div id="wishListGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p style="margin-top:12px;color:var(--gray-600)">위시리스트를 불러오는 중...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="custom-card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+                <h5 style="margin:0;font-weight:700"><i class="bi bi-calendar-event"></i> 일정</h5>
+            </div>
+            <div class="calendar-wrapper">
+                <div class="calendar-header">
+                    <button class="calendar-nav-btn" onclick="changeWishMonth(-1)"><i class="bi bi-chevron-left"></i></button>
+                    <div class="calendar-title" id="wishCalendarTitle">2025년 1월</div>
+                    <button class="calendar-nav-btn" onclick="changeWishMonth(1)"><i class="bi bi-chevron-right"></i></button>
+                </div>
+                <div class="calendar-grid" id="wishCalendarGrid"></div>
+            </div>
+            <div id="wishScheduleList" style="margin-top:20px;display:flex;flex-direction:column;gap:12px"></div>
         </div>
     </div>
 </div>
@@ -520,8 +552,8 @@
 </div>
 <nav class="bottom-nav">
     <div class="nav-item active" data-tab="homeTab"><i class="bi bi-house-door-fill"></i><span>홈</span></div>
-    <div class="nav-item" data-tab="medicineTab"><i class="bi bi-capsule-pill"></i><span>약복용</span></div>
-    <div class="nav-item" data-tab="mealTab"><i class="bi bi-egg-fried"></i><span>식단관리</span></div>
+    <div class="nav-item" data-tab="healthTab"><i class="bi bi-heart-pulse-fill"></i><span>건강</span></div>
+    <div class="nav-item" data-tab="wishTab"><i class="bi bi-star-fill"></i><span>위시</span></div>
     <div class="nav-item" data-tab="dailyTab"><i class="bi bi-images"></i><span>일상</span></div>
     <div class="nav-item" data-tab="settingsTab"><i class="bi bi-gear"></i><span>설정</span></div>
 </nav>
@@ -687,7 +719,72 @@
         </form>
     </div>
 </div>
+<div class="modal-overlay" id="wishModal" onclick="closeModal('wishModal')">
+    <div class="modal-content" onclick="event.stopPropagation()" style="max-width:700px;max-height:90vh;overflow-y:auto">
+        <div class="modal-header">
+            <div class="modal-title">위시 추가</div>
+            <button class="modal-close" onclick="closeModal('wishModal')"><i class="bi bi-x"></i></button>
+        </div>
+        <form id="wishForm" onsubmit="submitWish(event)">
+            <div style="margin-bottom:16px">
+                <label style="display:block;margin-bottom:8px;font-weight:600">제목</label>
+                <input type="text" id="wishTitle" class="comment-input" style="width:100%;border-radius:12px" placeholder="예: 강남 맛집 방문" required>
+            </div>
+            <div style="margin-bottom:16px">
+                <label style="display:block;margin-bottom:8px;font-weight:600">설명</label>
+                <textarea id="wishDescription" class="comment-input" style="width:100%;min-height:100px;border-radius:12px;resize:vertical" placeholder="상세 설명을 입력하세요..."></textarea>
+            </div>
+            <div style="margin-bottom:16px">
+                <label style="display:block;margin-bottom:8px;font-weight:600">카테고리</label>
+                <select id="wishCategory" class="comment-input" style="width:100%;border-radius:12px" required>
+                    <option value="">카테고리 선택</option>
+                    <option value="RESTAURANT">맛집</option>
+                    <option value="TRAVEL">여행지</option>
+                    <option value="SHOPPING">쇼핑</option>
+                    <option value="CAFE">카페</option>
+                    <option value="ACTIVITY">액티비티</option>
+                    <option value="OTHER">기타</option>
+                </select>
+            </div>
+            <div style="margin-bottom:16px">
+                <label style="display:block;margin-bottom:8px;font-weight:600">위치 검색</label>
+                <div style="display:flex;gap:8px;margin-bottom:8px">
+                    <input type="text" id="wishLocationSearch" class="comment-input" style="flex:1;border-radius:12px" placeholder="장소명 또는 주소 검색">
+                    <button type="button" class="comment-submit-btn" onclick="searchLocation()">
+                        <i class="bi bi-search"></i> 검색
+                    </button>
+                </div>
+                <div id="naverMap" style="width:100%;height:300px;border-radius:12px;overflow:hidden;margin-bottom:8px"></div>
+                <input type="hidden" id="wishLatitude">
+                <input type="hidden" id="wishLongitude">
+                <input type="text" id="wishAddress" class="comment-input" style="width:100%;border-radius:12px" placeholder="선택된 주소" readonly>
+            </div>
+            <div style="margin-bottom:16px">
+                <label style="display:block;margin-bottom:8px;font-weight:600">이미지 (선택)</label>
+                <input type="file" id="wishImage" accept="image/*" style="width:100%">
+                <div id="wishImagePreview" style="margin-top:12px;display:none"></div>
+            </div>
+            <div style="margin-bottom:16px">
+                <label style="display:block;margin-bottom:8px;font-weight:600">일정 추가 (선택)</label>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                    <div>
+                        <label style="display:block;margin-bottom:4px;font-size:12px;color:var(--gray-600)">날짜</label>
+                        <input type="date" id="wishScheduleDate" class="comment-input" style="width:100%;border-radius:12px">
+                    </div>
+                    <div>
+                        <label style="display:block;margin-bottom:4px;font-size:12px;color:var(--gray-600)">시간</label>
+                        <input type="time" id="wishScheduleTime" class="comment-input" style="width:100%;border-radius:12px">
+                    </div>
+                </div>
+            </div>
+            <button type="submit" class="comment-submit-btn" style="width:100%">
+                <i class="bi bi-star-fill"></i> 위시 추가하기
+            </button>
+        </form>
+    </div>
+</div>
 <div class="toast-container" id="toastContainer"></div>
+<script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=YOUR_CLIENT_ID&submodules=geocoder"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js"></script>
@@ -702,7 +799,7 @@ function initializeDarkMode(){const darkMode=localStorage.getItem('darkMode')===
 function toggleDarkMode(){const isDark=document.body.classList.toggle('dark-mode');localStorage.setItem('darkMode',isDark);updateDarkModeUI(isDark);showToast(isDark?'다크 모드가 활성화되었습니다.':'라이트 모드가 활성화되었습니다.','success')}
 function updateDarkModeUI(isDark){const homeToggle=document.getElementById('homeDarkModeToggle');const settingsSwitch=document.getElementById('darkModeSwitch');if(homeToggle){homeToggle.innerHTML=isDark?'<i class="bi bi-sun-fill"></i>':'<i class="bi bi-moon-fill"></i>'}if(settingsSwitch){settingsSwitch.checked=isDark}}
 function initializeNavigation(){document.querySelectorAll('.nav-item').forEach(item=>{item.addEventListener('click',function(){switchTab(this.getAttribute('data-tab'))})})}
-function switchTab(tabId){document.querySelectorAll('.tab-content-wrapper').forEach(tab=>tab.classList.remove('active'));document.querySelectorAll('.nav-item').forEach(item=>item.classList.remove('active'));document.getElementById(tabId).classList.add('active');document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');currentTab=tabId;if(tabId==='medicineTab'){initializeCalendar()}else if(tabId==='mealTab'){initializeMealStatus();renderMealCalendar()}else if(tabId==='dailyTab'){loadDailies()}}
+function switchTab(tabId){document.querySelectorAll('.tab-content-wrapper').forEach(tab=>tab.classList.remove('active'));document.querySelectorAll('.nav-item').forEach(item=>item.classList.remove('active'));document.getElementById(tabId).classList.add('active');document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');currentTab=tabId;if(tabId==='healthTab'){initializeCalendar();initializeMealStatus();renderMealCalendar()}else if(tabId==='dailyTab'){loadDailies()}else if(tabId==='wishTab'){loadWishes();loadWishSchedules()}}
 async function loadComments(){try{const response=await fetch('/api/comments');allComments=await response.json();renderComments()}catch(error){console.error('댓글 로드 실패:',error);showToast('댓글을 불러오는데 실패했습니다.','error')}}
 let commentImageData=null;
 function handleCommentImageSelect(event){const file=event.target.files[0];if(!file)return;if(file.size>5*1024*1024){showToast('이미지 크기는 5MB 이하여야 합니다.','error');return}const reader=new FileReader();reader.onload=function(e){commentImageData=e.target.result;document.getElementById('commentImagePreview').src=commentImageData;document.getElementById('commentImagePreviewWrapper').style.display='block';document.querySelector('.comment-image-btn').classList.add('active')};reader.readAsDataURL(file)}
@@ -776,6 +873,23 @@ function renderDailyComments(dailyId,comments){const commentsDiv=document.getEle
 function showDailyReplyInput(commentId,dailyId){const replyDiv=document.getElementById(`dailyReply-${commentId}`);if(replyDiv.style.display==='none'){replyDiv.innerHTML=`<div class="comment-input-row"><input type="text" id="dailyReplyInput-${commentId}" class="comment-input" placeholder="답글을 입력하세요..."><button class="comment-submit-btn" onclick="addDailyComment(${dailyId},${commentId})"><i class="bi bi-send-fill"></i></button><button class="comment-submit-btn" style="background:var(--gray-600)" onclick="document.getElementById('dailyReply-${commentId}').style.display='none'">취소</button></div>`;replyDiv.style.display='block';document.getElementById(`dailyReplyInput-${commentId}`).focus()}else{replyDiv.style.display='none'}}
 async function addDailyComment(dailyId,parentCommentId){const inputId=parentCommentId?`dailyReplyInput-${parentCommentId}`:`dailyCommentInput-${dailyId}`;const input=document.getElementById(inputId);const content=input.value.trim();if(!content){showToast('댓글 내용을 입력해주세요.','error');return}const formData=new FormData();formData.append('content',content);if(parentCommentId)formData.append('parentCommentId',parentCommentId);try{const response=await fetch(`/api/daily/${dailyId}/comments`,{method:'POST',body:formData});if(response.ok){input.value='';if(parentCommentId)document.getElementById(`dailyReply-${parentCommentId}`).style.display='none';showToast('댓글이 등록되었습니다.','success');const commentsResponse=await fetch(`/api/daily/${dailyId}/comments`);const comments=await commentsResponse.json();renderDailyComments(dailyId,comments)}else throw new Error('댓글 등록 실패')}catch(error){console.error('댓글 등록 실패:',error);showToast('댓글 등록에 실패했습니다.','error')}}
 async function deleteDailyComment(commentId,dailyId){if(!confirm('댓글을 삭제하시겠습니까?'))return;try{const response=await fetch(`/api/daily/comments/${commentId}`,{method:'DELETE'});if(response.ok){showToast('댓글이 삭제되었습니다.','success');const commentsResponse=await fetch(`/api/daily/${dailyId}/comments`);const comments=await commentsResponse.json();renderDailyComments(dailyId,comments)}else throw new Error('삭제 실패')}catch(error){console.error('삭제 실패:',error);showToast('댓글 삭제에 실패했습니다.','error')}}
+let naverMap;let naverMarker;let selectedLat=null;let selectedLng=null;let wishCurrentMonth=new Date().getMonth();let wishCurrentYear=new Date().getFullYear();
+function showWishModal(){document.getElementById('wishModal').classList.add('active');setTimeout(()=>{initNaverMap()},300)}
+function initNaverMap(){if(typeof naver==='undefined'||!naver.maps){console.error('Naver Maps API가 로드되지 않았습니다.');showToast('지도를 로드할 수 없습니다. 페이지를 새로고침해주세요.','error');return}const mapDiv=document.getElementById('naverMap');if(naverMap){return}const mapOptions={center:new naver.maps.LatLng(37.5665,126.9780),zoom:15};naverMap=new naver.maps.Map(mapDiv,mapOptions);naverMarker=new naver.maps.Marker({position:naverMap.getCenter(),map:naverMap});naver.maps.Event.addListener(naverMap,'click',function(e){const latlng=e.coord;naverMarker.setPosition(latlng);selectedLat=latlng.lat();selectedLng=latlng.lng();document.getElementById('wishLatitude').value=selectedLat;document.getElementById('wishLongitude').value=selectedLng;naver.maps.Service.reverseGeocode({coords:latlng},function(status,response){if(status===naver.maps.Service.Status.OK){const result=response.v2.address;const address=result.jibunAddress||result.roadAddress;document.getElementById('wishAddress').value=address}else{document.getElementById('wishAddress').value='주소를 찾을 수 없습니다.'}})})}
+async function searchLocation(){const query=document.getElementById('wishLocationSearch').value.trim();if(!query){showToast('검색어를 입력해주세요.','error');return}try{naver.maps.Service.geocode({query:query},function(status,response){if(status===naver.maps.Service.Status.OK){const result=response.v2.addresses[0];if(result){const latlng=new naver.maps.LatLng(result.y,result.x);naverMap.setCenter(latlng);naverMap.setZoom(16);naverMarker.setPosition(latlng);selectedLat=result.y;selectedLng=result.x;document.getElementById('wishLatitude').value=selectedLat;document.getElementById('wishLongitude').value=selectedLng;document.getElementById('wishAddress').value=result.jibunAddress||result.roadAddress}else{showToast('검색 결과가 없습니다.','error')}}else{showToast('위치 검색에 실패했습니다.','error')}})}catch(error){console.error('위치 검색 실패:',error);showToast('위치 검색에 실패했습니다.','error')}}
+async function submitWish(event){event.preventDefault();const title=document.getElementById('wishTitle').value.trim();const description=document.getElementById('wishDescription').value.trim();const category=document.getElementById('wishCategory').value;const imageFile=document.getElementById('wishImage').files[0];const scheduleDate=document.getElementById('wishScheduleDate').value;const scheduleTime=document.getElementById('wishScheduleTime').value;if(!title||!category){showToast('제목과 카테고리는 필수입니다.','error');return}const formData=new FormData();formData.append('title',title);if(description)formData.append('description',description);formData.append('category',category);if(selectedLat)formData.append('latitude',selectedLat);if(selectedLng)formData.append('longitude',selectedLng);if(document.getElementById('wishAddress').value)formData.append('address',document.getElementById('wishAddress').value);if(imageFile)formData.append('image',imageFile);if(scheduleDate){let scheduledDateTime=scheduleDate;if(scheduleTime){scheduledDateTime+=`T${scheduleTime}:00`}else{scheduledDateTime+='T00:00:00'}formData.append('scheduleDate',scheduledDateTime)}try{const response=await fetch('/api/wish',{method:'POST',body:formData});if(response.ok){showToast('위시가 추가되었습니다.','success');closeModal('wishModal');document.getElementById('wishForm').reset();selectedLat=null;selectedLng=null;await loadWishes();await loadWishSchedules()}else{const error=await response.json();showToast(error.error||'위시 추가에 실패했습니다.','error')}}catch(error){console.error('위시 추가 실패:',error);showToast('위시 추가에 실패했습니다.','error')}}
+async function loadWishes(){try{const response=await fetch('/api/wish');const wishes=await response.json();renderWishes(wishes)}catch(error){console.error('위시리스트 로드 실패:',error);showToast('위시리스트를 불러오는데 실패했습니다.','error')}}
+function renderWishes(wishes){const grid=document.getElementById('wishListGrid');if(!wishes||wishes.length===0){grid.innerHTML='<div class="empty-state" style="grid-column:1/-1"><div class="empty-state-icon"><i class="bi bi-star-fill"></i></div><div class="empty-state-title">위시리스트가 비어있습니다</div><div class="empty-state-text">첫 번째 위시를 추가해보세요!</div></div>';return}const categoryColors={RESTAURANT:'#ff6b6b',TRAVEL:'#4ecdc4',SHOPPING:'#45b7d1',CAFE:'#f9ca24',ACTIVITY:'#ee5a6f',OTHER:'#95a5a6'};const categoryIcons={RESTAURANT:'shop',TRAVEL:'airplane',SHOPPING:'bag-fill',CAFE:'cup-hot-fill',ACTIVITY:'bicycle',OTHER:'star-fill'};grid.innerHTML=wishes.map(wish=>`<div class="comment-item" style="padding:0;overflow:hidden;${wish.completed?'opacity:0.6;':''}">${wish.imageUrl?`<img src="${wish.imageUrl}" style="width:100%;height:200px;object-fit:cover;cursor:pointer" onclick="showImageModal('${wish.imageUrl}')">`:''}  <div style="padding:16px"><div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:12px"><div style="flex:1"><div style="display:inline-block;padding:4px 12px;background:${categoryColors[wish.category]||'#95a5a6'};color:white;border-radius:12px;font-size:12px;font-weight:600;margin-bottom:8px"><i class="bi bi-${categoryIcons[wish.category]||'star-fill'}"></i> ${wish.category}</div><h6 style="font-weight:700;margin-bottom:4px;${wish.completed?'text-decoration:line-through;color:var(--gray-600)':''}">${escapeHtml(wish.title)}</h6></div>${wish.user.id==currentUserId?`<button class="comment-delete-btn" onclick="deleteWish(${wish.id})"><i class="bi bi-trash"></i></button>`:''}</div>${wish.description?`<p style="font-size:14px;color:var(--gray-600);margin-bottom:12px;line-height:1.5">${escapeHtml(wish.description)}</p>`:''} ${wish.address?`<div style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--gray-600);margin-bottom:12px"><i class="bi bi-geo-alt-fill"></i><span>${escapeHtml(wish.address)}</span></div>`:''} <div style="display:flex;gap:8px"><button class="comment-submit-btn" style="padding:8px 16px;font-size:13px;${wish.completed?'background:var(--gray-600)':'background:var(--success)'}" onclick="toggleWishCompletion(${wish.id})"><i class="bi bi-${wish.completed?'arrow-counterclockwise':'check-lg'}"></i> ${wish.completed?'미완료로 변경':'완료'}</button>${wish.latitude&&wish.longitude?`<button class="comment-submit-btn" style="padding:8px 16px;font-size:13px;background:var(--info)" onclick="openNaverMapLink(${wish.latitude},${wish.longitude},'${escapeForAttribute(wish.title)}')"><i class="bi bi-map-fill"></i> 지도보기</button>`:''}</div></div></div>`).join('')}
+async function toggleWishCompletion(wishId){try{const response=await fetch(`/api/wish/${wishId}/toggle-complete`,{method:'POST'});if(response.ok){const result=await response.json();showToast(result.completed?'위시가 완료되었습니다!':'위시가 미완료로 변경되었습니다.','success');await loadWishes()}else throw new Error('완료 처리 실패')}catch(error){console.error('완료 처리 실패:',error);showToast('완료 처리에 실패했습니다.','error')}}
+async function deleteWish(wishId){if(!confirm('이 위시를 삭제하시겠습니까?'))return;try{const response=await fetch(`/api/wish/${wishId}`,{method:'DELETE'});if(response.ok){showToast('위시가 삭제되었습니다.','success');await loadWishes();await loadWishSchedules()}else throw new Error('삭제 실패')}catch(error){console.error('삭제 실패:',error);showToast('위시 삭제에 실패했습니다.','error')}}
+function openNaverMapLink(lat,lng,title){const url=`https://map.naver.com/v5/?c=${lng},${lat},15,0,0,0,dh&p=${lat},${lng},-,-,${encodeURIComponent(title)}`;window.open(url,'_blank')}
+async function loadWishSchedules(){try{const response=await fetch('/api/wish/schedules');const schedules=await response.json();renderWishCalendar(schedules);renderWishScheduleList(schedules)}catch(error){console.error('일정 로드 실패:',error)}}
+function renderWishCalendar(schedules){const title=document.getElementById('wishCalendarTitle');title.textContent=`${wishCurrentYear}년 ${wishCurrentMonth+1}월`;const grid=document.getElementById('wishCalendarGrid');const firstDay=new Date(wishCurrentYear,wishCurrentMonth,1).getDay();const lastDate=new Date(wishCurrentYear,wishCurrentMonth+1,0).getDate();const today=new Date();today.setHours(0,0,0,0);let html='<div class="calendar-weekdays">';['일','월','화','수','목','금','토'].forEach((day,index)=>{html+=`<div class="calendar-weekday" style="${index===0?'color:#e74c3c':index===6?'color:#3498db':''}">${day}</div>`});html+='</div><div class="calendar-days">';for(let i=0;i<firstDay;i++){html+='<div class="calendar-day empty"></div>'}for(let day=1;day<=lastDate;day++){const date=new Date(wishCurrentYear,wishCurrentMonth,day);date.setHours(0,0,0,0);const isToday=date.getTime()===today.getTime();const daySchedules=schedules.filter(s=>{const scheduleDate=new Date(s.scheduledDate);return scheduleDate.getFullYear()===wishCurrentYear&&scheduleDate.getMonth()===wishCurrentMonth&&scheduleDate.getDate()===day});html+=`<div class="calendar-day ${isToday?'today':''}" style="${daySchedules.length>0?'background:#e3f2fd;font-weight:700':''}">${day}${daySchedules.length>0?`<div style="font-size:10px;color:#1976d2">${daySchedules.length}개</div>`:''}</div>`}html+='</div>';grid.innerHTML=html}
+function renderWishScheduleList(schedules){const list=document.getElementById('wishScheduleList');const currentMonth=new Date(wishCurrentYear,wishCurrentMonth);const nextMonth=new Date(wishCurrentYear,wishCurrentMonth+1);const monthSchedules=schedules.filter(s=>{const date=new Date(s.scheduledDate);return date>=currentMonth&&date<nextMonth});if(!monthSchedules||monthSchedules.length===0){list.innerHTML='<div class="empty-state"><p>이번 달에 예정된 일정이 없습니다.</p></div>';return}const categoryColors={RESTAURANT:'#ff6b6b',TRAVEL:'#4ecdc4',SHOPPING:'#45b7d1',CAFE:'#f9ca24',ACTIVITY:'#ee5a6f',OTHER:'#95a5a6'};list.innerHTML=monthSchedules.map(schedule=>`<div class="comment-item" style="padding:16px;${schedule.completed?'opacity:0.6;':''}"><div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px"><div style="flex:1"><div style="display:inline-block;padding:4px 12px;background:${categoryColors[schedule.wish.category]||'#95a5a6'};color:white;border-radius:12px;font-size:12px;font-weight:600;margin-bottom:8px">${schedule.wish.category}</div><h6 style="font-weight:700;margin-bottom:4px;${schedule.completed?'text-decoration:line-through;color:var(--gray-600)':''}">${escapeHtml(schedule.title)}</h6><div style="font-size:13px;color:var(--gray-600);margin-bottom:4px"><i class="bi bi-calendar-event"></i> ${formatDateTime(new Date(schedule.scheduledDate))}</div>${schedule.wish.address?`<div style="font-size:13px;color:var(--gray-600)"><i class="bi bi-geo-alt-fill"></i> ${escapeHtml(schedule.wish.address)}</div>`:''}</div><button class="comment-delete-btn" onclick="deleteSchedule(${schedule.id})"><i class="bi bi-trash"></i></button></div><div style="display:flex;gap:8px"><button class="comment-submit-btn" style="padding:8px 16px;font-size:13px;${schedule.completed?'background:var(--gray-600)':'background:var(--success)'}" onclick="toggleScheduleCompletion(${schedule.id})"><i class="bi bi-${schedule.completed?'arrow-counterclockwise':'check-lg'}"></i> ${schedule.completed?'미완료':'완료'}</button></div></div>`).join('')}
+async function toggleScheduleCompletion(scheduleId){try{const response=await fetch(`/api/wish/schedules/${scheduleId}/toggle-complete`,{method:'POST'});if(response.ok){const result=await response.json();showToast(result.completed?'일정이 완료되었습니다!':'일정이 미완료로 변경되었습니다.','success');await loadWishSchedules()}else throw new Error('완료 처리 실패')}catch(error){console.error('완료 처리 실패:',error);showToast('완료 처리에 실패했습니다.','error')}}
+async function deleteSchedule(scheduleId){if(!confirm('이 일정을 삭제하시겠습니까?'))return;try{const response=await fetch(`/api/wish/schedules/${scheduleId}`,{method:'DELETE'});if(response.ok){showToast('일정이 삭제되었습니다.','success');await loadWishSchedules()}else throw new Error('삭제 실패')}catch(error){console.error('삭제 실패:',error);showToast('일정 삭제에 실패했습니다.','error')}}
+function changeWishMonth(delta){wishCurrentMonth+=delta;if(wishCurrentMonth<0){wishCurrentMonth=11;wishCurrentYear--}else if(wishCurrentMonth>11){wishCurrentMonth=0;wishCurrentYear++}loadWishSchedules()}
+function formatDateTime(date){return`${date.getFullYear()}년 ${date.getMonth()+1}월 ${date.getDate()}일 ${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`}
 </script>
 </body>
 </html>
