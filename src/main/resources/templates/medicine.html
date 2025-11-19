@@ -243,10 +243,6 @@
 <div id="homeTab" class="tab-content-wrapper active">
     <div class="app-container">
         <div class="custom-card">
-            <div th:if="${user.role.name() == 'FATHER'}" class="expected-points-display" id="expectedPointsDisplay">
-                <div class="expected-points-label">💚 내일 적립 예정 포인트</div>
-                <div class="expected-points-value" id="expectedPointsValue">계산 중...</div>
-            </div>
             <div class="user-header">
                 <div class="user-info">
                     <div class="user-avatar" id="headerUserAvatar"
@@ -279,42 +275,27 @@
                 </div>
             </div>
 
-            <div class="home-medicine-status">
-                <h6 style="margin-bottom:12px;font-weight:700"><i class="bi bi-capsule"></i> 오늘의 약 복용</h6>
-                <div class="medicine-status-grid">
-                    <div class="medicine-status-item" id="homeMorningStatus" th:classappend="${morningRecord.taken}?'taken':''">
-                        <div class="medicine-status-icon">🌅</div>
-                        <div class="medicine-status-label">아침</div>
-                        <div class="medicine-status-text" th:text="${morningRecord.taken}?'복용완료':'미복용'">미복용</div>
-                    </div>
-                    <div class="medicine-status-item" id="homeEveningStatus" th:classappend="${eveningRecord.taken}?'taken':''">
-                        <div class="medicine-status-icon">🌙</div>
-                        <div class="medicine-status-label">저녁</div>
-                        <div class="medicine-status-text" th:text="${eveningRecord.taken}?'복용완료':'미복용'">미복용</div>
+            <div class="home-daily-section">
+                <h6 style="margin-bottom:16px;font-weight:700"><i class="bi bi-images"></i> 최근 일상</h6>
+                <div id="homeRecentDailies" style="display:flex;flex-direction:column;gap:12px">
+                    <div class="loading">
+                        <div class="loading-spinner"></div>
+                        <p style="margin-top:12px;color:var(--gray-600)">일상을 불러오는 중...</p>
                     </div>
                 </div>
             </div>
 
-            <div class="home-meals-section">
-                <h6 style="margin-bottom:12px;font-weight:700"><i class="bi bi-egg-fried"></i> 오늘의 식단</h6>
-                <div class="home-meal-grid">
-                    <div class="home-meal-item" id="homeBreakfastMeal">
-                        <div class="home-meal-placeholder">
-                            <i class="bi bi-egg-fried"></i>
-                            <div class="home-meal-label">아침</div>
-                        </div>
-                    </div>
-                    <div class="home-meal-item" id="homeLunchMeal">
-                        <div class="home-meal-placeholder">
-                            <i class="bi bi-cup-hot"></i>
-                            <div class="home-meal-label">점심</div>
-                        </div>
-                    </div>
-                    <div class="home-meal-item" id="homeDinnerMeal">
-                        <div class="home-meal-placeholder">
-                            <i class="bi bi-moon-stars"></i>
-                            <div class="home-meal-label">저녁</div>
-                        </div>
+            <div class="activity-section" style="margin-top:24px">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+                    <h6 style="font-weight:700;margin:0"><i class="bi bi-bell-fill"></i> 활동 알림</h6>
+                    <button onclick="markAllActivitiesAsRead()" style="background:none;border:none;color:var(--primary);font-size:13px;cursor:pointer;padding:4px 8px;border-radius:6px;transition:background .2s" onmouseover="this.style.background='var(--hover-bg)'" onmouseout="this.style.background='none'">
+                        모두 읽음
+                    </button>
+                </div>
+                <div id="activityList" style="display:flex;flex-direction:column;gap:8px;max-height:400px;overflow-y:auto">
+                    <div class="loading">
+                        <div class="loading-spinner"></div>
+                        <p style="margin-top:12px;color:var(--gray-600)">활동을 불러오는 중...</p>
                     </div>
                 </div>
             </div>
@@ -348,6 +329,12 @@
 </div>
 <div id="healthTab" class="tab-content-wrapper">
     <div class="app-container">
+        <!-- 예상 포인트 -->
+        <div th:if="${user.role.name() == 'FATHER'}" class="expected-points-display" id="healthExpectedPointsDisplay" style="margin-bottom:16px;padding:12px;background:linear-gradient(135deg,#d1fae5 0%,#a7f3d0 100%);border-radius:12px">
+            <div style="font-size:13px;color:#065f46;font-weight:600;margin-bottom:4px">💚 내일 적립 예정 포인트</div>
+            <div style="font-size:20px;font-weight:700;color:#047857"><span id="healthExpectedPointsValue">계산 중...</span><span style="font-size:14px;margin-left:4px">p</span></div>
+        </div>
+
         <!-- 약복용 섹션 -->
         <div class="custom-card">
             <h5 style="margin-bottom:20px;font-weight:700"><i class="bi bi-capsule"></i> 오늘의 약 복용</h5>
@@ -372,14 +359,6 @@
                         <span th:text="${eveningRecord.taken}?'복용완료':'미복용'">미복용</span>
                     </div>
                 </div>
-            </div>
-            <div class="calendar-wrapper">
-                <div class="calendar-header">
-                    <button class="calendar-nav-btn" onclick="changeMonth(-1)"><i class="bi bi-chevron-left"></i></button>
-                    <div class="calendar-title" id="calendarTitle">2025년 1월</div>
-                    <button class="calendar-nav-btn" onclick="changeMonth(1)"><i class="bi bi-chevron-right"></i></button>
-                </div>
-                <div class="calendar-grid" id="calendarGrid"></div>
             </div>
         </div>
 
@@ -413,14 +392,20 @@
                 </div>
             </div>
             <input type="file" id="mealImageInput" accept="image/*" style="display:none" onchange="handleMealImageUpload()">
-            <div class="calendar-wrapper" style="margin-top:24px">
+        </div>
+
+        <!-- 통합 캘린더 -->
+        <div class="custom-card">
+            <h5 style="margin-bottom:20px;font-weight:700"><i class="bi bi-calendar3"></i> 건강 캘린더</h5>
+            <div class="calendar-wrapper">
                 <div class="calendar-header">
-                    <button class="calendar-nav-btn" onclick="changeMealMonth(-1)"><i class="bi bi-chevron-left"></i></button>
-                    <div class="calendar-title" id="mealCalendarTitle">2025년 1월</div>
-                    <button class="calendar-nav-btn" onclick="changeMealMonth(1)"><i class="bi bi-chevron-right"></i></button>
+                    <button class="calendar-nav-btn" onclick="changeHealthMonth(-1)"><i class="bi bi-chevron-left"></i></button>
+                    <div class="calendar-title" id="healthCalendarTitle">2025년 1월</div>
+                    <button class="calendar-nav-btn" onclick="changeHealthMonth(1)"><i class="bi bi-chevron-right"></i></button>
                 </div>
-                <div class="calendar-grid" id="mealCalendarGrid"></div>
+                <div class="calendar-grid" id="healthCalendarGrid"></div>
             </div>
+            <div id="healthDayDetails" style="margin-top:20px;display:none"></div>
         </div>
     </div>
 </div>
@@ -794,15 +779,15 @@ const currentUsername='[[${user.username}]]';
 const canTakeMedicine=[[${canTakeMedicine}]];
 let currentTab='homeTab',currentPage=1,commentsPerPage=10,allComments=[],currentMealType=null,currentCalendarDate=new Date();
 let messaging=null,currentFcmToken=null,currentMealData={};
-document.addEventListener('DOMContentLoaded',function(){initializeDarkMode();initializeNavigation();loadComments();initializeMedicineStatus();initializeCalendar();initializeMealStatus();initializeHomeMeals();checkPushNotificationStatus();calculateExpectedPoints();initializeFirebase()});
+document.addEventListener('DOMContentLoaded',function(){initializeDarkMode();initializeNavigation();loadComments();initializeMedicineStatus();initializeMealStatus();loadHomeRecentDailies();loadActivities();checkPushNotificationStatus();calculateExpectedPoints();initializeFirebase()});
 function initializeDarkMode(){const darkMode=localStorage.getItem('darkMode')==='true';if(darkMode){document.body.classList.add('dark-mode');updateDarkModeUI(true)}else{updateDarkModeUI(false)}}
 function toggleDarkMode(){const isDark=document.body.classList.toggle('dark-mode');localStorage.setItem('darkMode',isDark);updateDarkModeUI(isDark);showToast(isDark?'다크 모드가 활성화되었습니다.':'라이트 모드가 활성화되었습니다.','success')}
 function updateDarkModeUI(isDark){const homeToggle=document.getElementById('homeDarkModeToggle');const settingsSwitch=document.getElementById('darkModeSwitch');if(homeToggle){homeToggle.innerHTML=isDark?'<i class="bi bi-sun-fill"></i>':'<i class="bi bi-moon-fill"></i>'}if(settingsSwitch){settingsSwitch.checked=isDark}}
 function initializeNavigation(){document.querySelectorAll('.nav-item').forEach(item=>{item.addEventListener('click',function(){switchTab(this.getAttribute('data-tab'))})})}
-function switchTab(tabId){document.querySelectorAll('.tab-content-wrapper').forEach(tab=>tab.classList.remove('active'));document.querySelectorAll('.nav-item').forEach(item=>item.classList.remove('active'));document.getElementById(tabId).classList.add('active');document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');currentTab=tabId;if(tabId==='healthTab'){initializeCalendar();initializeMealStatus();renderMealCalendar()}else if(tabId==='dailyTab'){loadDailies()}else if(tabId==='wishTab'){loadWishes();loadWishSchedules()}}
+function switchTab(tabId){document.querySelectorAll('.tab-content-wrapper').forEach(tab=>tab.classList.remove('active'));document.querySelectorAll('.nav-item').forEach(item=>item.classList.remove('active'));document.getElementById(tabId).classList.add('active');document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');currentTab=tabId;if(tabId==='healthTab'){initializeMedicineStatus();initializeMealStatus();renderHealthCalendar()}else if(tabId==='dailyTab'){loadDailies()}else if(tabId==='wishTab'){loadWishes();loadWishSchedules()}}
 async function loadComments(){try{const response=await fetch('/api/comments');allComments=await response.json();renderComments()}catch(error){console.error('댓글 로드 실패:',error);showToast('댓글을 불러오는데 실패했습니다.','error')}}
 let commentImageData=null;
-function handleCommentImageSelect(event){const file=event.target.files[0];if(!file)return;if(file.size>5*1024*1024){showToast('이미지 크기는 5MB 이하여야 합니다.','error');return}const reader=new FileReader();reader.onload=function(e){commentImageData=e.target.result;document.getElementById('commentImagePreview').src=commentImageData;document.getElementById('commentImagePreviewWrapper').style.display='block';document.querySelector('.comment-image-btn').classList.add('active')};reader.readAsDataURL(file)}
+function handleCommentImageSelect(event){const file=event.target.files[0];if(!file)return;if(file.size>5*1024*1024){showToast('이미지 크기는 5MB 이하여야 합니다.','error');return}const reader=new FileReader();reader.onload=function(e){const img=new Image();img.onload=function(){const maxWidth=600;const maxHeight=600;let width=img.width;let height=img.height;if(width>height){if(width>maxWidth){height*=maxWidth/width;width=maxWidth}}else{if(height>maxHeight){width*=maxHeight/height;height=maxHeight}}const canvas=document.createElement('canvas');canvas.width=width;canvas.height=height;const ctx=canvas.getContext('2d');ctx.drawImage(img,0,0,width,height);commentImageData=canvas.toDataURL('image/jpeg',0.85);document.getElementById('commentImagePreview').src=commentImageData;document.getElementById('commentImagePreviewWrapper').style.display='block';document.querySelector('.comment-image-btn').classList.add('active')};img.src=e.target.result};reader.readAsDataURL(file)}
 function removeCommentImage(){commentImageData=null;document.getElementById('commentImageInput').value='';document.getElementById('commentImagePreviewWrapper').style.display='none';document.querySelector('.comment-image-btn').classList.remove('active')}
 function showReplyInput(commentId){const existingReplyWrapper=document.querySelector('.reply-input-wrapper.active');if(existingReplyWrapper)existingReplyWrapper.remove();const replyHtml=`<div class="reply-input-wrapper active" id="reply-${commentId}"><div class="comment-input-row"><input type="text" id="replyInput-${commentId}" class="comment-input" placeholder="답글을 입력하세요..."><button class="comment-submit-btn" onclick="submitReply(${commentId})"><i class="bi bi-send-fill"></i></button><button class="comment-submit-btn" style="background:var(--gray-600)" onclick="cancelReply(${commentId})">취소</button></div></div>`;const commentEl=document.querySelector(`[data-comment-id="${commentId}"]`);if(commentEl){commentEl.insertAdjacentHTML('afterend',replyHtml);document.getElementById(`replyInput-${commentId}`).focus()}}
 function cancelReply(commentId){const replyWrapper=document.getElementById(`reply-${commentId}`);if(replyWrapper)replyWrapper.remove()}
@@ -846,7 +831,7 @@ function escapeHtml(text){const div=document.createElement('div');div.textConten
 async function loadPointItems(){const sampleItems=[{id:1,name:'제주 콘도 1박',description:'아름다운 제주도에서의 힐링 타임! 오션뷰 콘도에서 편안한 휴식을 즐기세요.',price:5000,imageUrl:'https://via.placeholder.com/300x200/4A90E2/ffffff?text=%EC%A0%9C%EC%A3%BC+%EC%BD%98%EB%8F%84',available:true},{id:2,name:'서울 5성급 호텔 1박',description:'강남 프리미엄 호텔 스위트룸 1박 2일 + 조식 2인 포함',price:8000,imageUrl:'https://via.placeholder.com/300x200/5cb85c/ffffff?text=%ED%98%B8%ED%85%94+%EC%88%99%EB%B0%95',available:true},{id:3,name:'고급 레스토랑 디너 2인',description:'미슐랭 가이드 선정 레스토랑 디너 코스 (2인)',price:3000,imageUrl:'https://via.placeholder.com/300x200/f0ad4e/ffffff?text=%EB%94%94%EB%84%88+%EC%BD%94%EC%8A%A4',available:true},{id:4,name:'부산 해운대 콘도 2박',description:'부산 해운대 오션뷰 콘도 2박 3일 + 워터파크 이용권',price:6500,imageUrl:'https://via.placeholder.com/300x200/5bc0de/ffffff?text=%EB%B6%80%EC%82%B0+%EC%BD%98%EB%8F%84',available:true},{id:5,name:'한정식 특선 메뉴 (4인)',description:'전통 한정식 특선 코스요리 4인분',price:2500,imageUrl:'https://via.placeholder.com/300x200/d9534f/ffffff?text=%ED%95%9C%EC%A0%95%EC%8B%9D',available:true},{id:6,name:'스파 & 마사지 패키지',description:'프리미엄 스파 + 전신 마사지 90분 코스',price:1800,imageUrl:'https://via.placeholder.com/300x200/9b59b6/ffffff?text=%EC%8A%A4%ED%8C%8C',available:true}];try{const response=await fetch('/api/points/items');const items=await response.json();renderPointItems(items)}catch(error){console.log('API 실패, 샘플 데이터 표시');renderPointItems(sampleItems)}}
 function renderPointItems(items){const grid=document.getElementById('pointItemsGrid');const userRole='[[${user.role.name()}]]';const isFather=userRole==='FATHER';if(!items||items.length===0){grid.innerHTML='<div class="empty-state"><div class="empty-state-icon"><i class="bi bi-shop"></i></div><div class="empty-state-title">등록된 상품이 없습니다</div></div>';return}grid.innerHTML=items.map(item=>{const canPurchase=isFather&&item.available&&parseInt(document.getElementById('currentPoints').textContent)>=item.points;return`<div class="point-item-card ${canPurchase?'':'disabled'}" onclick="${canPurchase?`purchaseItem(${item.id})`:''}"><div class="point-item-icon-wrapper" style="background:${item.color||'#e5e7eb'}">${item.icon?`<i class="bi bi-${item.icon}"></i>`:'🎁'}</div><div class="point-item-name">${item.name}</div><div class="point-item-desc">${item.description||''}</div><div class="point-item-price"><span class="point-item-price-value">${item.points}</span><span class="point-item-price-unit">pt</span>${!isFather?'<span style="font-size:12px;color:var(--danger);margin-left:auto">아버지만 구매 가능</span>':''}</div></div>`}).join('')}
 async function purchaseItem(itemId){if(!confirm('이 상품을 구매하시겠습니까?'))return;try{const response=await fetch(`/api/points/purchase/${itemId}`,{method:'POST'});if(response.ok){const result=await response.json();document.getElementById('currentPoints').textContent=result.remainingPoints;document.getElementById('userPoints').textContent=result.remainingPoints;showToast('상품을 구매했습니다!','success');await loadPointItems()}else{const error=await response.json();showToast(error.message||'구매에 실패했습니다.','error')}}catch(error){console.error('상품 구매 실패:',error);showToast('상품 구매에 실패했습니다.','error')}}
-async function calculateExpectedPoints(){try{const today=new Date().toISOString().split('T')[0];const [medicineRes,mealRes]=await Promise.all([fetch(`/api/medicine/today`),fetch(`/api/meals/date/${today}`)]);const medicineRecords=await medicineRes.json();const meals=await mealRes.json();let medicinePoints=0;if(medicineRecords.morning&&medicineRecords.morning.taken)medicinePoints+=10;if(medicineRecords.evening&&medicineRecords.evening.taken)medicinePoints+=10;let mealPoints=0;if(meals&&meals.length>0){const avgScore=meals.reduce((sum,m)=>sum+(m.score||0),0)/meals.length;if(avgScore>=80)mealPoints=70;else if(avgScore>=60)mealPoints=50;else if(avgScore>=40)mealPoints=30;else mealPoints=20}const totalExpected=medicinePoints+mealPoints;const expectedEl=document.getElementById('expectedPointsValue');if(expectedEl)expectedEl.textContent=`${totalExpected}pt (약: ${medicinePoints}pt + 식단: ${mealPoints}pt)`}catch(error){console.error('예상 포인트 계산 실패:',error);const expectedEl=document.getElementById('expectedPointsValue');if(expectedEl)expectedEl.textContent='계산 실패'}}
+async function calculateExpectedPoints(){try{const today=new Date().toISOString().split('T')[0];const [medicineRes,mealRes]=await Promise.all([fetch(`/api/medicine/today`),fetch(`/api/meals/date/${today}`)]);const medicineRecords=await medicineRes.json();const meals=await mealRes.json();let medicinePoints=0;if(medicineRecords.morning&&medicineRecords.morning.taken)medicinePoints+=10;if(medicineRecords.evening&&medicineRecords.evening.taken)medicinePoints+=10;let mealPoints=0;if(meals&&meals.length>0){const avgScore=meals.reduce((sum,m)=>sum+(m.score||0),0)/meals.length;if(avgScore>=80)mealPoints=70;else if(avgScore>=60)mealPoints=50;else if(avgScore>=40)mealPoints=30;else mealPoints=20}const totalExpected=medicinePoints+mealPoints;const expectedEl=document.getElementById('healthExpectedPointsValue');if(expectedEl)expectedEl.textContent=`${totalExpected} (약: ${medicinePoints}p + 식단: ${mealPoints}p)`}catch(error){console.error('예상 포인트 계산 실패:',error);const expectedEl=document.getElementById('healthExpectedPointsValue');if(expectedEl)expectedEl.textContent='계산 실패'}}
 async function initializeHomeMeals(){try{const today=new Date().toISOString().split('T')[0];const response=await fetch(`/api/meal/date/${today}`);const data=await response.json();if(data.success&&data.meals){data.meals.forEach(meal=>{const mealType=meal.mealType.toLowerCase();const element=document.getElementById(`home${mealType.charAt(0).toUpperCase()+mealType.slice(1)}Meal`);if(element&&meal.imageUrl){element.classList.add('has-image');element.innerHTML=`<img src="${meal.imageUrl}" alt="${meal.mealType}" onclick="showImageModal('${meal.imageUrl}')">`;if(meal.aiEvaluation){element.innerHTML+=`<button class="ai-eval-btn" onclick="event.stopPropagation();showAiEvaluation('${mealType}','${escapeForAttribute(meal.aiEvaluation)}',${meal.score||0})"><i class="bi bi-stars"></i> AI평가</button>`}}currentMealData[mealType]=meal})}}catch(error){console.error('홈 식단 로드 실패:',error)}}
 function escapeForAttribute(text){return text.replace(/'/g,'&apos;').replace(/"/g,'&quot;').replace(/\n/g,' ')}
 function showImageModal(imageUrl){document.getElementById('imageModalImage').src=imageUrl;document.getElementById('imageModal').classList.add('active')}
@@ -890,6 +875,16 @@ async function toggleScheduleCompletion(scheduleId){try{const response=await fet
 async function deleteSchedule(scheduleId){if(!confirm('이 일정을 삭제하시겠습니까?'))return;try{const response=await fetch(`/api/wish/schedules/${scheduleId}`,{method:'DELETE'});if(response.ok){showToast('일정이 삭제되었습니다.','success');await loadWishSchedules()}else throw new Error('삭제 실패')}catch(error){console.error('삭제 실패:',error);showToast('일정 삭제에 실패했습니다.','error')}}
 function changeWishMonth(delta){wishCurrentMonth+=delta;if(wishCurrentMonth<0){wishCurrentMonth=11;wishCurrentYear--}else if(wishCurrentMonth>11){wishCurrentMonth=0;wishCurrentYear++}loadWishSchedules()}
 function formatDateTime(date){return`${date.getFullYear()}년 ${date.getMonth()+1}월 ${date.getDate()}일 ${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`}
+async function loadHomeRecentDailies(){try{const response=await fetch('/api/daily');const dailies=await response.json();const recentDailies=dailies.slice(0,3);renderHomeRecentDailies(recentDailies)}catch(error){console.error('홈 일상 로드 실패:',error)}}
+function renderHomeRecentDailies(dailies){const container=document.getElementById('homeRecentDailies');if(!dailies||dailies.length===0){container.innerHTML='<div class="empty-state"><p>아직 일상 게시물이 없습니다.</p></div>';return}container.innerHTML=dailies.map(daily=>`<div class="comment-item" style="padding:12px;cursor:pointer" onclick="switchTab('dailyTab')"><div class="comment-header" style="margin-bottom:8px"><div class="comment-avatar" style="width:32px;height:32px;font-size:14px">${daily.user.profileImage?`<img src="${daily.user.profileImage}" alt="${daily.user.displayName}">`:daily.user.displayName.substring(0,1)}</div><div class="comment-user-info"><div class="comment-username" style="font-size:13px">${daily.user.displayName}</div><div class="comment-time" style="font-size:11px">${formatTimeAgo(new Date(daily.createdAt))}</div></div></div><div style="font-size:14px;line-height:1.4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(daily.content)}</div>${daily.mediaUrl?`<div style="margin-top:8px;border-radius:8px;overflow:hidden;max-height:120px"><img src="${daily.mediaUrl}" style="width:100%;height:100%;object-fit:cover"></div>`:''}</div>`).join('')}
+async function loadActivities(){try{const response=await fetch('/api/activity');const data=await response.json();renderActivities(data.activities)}catch(error){console.error('활동 로드 실패:',error)}}
+function renderActivities(activities){const container=document.getElementById('activityList');if(!activities||activities.length===0){container.innerHTML='<div class="empty-state"><p>활동 내역이 없습니다.</p></div>';return}const activityIcons={COMMENT:'chat-heart-fill',COMMENT_REPLY:'reply-fill',DAILY_POST:'images',DAILY_COMMENT:'chat-dots-fill',DAILY_LIKE:'heart-fill',WISH_ADDED:'star-fill',SCHEDULE_ADDED:'calendar-plus-fill'};const activityTabs={COMMENT:'homeTab',COMMENT_REPLY:'homeTab',DAILY_POST:'dailyTab',DAILY_COMMENT:'dailyTab',DAILY_LIKE:'dailyTab',WISH_ADDED:'wishTab',SCHEDULE_ADDED:'wishTab'};container.innerHTML=activities.map(activity=>`<div class="comment-item" style="padding:12px;${activity.isRead?'opacity:0.7':'background:var(--primary-light);border-left:3px solid var(--primary)'}"><div style="display:flex;justify-content:space-between;align-items:start"><div style="flex:1"><div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><div class="comment-avatar" style="width:28px;height:28px;font-size:12px">${activity.user.profileImage?`<img src="${activity.user.profileImage}" alt="${activity.user.displayName}">`:activity.user.displayName.substring(0,1)}</div><span style="font-size:14px;line-height:1.4">${escapeHtml(activity.message)}</span></div><div style="font-size:11px;color:var(--gray-600);margin-left:36px">${formatTimeAgo(new Date(activity.createdAt))}</div></div><button onclick="navigateToActivity('${activityTabs[activity.activityType]}',${activity.id})" style="background:var(--primary);color:white;border:none;border-radius:6px;padding:6px 12px;font-size:12px;cursor:pointer;white-space:nowrap;transition:all .2s" onmouseover="this.style.background='var(--primary-dark)'" onmouseout="this.style.background='var(--primary)'"><i class="bi bi-${activityIcons[activity.activityType]||'arrow-right'}"></i> 보기</button></div></div>`).join('')}
+async function navigateToActivity(tabId,activityId){try{await fetch(`/api/activity/${activityId}/read`,{method:'POST'});switchTab(tabId);await loadActivities()}catch(error){console.error('활동 읽음 처리 실패:',error);switchTab(tabId)}}
+async function markAllActivitiesAsRead(){try{const response=await fetch('/api/activity/read-all',{method:'POST'});if(response.ok){showToast('모든 활동을 읽음 처리했습니다.','success');await loadActivities()}else throw new Error('읽음 처리 실패')}catch(error){console.error('모든 활동 읽음 처리 실패:',error);showToast('읽음 처리에 실패했습니다.','error')}}
+let healthCurrentMonth=new Date().getMonth();let healthCurrentYear=new Date().getFullYear();
+async function renderHealthCalendar(){const title=document.getElementById('healthCalendarTitle');title.textContent=`${healthCurrentYear}년 ${healthCurrentMonth+1}월`;const today=new Date().toISOString().split('T')[0];const [medicineRes,mealsRes]=await Promise.all([fetch(`/api/medicine/records`),fetch(`/api/meals/all`)]);const medicineRecords=await medicineRes.json();const meals=await mealsRes.json();const grid=document.getElementById('healthCalendarGrid');const firstDay=new Date(healthCurrentYear,healthCurrentMonth,1).getDay();const lastDate=new Date(healthCurrentYear,healthCurrentMonth+1,0).getDate();const todayDate=new Date();todayDate.setHours(0,0,0,0);let html='<div class="calendar-weekdays">';['일','월','화','수','목','금','토'].forEach((day,index)=>{html+=`<div class="calendar-weekday" style="${index===0?'color:#e74c3c':index===6?'color:#3498db':''}">${day}</div>`});html+='</div><div class="calendar-days">';for(let i=0;i<firstDay;i++){html+='<div class="calendar-day empty"></div>'}for(let day=1;day<=lastDate;day++){const date=new Date(healthCurrentYear,healthCurrentMonth,day);date.setHours(0,0,0,0);const dateStr=`${healthCurrentYear}-${String(healthCurrentMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;const isToday=date.getTime()===todayDate.getTime();const dayMedicine=medicineRecords.find(r=>r.date===dateStr);const dayMeals=meals.filter(m=>m.date===dateStr);let medicineStatus='';if(dayMedicine){const morningTaken=dayMedicine.morning?.taken||false;const eveningTaken=dayMedicine.evening?.taken||false;if(morningTaken&&eveningTaken)medicineStatus='<div style="font-size:10px;color:#10b981">약💊</div>';else if(morningTaken||eveningTaken)medicineStatus='<div style="font-size:10px;color:#f59e0b">약💊</div>'}let mealStatus='';if(dayMeals&&dayMeals.length>0){const avgScore=dayMeals.reduce((sum,m)=>sum+(m.score||0),0)/dayMeals.length;mealStatus=`<div style="font-size:10px;color:${avgScore>=80?'#10b981':avgScore>=60?'#f59e0b':'#ef4444'}">식🍽️</div>`}html+=`<div class="calendar-day ${isToday?'today':''}" onclick="showHealthDayDetails('${dateStr}')" style="cursor:pointer">${day}${medicineStatus}${mealStatus}</div>`}html+='</div>';grid.innerHTML=html}
+function changeHealthMonth(delta){healthCurrentMonth+=delta;if(healthCurrentMonth<0){healthCurrentMonth=11;healthCurrentYear--}else if(healthCurrentMonth>11){healthCurrentMonth=0;healthCurrentYear++}renderHealthCalendar()}
+async function showHealthDayDetails(dateStr){try{const [medicineRes,mealsRes]=await Promise.all([fetch(`/api/medicine/records`),fetch(`/api/meals/date/${dateStr}`)]);const medicineRecords=await medicineRes.json();const mealsData=await mealsRes.json();const dayMedicine=medicineRecords.find(r=>r.date===dateStr);const dayMeals=mealsData.meals||[];const detailsDiv=document.getElementById('healthDayDetails');let html=`<div style="padding:16px;background:var(--gray-100);border-radius:12px"><h6 style="font-weight:700;margin-bottom:12px">${dateStr} 건강 기록</h6>`;html+='<div style="margin-bottom:16px"><div style="font-weight:600;margin-bottom:8px"><i class="bi bi-capsule"></i> 약 복용</div>';if(dayMedicine){html+=`<div style="display:flex;gap:12px"><span style="padding:4px 12px;border-radius:8px;background:${dayMedicine.morning?.taken?'#dcfce7':'#fee2e2'};color:${dayMedicine.morning?.taken?'#065f46':'#991b1b'}">아침: ${dayMedicine.morning?.taken?'복용완료':'미복용'}</span><span style="padding:4px 12px;border-radius:8px;background:${dayMedicine.evening?.taken?'#dcfce7':'#fee2e2'};color:${dayMedicine.evening?.taken?'#065f46':'#991b1b'}">저녁: ${dayMedicine.evening?.taken?'복용완료':'미복용'}</span></div>`}else{html+='<div style="color:var(--gray-600)">기록 없음</div>'}html+='</div>';html+='<div><div style="font-weight:600;margin-bottom:8px"><i class="bi bi-egg-fried"></i> 식단</div>';if(dayMeals&&dayMeals.length>0){html+='<div style="display:flex;flex-direction:column;gap:8px">';dayMeals.forEach(meal=>{html+=`<div style="display:flex;align-items:center;gap:8px"><span style="font-weight:600">${meal.mealType==='BREAKFAST'?'아침':meal.mealType==='LUNCH'?'점심':'저녁'}</span>${meal.imageUrl?`<img src="${meal.imageUrl}" style="width:40px;height:40px;border-radius:4px;object-fit:cover" onclick="showImageModal('${meal.imageUrl}')">`:''}${meal.score?`<span style="padding:2px 8px;border-radius:4px;background:${meal.score>=80?'#dcfce7':meal.score>=60?'#fef3c7':'#fee2e2'};color:${meal.score>=80?'#065f46':meal.score>=60?'#92400e':'#991b1b'};font-size:12px;font-weight:600">${meal.score}점</span>`:''}</div>`});html+='</div>'}else{html+='<div style="color:var(--gray-600)">기록 없음</div>'}html+='</div></div>';detailsDiv.innerHTML=html;detailsDiv.style.display='block'}catch(error){console.error('날짜 상세 로드 실패:',error);showToast('해당 날짜의 기록을 불러오는데 실패했습니다.','error')}}
 </script>
 </body>
 </html>

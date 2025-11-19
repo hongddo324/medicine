@@ -1,5 +1,6 @@
 package com.medicine.service;
 
+import com.medicine.model.Activity;
 import com.medicine.model.User;
 import com.medicine.model.Wish;
 import com.medicine.model.WishSchedule;
@@ -24,6 +25,7 @@ public class WishService {
     private final WishRepository wishRepository;
     private final WishScheduleRepository wishScheduleRepository;
     private final FileStorageService fileStorageService;
+    private final ActivityService activityService;
 
     /**
      * 모든 위시리스트 조회
@@ -67,7 +69,17 @@ public class WishService {
             wish.setImageUrl(imageUrl);
         }
 
-        return wishRepository.save(wish);
+        Wish saved = wishRepository.save(wish);
+
+        // 활동 기록 생성
+        try {
+            String message = user.getDisplayName() + "님이 위시를 추가했습니다: " + title;
+            activityService.createActivity(user, Activity.ActivityType.WISH_ADDED, message, saved.getId());
+        } catch (Exception e) {
+            log.error("Failed to create activity for wish", e);
+        }
+
+        return saved;
     }
 
     /**
@@ -156,7 +168,17 @@ public class WishService {
         schedule.setTitle(title != null ? title : wish.getTitle());
         schedule.setDescription(description);
 
-        return wishScheduleRepository.save(schedule);
+        WishSchedule saved = wishScheduleRepository.save(schedule);
+
+        // 활동 기록 생성
+        try {
+            String message = wish.getUser().getDisplayName() + "님이 일정을 추가했습니다: " + saved.getTitle();
+            activityService.createActivity(wish.getUser(), Activity.ActivityType.SCHEDULE_ADDED, message, saved.getId());
+        } catch (Exception e) {
+            log.error("Failed to create activity for schedule", e);
+        }
+
+        return saved;
     }
 
     /**
