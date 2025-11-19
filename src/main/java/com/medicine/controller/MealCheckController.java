@@ -1,7 +1,9 @@
 package com.medicine.controller;
 
+import com.medicine.model.Activity;
 import com.medicine.model.MealCheck;
 import com.medicine.model.User;
+import com.medicine.service.ActivityService;
 import com.medicine.service.MealCheckService;
 import com.medicine.service.PushNotificationService;
 import jakarta.servlet.http.HttpSession;
@@ -26,6 +28,7 @@ public class MealCheckController {
 
     private final MealCheckService mealCheckService;
     private final PushNotificationService pushNotificationService;
+    private final ActivityService activityService;
 
     /**
      * 식단 이미지 업로드
@@ -57,6 +60,16 @@ public class MealCheckController {
 
             log.info("Meal uploaded successfully - ID: {}, Score: {}",
                     mealCheck.getId(), mealCheck.getScore());
+
+            // 활동 기록 생성
+            try {
+                String mealTypeName = type.getDisplayName();
+                String message = user.getDisplayName() + "님이 " + mealTypeName + " 식단을 업로드했습니다";
+                activityService.createActivity(user, Activity.ActivityType.MEAL_UPLOADED, message, mealCheck.getId());
+                log.info("Activity created for meal upload - User: {}, Type: {}", user.getUsername(), mealTypeName);
+            } catch (Exception e) {
+                log.error("Failed to create activity for meal upload", e);
+            }
 
             // 식사 업로드 알림 전송
             String mealTypeName = type.getDisplayName();

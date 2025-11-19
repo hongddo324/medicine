@@ -1,9 +1,11 @@
 package com.medicine.controller;
 
+import com.medicine.model.Activity;
 import com.medicine.model.Comment;
 import com.medicine.model.MedicineRecord;
 import com.medicine.model.Role;
 import com.medicine.model.User;
+import com.medicine.service.ActivityService;
 import com.medicine.service.CommentService;
 import com.medicine.service.FileStorageService;
 import com.medicine.service.MedicineService;
@@ -36,6 +38,7 @@ public class MedicineController {
     private final FileStorageService fileStorageService;
     private final PushNotificationService pushNotificationService;
     private final PointService pointService;
+    private final ActivityService activityService;
 
     @GetMapping("/")
     public String home(HttpSession session, Model model) {
@@ -82,6 +85,15 @@ public class MedicineController {
                 pointService.addPoints(user, 10, PointHistory.PointType.MEDICINE,
                     type.getDisplayName() + " 약 복용");
                 log.info("Points added - User: {}, Points: +10, Type: MEDICINE", user.getUsername());
+            }
+
+            // 활동 기록 생성
+            try {
+                String message = user.getDisplayName() + "님이 " + type.getDisplayName() + " 약을 복용했습니다";
+                activityService.createActivity(user, Activity.ActivityType.MEDICINE_TAKEN, message, record.getId());
+                log.info("Activity created for medicine taken - User: {}, Type: {}", user.getUsername(), type);
+            } catch (Exception e) {
+                log.error("Failed to create activity for medicine taken", e);
             }
 
             log.info("Medicine taken - User: {}, Type: {}, Date: {}, Time: {}",
