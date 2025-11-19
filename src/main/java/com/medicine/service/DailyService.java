@@ -28,6 +28,7 @@ public class DailyService {
     private final DailyLikeRepository dailyLikeRepository;
     private final FileStorageService fileStorageService;
     private final ActivityService activityService;
+    private final WebSocketService webSocketService;
 
     /**
      * 모든 일상 게시물 조회 (최신순)
@@ -86,6 +87,13 @@ public class DailyService {
             log.error("Failed to create activity for daily post", e);
         }
 
+        // WebSocket 실시간 업데이트 전송
+        try {
+            webSocketService.broadcastDailyUpdate(saved, "CREATE");
+        } catch (Exception e) {
+            log.error("Failed to broadcast daily create via WebSocket", e);
+        }
+
         return saved;
     }
 
@@ -102,7 +110,16 @@ public class DailyService {
         }
 
         daily.setContent(content);
-        return dailyRepository.save(daily);
+        Daily updated = dailyRepository.save(daily);
+
+        // WebSocket 실시간 업데이트 전송
+        try {
+            webSocketService.broadcastDailyUpdate(updated, "UPDATE");
+        } catch (Exception e) {
+            log.error("Failed to broadcast daily update via WebSocket", e);
+        }
+
+        return updated;
     }
 
     /**
@@ -124,6 +141,13 @@ public class DailyService {
 
         dailyRepository.delete(daily);
         log.info("Daily post deleted - User: {}, ID: {}", user.getUsername(), id);
+
+        // WebSocket 실시간 업데이트 전송
+        try {
+            webSocketService.broadcastDailyUpdate(daily, "DELETE");
+        } catch (Exception e) {
+            log.error("Failed to broadcast daily delete via WebSocket", e);
+        }
     }
 
     /**

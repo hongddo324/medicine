@@ -12,6 +12,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 @Slf4j
@@ -85,6 +86,7 @@ public class ProfileController {
                 // Store new profile image
                 String imagePath = fileStorageService.storeProfileImage(profileImage, user.getId().toString());
                 updatedUser.setProfileImage(imagePath);
+                updatedUser.setProfileImageUpdatedAt(LocalDateTime.now());  // 프로필 사진 업데이트 시각 기록
                 log.info("Profile image updated - User: {}, Path: {}, Size: {} bytes",
                         user.getUsername(), imagePath, profileImage.getSize());
             }
