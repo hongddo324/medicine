@@ -204,3 +204,13 @@ CREATE TABLE activity (
 ### 인덱스
 - **Activity**: created_at (내림차순) - 최신 활동 조회 최적화
 - **Activity**: is_read - 읽지 않은 활동 조회 최적화
+
+## 7. 기존 데이터 업데이트
+
+### User 테이블의 points가 null인 데이터를 0으로 업데이트
+
+기존에 생성된 사용자 중 points가 null인 경우 0으로 초기화합니다.
+
+```sql
+UPDATE users SET points = 0 WHERE points IS NULL;
+```
