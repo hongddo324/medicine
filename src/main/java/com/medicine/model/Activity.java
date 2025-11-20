@@ -14,7 +14,9 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "activity", indexes = {
     @Index(name = "idx_created_at", columnList = "created_at"),
-    @Index(name = "idx_is_read", columnList = "is_read")
+    @Index(name = "idx_is_read", columnList = "is_read"),
+    @Index(name = "idx_recipient_user_id", columnList = "recipient_user_id"),
+    @Index(name = "idx_recipient_created", columnList = "recipient_user_id, created_at")
 })
 public class Activity implements Serializable {
 
@@ -28,7 +30,11 @@ public class Activity implements Serializable {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private User user;  // 활동 수행자
+    private User user;  // 활동 수행자 (actor)
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "recipient_user_id", nullable = false)
+    private User recipient;  // 알림 수신자 (recipient)
 
     @Column(columnDefinition = "TEXT")
     private String message;  // 활동 메시지

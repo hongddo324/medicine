@@ -23,12 +23,19 @@ public class ActivityService {
     private final WebSocketService webSocketService;
 
     /**
-     * 활동 생성
+     * 활동 생성 (수신자 지정)
      */
     @Transactional
-    public Activity createActivity(User user, Activity.ActivityType activityType, String message, Long referenceId) {
+    public Activity createActivity(User actor, User recipient, Activity.ActivityType activityType, String message, Long referenceId) {
+        // 자기 자신에게는 알림을 보내지 않음
+        if (actor.getId().equals(recipient.getId())) {
+            log.debug("Skipping self-notification for user {}", actor.getId());
+            return null;
+        }
+
         Activity activity = new Activity();
-        activity.setUser(user);
+        activity.setUser(actor);
+        activity.setRecipient(recipient);
         activity.setActivityType(activityType);
         activity.setMessage(message);
         activity.setReferenceId(referenceId);
@@ -47,6 +54,16 @@ public class ActivityService {
     }
 
     /**
+     * 활동 생성 (하위 호환성 - deprecated)
+     */
+    @Deprecated
+    @Transactional
+    public Activity createActivity(User user, Activity.ActivityType activityType, String message, Long referenceId) {
+        log.warn("Using deprecated createActivity without recipient - activity will not be created");
+        return null;
+    }
+
+    /**
      * 최근 활동 조회 (최대 20개)
      * @deprecated 사용자별 읽음 상태를 포함하지 않음. getRecentActivitiesForUser 사용 권장
      */
@@ -56,11 +73,10 @@ public class ActivityService {
     }
 
     /**
-     * 사용자별 읽음 상태를 포함한 최근 활동 조회 (최대 50개)
+     * 사용자별 최근 활동 조회 (수신자 기준, 최대 50개)
      */
-    public List<Map<String, Object>> getRecentActivitiesForUser(User user) {
-        List<Activity> activities = activityRepository.findTop50ByOrderByCreatedAtDesc();
-        Set<Long> readActivityIds = activityReadStatusRepository.getReadActivityIds(user.getId());
+    public List<Map<String, Object>> getRecentActivitiesForUser(User recipient) {
+        List<Activity> activities = activityRepository.findTop50ByRecipientIdOrderByCreatedAtDesc(recipient.getId());
 
         return activities.stream()
                 .map(activity -> {
@@ -70,9 +86,9 @@ public class ActivityService {
                     activityMap.put("activityType", activity.getActivityType().name());
                     activityMap.put("referenceId", activity.getReferenceId());
                     activityMap.put("createdAt", activity.getCreatedAt());
-                    activityMap.put("isRead", readActivityIds.contains(activity.getId()));
+                    activityMap.put("isRead", activity.getIsRead());
 
-                    // User 정보 추가
+                    // Actor(수행자) 정보 추가
                     if (activity.getUser() != null) {
                         Map<String, Object> userMap = new HashMap<>();
                         userMap.put("id", activity.getUser().getId());
@@ -95,48 +111,18 @@ public class ActivityService {
     }
 
     /**
-     * 사용자별 읽지 않은 활동 개수
+     * 사용자별 읽지 않은 활동 개수 (항상 0 반환 - 읽음=삭제 정책으로 변경됨)
      */
     public long getUnreadCount(User user) {
-        List<Activity> allActivities = activityRepository.findTop50ByOrderByCreatedAtDesc();
-        Set<Long> allActivityIds = allActivities.stream()
-                .map(Activity::getId)
-                .collect(Collectors.toSet());
-
-        return activityReadStatusRepository.getUnreadCount(user.getId(), allActivityIds);
+        return 0; // 읽지 않은 알림 = 존재하는 모든 알림 (읽으면 자동 삭제)
     }
 
     /**
-     * 사용자별 읽지 않은 활동 조회
+     * 사용자별 읽지 않은 활동 조회 (수신자 기준 모든 활동)
      */
-    public List<Map<String, Object>> getUnreadActivitiesForUser(User user) {
-        List<Activity> activities = activityRepository.findTop50ByOrderByCreatedAtDesc();
-        Set<Long> readActivityIds = activityReadStatusRepository.getReadActivityIds(user.getId());
-
-        return activities.stream()
-                .filter(activity -> !readActivityIds.contains(activity.getId()))
-                .map(activity -> {
-                    Map<String, Object> activityMap = new HashMap<>();
-                    activityMap.put("id", activity.getId());
-                    activityMap.put("message", activity.getMessage());
-                    activityMap.put("activityType", activity.getActivityType().name());
-                    activityMap.put("referenceId", activity.getReferenceId());
-                    activityMap.put("createdAt", activity.getCreatedAt());
-                    activityMap.put("isRead", false);
-
-                    // User 정보 추가
-                    if (activity.getUser() != null) {
-                        Map<String, Object> userMap = new HashMap<>();
-                        userMap.put("id", activity.getUser().getId());
-                        userMap.put("username", activity.getUser().getUsername());
-                        userMap.put("displayName", activity.getUser().getDisplayName());
-                        userMap.put("profileImage", activity.getUser().getProfileImage());
-                        activityMap.put("user", userMap);
-                    }
-
-                    return activityMap;
-                })
-                .collect(Collectors.toList());
+    public List<Map<String, Object>> getUnreadActivitiesForUser(User recipient) {
+        // 읽음 = 삭제이므로, 존재하는 모든 활동이 읽지 않은 활동
+        return getRecentActivitiesForUser(recipient);
     }
 
     /**
@@ -158,32 +144,34 @@ public class ActivityService {
     }
 
     /**
-     * 사용자별 활동 읽음 처리
+     * 활동 읽음 처리 (읽으면 자동 삭제)
      */
+    @Transactional
     public void markAsRead(User user, Long activityId) {
-        activityReadStatusRepository.markAsRead(user.getId(), activityId);
-        log.debug("Activity {} marked as read for user {}", activityId, user.getUsername());
+        // 읽음 = 삭제
+        activityRepository.deleteByIdAndRecipientId(activityId, user.getId());
+        log.debug("Activity {} deleted (read) for user {}", activityId, user.getUsername());
     }
 
     /**
-     * 사용자별 여러 활동을 한번에 읽음 처리
+     * 여러 활동 읽음 처리 (읽으면 자동 삭제)
      */
+    @Transactional
     public void markMultipleAsRead(User user, Set<Long> activityIds) {
-        activityReadStatusRepository.markMultipleAsRead(user.getId(), activityIds);
-        log.debug("Marked {} activities as read for user {}", activityIds.size(), user.getUsername());
+        for (Long activityId : activityIds) {
+            activityRepository.deleteByIdAndRecipientId(activityId, user.getId());
+        }
+        log.debug("Marked {} activities as read (deleted) for user {}", activityIds.size(), user.getUsername());
     }
 
     /**
-     * 사용자별 모든 활동 읽음 처리
+     * 모든 활동 읽음 처리 (모두 삭제)
      */
+    @Transactional
     public void markAllAsRead(User user) {
-        List<Activity> activities = activityRepository.findTop50ByOrderByCreatedAtDesc();
-        Set<Long> activityIds = activities.stream()
-                .map(Activity::getId)
-                .collect(Collectors.toSet());
-
-        activityReadStatusRepository.markMultipleAsRead(user.getId(), activityIds);
-        log.info("Marked all {} activities as read for user {}", activityIds.size(), user.getUsername());
+        long count = activityRepository.countByRecipientId(user.getId());
+        activityRepository.deleteByRecipientId(user.getId());
+        log.info("Deleted all {} activities for user {}", count, user.getUsername());
     }
 
     /**
@@ -227,22 +215,20 @@ public class ActivityService {
     }
 
     /**
-     * 활동 삭제
+     * 활동 삭제 (수신자별)
      */
     @Transactional
-    public void deleteActivity(Long activityId) {
-        activityRepository.deleteById(activityId);
-        // Redis에서도 삭제
-        activityReadStatusRepository.removeActivityFromAllUsers(activityId);
-        log.info("Activity {} deleted", activityId);
+    public void deleteActivity(Long activityId, User recipient) {
+        activityRepository.deleteByIdAndRecipientId(activityId, recipient.getId());
+        log.info("Activity {} deleted for user {}", activityId, recipient.getUsername());
     }
 
     /**
-     * 모든 활동 삭제
+     * 모든 활동 삭제 (수신자별)
      */
     @Transactional
-    public void deleteAllActivities() {
-        activityRepository.deleteAll();
-        log.info("All activities deleted");
+    public void deleteAllActivities(User recipient) {
+        activityRepository.deleteByRecipientId(recipient.getId());
+        log.info("All activities deleted for user {}", recipient.getUsername());
     }
 }
