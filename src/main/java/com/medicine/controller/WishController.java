@@ -97,7 +97,8 @@ public class WishController {
             @RequestParam(required = false) String address,
             @RequestParam(required = false) MultipartFile image,
             @RequestParam(required = false) Long dailyId,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime scheduleDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
             HttpSession session) {
 
         User user = (User) session.getAttribute("user");
@@ -109,9 +110,15 @@ public class WishController {
             Wish.WishCategory wishCategory = Wish.WishCategory.valueOf(category);
             Wish wish = wishService.createWish(user, title, description, wishCategory, latitude, longitude, address, image, dailyId);
 
-            // 일정이 있으면 추가
-            if (scheduleDate != null) {
-                wishService.createSchedule(wish.getId(), scheduleDate, title, description);
+            // 날짜 범위로 일정 추가
+            if (startDate != null && endDate != null) {
+                LocalDateTime current = startDate;
+                while (!current.isAfter(endDate)) {
+                    wishService.createSchedule(wish.getId(), current, title, description);
+                    current = current.plusDays(1);
+                }
+            } else if (startDate != null) {
+                wishService.createSchedule(wish.getId(), startDate, title, description);
             }
 
             log.info("Wish created - User: {}, ID: {}", user.getUsername(), wish.getId());
