@@ -71,45 +71,25 @@ public class MedicineService {
     public Map<String, Object> getMonthCalendarData(int year, int month) {
         List<MedicineRecord> records = getMonthRecords(year, month);
 
-        // Group records by date
-        Map<LocalDate, List<MedicineRecord>> recordsByDate = records.stream()
-                .filter(MedicineRecord::isTaken)
-                .collect(Collectors.groupingBy(MedicineRecord::getDate));
-
         Map<String, Object> calendarData = new HashMap<>();
-        List<Map<String, Object>> events = new ArrayList<>();
+        List<Map<String, Object>> recordList = new ArrayList<>();
 
-        for (Map.Entry<LocalDate, List<MedicineRecord>> entry : recordsByDate.entrySet()) {
-            LocalDate date = entry.getKey();
-            List<MedicineRecord> dayRecords = entry.getValue();
-
-            // Check if both morning and evening medicine are taken
-            boolean hasMorning = dayRecords.stream()
-                    .anyMatch(r -> r.getMedicineType() == MedicineRecord.MedicineType.MORNING && r.isTaken());
-            boolean hasEvening = dayRecords.stream()
-                    .anyMatch(r -> r.getMedicineType() == MedicineRecord.MedicineType.EVENING && r.isTaken());
-
-            // If at least one medicine is taken but not both, mark as incomplete
-            boolean isIncomplete = !(hasMorning && hasEvening);
-
-            // Get the first taken time for display
-            String time = dayRecords.get(0).getTakenTime().toLocalTime().toString();
-
-            Map<String, Object> event = new HashMap<>();
-            event.put("date", date.toString());
-            event.put("time", time);
-            event.put("title", "약 복용");
-            event.put("incomplete", isIncomplete);
-            event.put("hasMorning", hasMorning);
-            event.put("hasEvening", hasEvening);
-
-            log.debug("Calendar event - Date: {}, Morning: {}, Evening: {}, Incomplete: {}",
-                    date, hasMorning, hasEvening, isIncomplete);
-
-            events.add(event);
+        // Convert MedicineRecord to simple map to avoid circular reference
+        for (MedicineRecord record : records) {
+            Map<String, Object> recordMap = new HashMap<>();
+            recordMap.put("date", record.getDate().toString());
+            recordMap.put("medicineType", record.getMedicineType().name());
+            recordMap.put("taken", record.isTaken());
+            if (record.getTakenTime() != null) {
+                recordMap.put("takenTime", record.getTakenTime().toString());
+            }
+            recordList.add(recordMap);
         }
 
-        calendarData.put("events", events);
+        calendarData.put("records", recordList);
+
+        log.debug("Retrieved {} medicine records for calendar {}-{}", recordList.size(), year, month);
+
         return calendarData;
     }
 
