@@ -50,9 +50,41 @@ self.addEventListener('notificationclick', (event) => {
 
     event.notification.close();
 
-    // 알림 클릭 시 이동할 URL (절대 경로로 변경하여 404 방지)
-    const targetUrl = event.notification.data?.url || '/medicine';
-    const urlToOpen = targetUrl.startsWith('http') ? targetUrl : 'https://www.hongddo.top' + targetUrl;
+    // 알림 데이터에서 정보 추출
+    const activityType = event.notification.data?.activityType;
+    const referenceId = event.notification.data?.referenceId;
+    let targetPath = event.notification.data?.url || '/medicine';
+
+    // Activity 타입에 따라 적절한 탭과 상세 페이지로 이동
+    if (activityType && referenceId) {
+        switch (activityType) {
+            case 'WISH_ADDED':
+            case 'SCHEDULE_ADDED':
+                targetPath = `/medicine?tab=wishTab&wishId=${referenceId}`;
+                break;
+            case 'DAILY_POST':
+            case 'DAILY_COMMENT':
+            case 'DAILY_LIKE':
+                targetPath = `/medicine?tab=dailyTab&dailyId=${referenceId}`;
+                break;
+            case 'MEDICINE_TAKEN':
+            case 'MEAL_UPLOADED':
+                targetPath = `/medicine?tab=healthTab`;
+                break;
+            case 'COMMENT':
+            case 'COMMENT_REPLY':
+                targetPath = `/medicine?tab=homeTab`;
+                break;
+            case 'PROFILE_UPDATED':
+                targetPath = `/medicine?tab=profileTab`;
+                break;
+            default:
+                targetPath = `/medicine?tab=activityTab`;
+        }
+    }
+
+    // 절대 URL 생성
+    const urlToOpen = targetPath.startsWith('http') ? targetPath : 'https://www.hongddo.top' + targetPath;
 
     // 클라이언트 창 열기 또는 포커스
     event.waitUntil(
@@ -62,9 +94,19 @@ self.addEventListener('notificationclick', (event) => {
                 for (const client of clientList) {
                     if (client.url.includes('hongddo.top') && 'focus' in client) {
                         return client.focus().then(focusedClient => {
+                            // postMessage로 탭 전환 및 상세 페이지 이동 요청
+                            focusedClient.postMessage({
+                                type: 'NOTIFICATION_CLICK',
+                                activityType: activityType,
+                                referenceId: referenceId,
+                                targetPath: targetPath
+                            });
+
+                            // navigate가 지원되면 사용
                             if ('navigate' in focusedClient) {
                                 return focusedClient.navigate(urlToOpen);
                             }
+                            return focusedClient;
                         });
                     }
                 }
