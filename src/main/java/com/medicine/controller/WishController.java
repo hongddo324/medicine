@@ -26,7 +26,7 @@ public class WishController {
     private final WishService wishService;
 
     /**
-     * 모든 위시리스트 조회
+     * 모든 위시리스트 조회 (모든 유저 공유)
      */
     @GetMapping
     public ResponseEntity<?> getAllWishes(HttpSession session) {
@@ -36,7 +36,8 @@ public class WishController {
         }
 
         try {
-            List<Wish> wishes = wishService.getUserWishes(user.getId());
+            // 모든 유저의 위시리스트 조회 (일상탭처럼 공유)
+            List<Wish> wishes = wishService.getAllWishes();
 
             List<Map<String, Object>> wishList = wishes.stream().map(wish -> {
                 Map<String, Object> wishMap = new HashMap<>();
