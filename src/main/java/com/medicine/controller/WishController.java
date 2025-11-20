@@ -58,10 +58,11 @@ public class WishController {
                 // 연결된 일상 게시물 제목 추가
                 if (wish.getDailyId() != null) {
                     try {
-                        Daily daily = dailyService.getDailyById(wish.getDailyId());
-                        if (daily != null && daily.getContent() != null) {
-                            wishMap.put("dailyTitle", daily.getContent());
-                        }
+                        dailyService.getDailyById(wish.getDailyId()).ifPresent(daily -> {
+                            if (daily.getContent() != null) {
+                                wishMap.put("dailyTitle", daily.getContent());
+                            }
+                        });
                     } catch (Exception e) {
                         log.warn("Failed to get daily title for wish {}: {}", wish.getId(), e.getMessage());
                     }
