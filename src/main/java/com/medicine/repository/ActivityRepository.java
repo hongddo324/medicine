@@ -26,4 +26,16 @@ public interface ActivityRepository extends JpaRepository<Activity, Long> {
 
     // 읽지 않은 활동 조회
     List<Activity> findByIsReadFalseOrderByCreatedAtDesc();
+
+    // 수신자별 최신 활동 조회 (최대 50개)
+    List<Activity> findTop50ByRecipientIdOrderByCreatedAtDesc(Long recipientId);
+
+    // 수신자별 활동 개수
+    long countByRecipientId(Long recipientId);
+
+    // 수신자별 활동 삭제
+    void deleteByIdAndRecipientId(Long activityId, Long recipientId);
+
+    // 수신자별 모든 활동 삭제
+    void deleteByRecipientId(Long recipientId);
 }
