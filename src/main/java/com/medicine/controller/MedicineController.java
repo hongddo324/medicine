@@ -11,6 +11,7 @@ import com.medicine.service.FileStorageService;
 import com.medicine.service.MedicineService;
 import com.medicine.service.PointService;
 import com.medicine.service.PushNotificationService;
+import com.medicine.service.UserService;
 import com.medicine.model.PointHistory;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +40,7 @@ public class MedicineController {
     private final PushNotificationService pushNotificationService;
     private final PointService pointService;
     private final ActivityService activityService;
+    private final UserService userService;
 
     @GetMapping("/")
     public String home(HttpSession session, Model model) {
@@ -47,16 +49,28 @@ public class MedicineController {
         MedicineRecord eveningRecord = medicineService.getTodayRecord(MedicineRecord.MedicineType.EVENING);
         List<Comment> comments = commentService.getAllComments();
 
+        // user ID 2의 포인트를 모든 사용자에게 표시
+        int displayPoints = 0;
+        try {
+            User targetUser = userService.findById(2L).orElse(null);
+            if (targetUser != null) {
+                displayPoints = targetUser.getPoints() != null ? targetUser.getPoints() : 0;
+            }
+        } catch (Exception e) {
+            log.warn("Failed to get user ID 2 points: {}", e.getMessage());
+        }
+
         model.addAttribute("user", user);
+        model.addAttribute("displayPoints", displayPoints);
         model.addAttribute("morningRecord", morningRecord);
         model.addAttribute("eveningRecord", eveningRecord);
         model.addAttribute("today", LocalDate.now());
         model.addAttribute("canTakeMedicine", user.getRole() == Role.FATHER);
         model.addAttribute("comments", comments);
 
-        log.debug("Home page accessed by user: {}, morning: {}, evening: {}",
+        log.debug("Home page accessed by user: {}, morning: {}, evening: {}, displayPoints: {}",
             user.getUsername(), morningRecord.isTaken() ? "taken" : "not taken",
-            eveningRecord.isTaken() ? "taken" : "not taken");
+            eveningRecord.isTaken() ? "taken" : "not taken", displayPoints);
 
         return "medicine";
     }
