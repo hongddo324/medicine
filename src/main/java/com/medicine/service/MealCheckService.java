@@ -178,7 +178,7 @@ public class MealCheckService {
                 .collect(Collectors.groupingBy(MealCheck::getDate));
 
         // 각 날짜별 평균 점수와 이모티콘 계산
-        List<Map<String, Object>> events = new ArrayList<>();
+        List<Map<String, Object>> dailyStats = new ArrayList<>();
 
         for (Map.Entry<LocalDate, List<MealCheck>> entry : mealsByDate.entrySet()) {
             LocalDate date = entry.getKey();
@@ -192,17 +192,19 @@ public class MealCheckService {
 
             String emoji = getEmojiForScore((int) averageScore);
 
-            Map<String, Object> event = new HashMap<>();
-            event.put("date", date.toString());
-            event.put("averageScore", (int) averageScore);
-            event.put("emoji", emoji);
-            event.put("mealCount", dailyMeals.size());
+            Map<String, Object> stat = new HashMap<>();
+            stat.put("date", date.toString());
+            stat.put("averageScore", (int) averageScore);
+            stat.put("emoji", emoji);
+            stat.put("mealCount", dailyMeals.size());
 
-            events.add(event);
+            dailyStats.add(stat);
         }
 
         Map<String, Object> result = new HashMap<>();
-        result.put("events", events);
+        result.put("dailyStats", dailyStats);
+
+        log.debug("Retrieved daily stats for {} days in {}-{}", dailyStats.size(), year, month);
 
         return result;
     }
