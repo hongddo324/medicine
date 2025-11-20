@@ -1,8 +1,10 @@
 package com.medicine.controller;
 
+import com.medicine.model.Daily;
 import com.medicine.model.User;
 import com.medicine.model.Wish;
 import com.medicine.model.WishSchedule;
+import com.medicine.service.DailyService;
 import com.medicine.service.WishService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,7 @@ import java.util.Map;
 public class WishController {
 
     private final WishService wishService;
+    private final DailyService dailyService;
 
     /**
      * 모든 위시리스트 조회 (모든 유저 공유)
@@ -51,6 +54,19 @@ public class WishController {
                 wishMap.put("imageUrl", wish.getImageUrl());
                 wishMap.put("completed", wish.getCompleted());
                 wishMap.put("dailyId", wish.getDailyId());
+
+                // 연결된 일상 게시물 제목 추가
+                if (wish.getDailyId() != null) {
+                    try {
+                        Daily daily = dailyService.getDailyById(wish.getDailyId());
+                        if (daily != null && daily.getContent() != null) {
+                            wishMap.put("dailyTitle", daily.getContent());
+                        }
+                    } catch (Exception e) {
+                        log.warn("Failed to get daily title for wish {}: {}", wish.getId(), e.getMessage());
+                    }
+                }
+
                 wishMap.put("createdAt", wish.getCreatedAt());
                 wishMap.put("user", Map.of(
                     "id", wish.getUser().getId(),
