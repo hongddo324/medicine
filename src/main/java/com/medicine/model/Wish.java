@@ -1,5 +1,7 @@
 package com.medicine.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -10,6 +12,7 @@ import java.util.List;
 @Entity
 @Table(name = "wish")
 @Data
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Wish {
 
     @Id
@@ -18,6 +21,7 @@ public class Wish {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnoreProperties({"dailies", "wishes", "schedules", "medicineRecords", "mealChecks", "comments", "dailyComments", "dailyLikes", "activities", "password"})
     private User user;
 
     @Column(nullable = false, length = 200)
@@ -55,6 +59,7 @@ public class Wish {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "wish", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference("wish-schedules")
     private List<WishSchedule> schedules = new ArrayList<>();
 
     public enum WishCategory {

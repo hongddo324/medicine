@@ -1,5 +1,6 @@
 package com.medicine.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -16,6 +17,7 @@ public class WishSchedule {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "wish_id", nullable = false)
+    @JsonBackReference("wish-schedules")
     private Wish wish;
 
     @Column(name = "scheduled_date", nullable = false)

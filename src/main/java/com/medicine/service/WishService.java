@@ -144,7 +144,18 @@ public class WishService {
                 .orElseThrow(() -> new IllegalArgumentException("위시를 찾을 수 없습니다."));
 
         // 권한 확인
-        if (!wish.getUser().getId().equals(user.getId())) {
+        User wishOwner = wish.getUser();
+        if (wishOwner == null) {
+            log.error("Wish {} has no owner", wishId);
+            throw new IllegalArgumentException("위시 소유자 정보가 없습니다.");
+        }
+
+        log.debug("Toggle wish completion - Wish ID: {}, Owner: {}, Current User: {}",
+                wishId, wishOwner.getId(), user.getId());
+
+        if (!wishOwner.getId().equals(user.getId())) {
+            log.warn("User {} attempted to toggle wish {} owned by {}",
+                    user.getId(), wishId, wishOwner.getId());
             throw new IllegalArgumentException("수정 권한이 없습니다.");
         }
 
