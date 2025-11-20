@@ -1,5 +1,6 @@
 package com.medicine.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -20,6 +21,7 @@ public class DailyImage {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "daily_id", nullable = false)
+    @JsonBackReference("daily-images")
     private Daily daily;
 
     /**

@@ -1,5 +1,7 @@
 package com.medicine.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -10,6 +12,7 @@ import java.util.List;
 @Entity
 @Table(name = "daily")
 @Data
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Daily {
 
     @Id
@@ -18,6 +21,7 @@ public class Daily {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnoreProperties({"dailies", "wishes", "schedules", "medicineRecords", "mealChecks", "comments", "dailyComments", "dailyLikes", "activities", "password"})
     private User user;
 
     @Column(columnDefinition = "TEXT")
@@ -40,9 +44,11 @@ public class Daily {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "daily", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference("daily-comments")
     private List<DailyComment> comments = new ArrayList<>();
 
     @OneToMany(mappedBy = "daily", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference("daily-likes")
     private List<DailyLike> likes = new ArrayList<>();
 
     /**
@@ -51,6 +57,7 @@ public class Daily {
      */
     @OneToMany(mappedBy = "daily", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("imageOrder ASC")
+    @JsonManagedReference("daily-images")
     private List<DailyImage> images = new ArrayList<>();
 
     public enum MediaType {
