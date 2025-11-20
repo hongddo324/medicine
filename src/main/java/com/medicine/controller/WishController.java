@@ -211,12 +211,23 @@ public class WishController {
                 scheduleMap.put("description", schedule.getDescription());
                 scheduleMap.put("scheduledDate", schedule.getScheduledDate());
                 scheduleMap.put("completed", schedule.getCompleted());
-                scheduleMap.put("wish", Map.of(
-                    "id", schedule.getWish().getId(),
-                    "title", schedule.getWish().getTitle(),
-                    "category", schedule.getWish().getCategory(),
-                    "address", schedule.getWish().getAddress() != null ? schedule.getWish().getAddress() : ""
+
+                Map<String, Object> wishMap = new HashMap<>();
+                wishMap.put("id", schedule.getWish().getId());
+                wishMap.put("title", schedule.getWish().getTitle());
+                wishMap.put("category", schedule.getWish().getCategory());
+                wishMap.put("address", schedule.getWish().getAddress() != null ? schedule.getWish().getAddress() : "");
+                wishMap.put("latitude", schedule.getWish().getLatitude());
+                wishMap.put("longitude", schedule.getWish().getLongitude());
+                wishMap.put("description", schedule.getWish().getDescription());
+                wishMap.put("dailyId", schedule.getWish().getDailyId());
+                wishMap.put("user", Map.of(
+                    "id", schedule.getWish().getUser().getId(),
+                    "username", schedule.getWish().getUser().getUsername(),
+                    "displayName", schedule.getWish().getUser().getDisplayName() != null ? schedule.getWish().getUser().getDisplayName() : schedule.getWish().getUser().getUsername()
                 ));
+
+                scheduleMap.put("wish", wishMap);
                 return scheduleMap;
             }).toList();
 
@@ -252,12 +263,23 @@ public class WishController {
                 scheduleMap.put("description", schedule.getDescription());
                 scheduleMap.put("scheduledDate", schedule.getScheduledDate());
                 scheduleMap.put("completed", schedule.getCompleted());
-                scheduleMap.put("wish", Map.of(
-                    "id", schedule.getWish().getId(),
-                    "title", schedule.getWish().getTitle(),
-                    "category", schedule.getWish().getCategory(),
-                    "address", schedule.getWish().getAddress() != null ? schedule.getWish().getAddress() : ""
+
+                Map<String, Object> wishMap = new HashMap<>();
+                wishMap.put("id", schedule.getWish().getId());
+                wishMap.put("title", schedule.getWish().getTitle());
+                wishMap.put("category", schedule.getWish().getCategory());
+                wishMap.put("address", schedule.getWish().getAddress() != null ? schedule.getWish().getAddress() : "");
+                wishMap.put("latitude", schedule.getWish().getLatitude());
+                wishMap.put("longitude", schedule.getWish().getLongitude());
+                wishMap.put("description", schedule.getWish().getDescription());
+                wishMap.put("dailyId", schedule.getWish().getDailyId());
+                wishMap.put("user", Map.of(
+                    "id", schedule.getWish().getUser().getId(),
+                    "username", schedule.getWish().getUser().getUsername(),
+                    "displayName", schedule.getWish().getUser().getDisplayName() != null ? schedule.getWish().getUser().getDisplayName() : schedule.getWish().getUser().getUsername()
                 ));
+
+                scheduleMap.put("wish", wishMap);
                 return scheduleMap;
             }).toList();
 

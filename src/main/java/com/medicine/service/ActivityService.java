@@ -4,6 +4,7 @@ import com.medicine.model.Activity;
 import com.medicine.model.User;
 import com.medicine.repository.ActivityReadStatusRepository;
 import com.medicine.repository.ActivityRepository;
+import com.medicine.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,7 @@ public class ActivityService {
     private final ActivityRepository activityRepository;
     private final ActivityReadStatusRepository activityReadStatusRepository;
     private final WebSocketService webSocketService;
+    private final UserRepository userRepository;
 
     /**
      * 활동 생성 (수신자 지정)
@@ -54,12 +56,50 @@ public class ActivityService {
     }
 
     /**
+     * 활동 생성 (모든 사용자에게 알림 전송 - 일상 게시글, 댓글 등)
+     */
+    @Transactional
+    public void createActivityForAllUsers(User actor, Activity.ActivityType activityType, String message, Long referenceId) {
+        try {
+            // 모든 사용자 조회
+            List<User> allUsers = userRepository.findAll();
+
+            // 각 사용자에게 알림 생성 (자기 자신 제외)
+            for (User recipient : allUsers) {
+                if (!recipient.getId().equals(actor.getId())) {
+                    Activity activity = new Activity();
+                    activity.setUser(actor);
+                    activity.setRecipient(recipient);
+                    activity.setActivityType(activityType);
+                    activity.setMessage(message);
+                    activity.setReferenceId(referenceId);
+                    activity.setIsRead(false);
+
+                    Activity saved = activityRepository.save(activity);
+
+                    // WebSocket 실시간 알림 전송
+                    try {
+                        webSocketService.broadcastActivity(saved);
+                    } catch (Exception e) {
+                        log.error("Failed to broadcast activity via WebSocket", e);
+                    }
+                }
+            }
+
+            log.info("Created {} activities for actor: {}", allUsers.size() - 1, actor.getUsername());
+        } catch (Exception e) {
+            log.error("Failed to create activities for all users", e);
+        }
+    }
+
+    /**
      * 활동 생성 (하위 호환성 - deprecated)
      */
     @Deprecated
     @Transactional
     public Activity createActivity(User user, Activity.ActivityType activityType, String message, Long referenceId) {
-        log.warn("Using deprecated createActivity without recipient - activity will not be created");
+        // 모든 유저에게 알림 전송으로 변경
+        createActivityForAllUsers(user, activityType, message, referenceId);
         return null;
     }
 
