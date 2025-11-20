@@ -23,6 +23,7 @@ public class ActivityService {
     private final ActivityReadStatusRepository activityReadStatusRepository;
     private final WebSocketService webSocketService;
     private final UserRepository userRepository;
+    private final PushNotificationService pushNotificationService;
 
     /**
      * 활동 생성 (수신자 지정)
@@ -50,6 +51,13 @@ public class ActivityService {
             webSocketService.broadcastActivity(saved);
         } catch (Exception e) {
             log.error("Failed to broadcast activity via WebSocket", e);
+        }
+
+        // FCM Push 알림 전송
+        try {
+            sendPushNotification(recipient, activityType, message, referenceId);
+        } catch (Exception e) {
+            log.error("Failed to send push notification for activity {}", saved.getId(), e);
         }
 
         return saved;
@@ -82,6 +90,13 @@ public class ActivityService {
                         webSocketService.broadcastActivity(saved);
                     } catch (Exception e) {
                         log.error("Failed to broadcast activity via WebSocket", e);
+                    }
+
+                    // FCM Push 알림 전송
+                    try {
+                        sendPushNotification(recipient, activityType, message, referenceId);
+                    } catch (Exception e) {
+                        log.error("Failed to send push notification for activity to user {}", recipient.getUsername(), e);
                     }
                 }
             }
@@ -270,5 +285,102 @@ public class ActivityService {
     public void deleteAllActivities(User recipient) {
         activityRepository.deleteByRecipientId(recipient.getId());
         log.info("All activities deleted for user {}", recipient.getUsername());
+    }
+
+    /**
+     * FCM Push 알림 전송 (Activity 타입별로 적절한 제목과 URL 설정)
+     */
+    private void sendPushNotification(User recipient, Activity.ActivityType activityType, String message, Long referenceId) {
+        try {
+            // 알림 제목 생성
+            String title = getNotificationTitle(activityType);
+
+            // 알림 클릭 시 이동할 URL 생성
+            String url = getNotificationUrl(activityType, referenceId);
+
+            // 추가 데이터 설정 (Service Worker에서 사용)
+            Map<String, String> data = new HashMap<>();
+            data.put("activityType", activityType.name());
+            if (referenceId != null) {
+                data.put("referenceId", referenceId.toString());
+            }
+            data.put("type", activityType.name());
+
+            // FCM 푸시 알림 전송
+            pushNotificationService.sendNotification(
+                    recipient.getUsername(),
+                    title,
+                    message,
+                    url,
+                    data
+            );
+
+            log.debug("[FCM] Push notification sent - Recipient: {}, Type: {}", recipient.getUsername(), activityType);
+
+        } catch (Exception e) {
+            log.error("[FCM] Failed to send push notification - Recipient: {}, Type: {}",
+                    recipient.getUsername(), activityType, e);
+        }
+    }
+
+    /**
+     * Activity 타입별 알림 제목 생성
+     */
+    private String getNotificationTitle(Activity.ActivityType activityType) {
+        switch (activityType) {
+            case COMMENT:
+            case COMMENT_REPLY:
+                return "💬 응원 메시지";
+            case DAILY_POST:
+                return "📸 새 일상 게시";
+            case DAILY_COMMENT:
+                return "💬 일상 댓글";
+            case DAILY_LIKE:
+                return "❤️ 일상 좋아요";
+            case WISH_ADDED:
+                return "⭐ 새 위시 추가";
+            case SCHEDULE_ADDED:
+                return "📅 새 일정 추가";
+            case PROFILE_UPDATED:
+                return "👤 프로필 업데이트";
+            case MEDICINE_TAKEN:
+                return "💊 약 복용 완료";
+            case MEAL_UPLOADED:
+                return "🍽️ 식단 등록";
+            default:
+                return "🔔 새 알림";
+        }
+    }
+
+    /**
+     * Activity 타입별 알림 클릭 URL 생성
+     */
+    private String getNotificationUrl(Activity.ActivityType activityType, Long referenceId) {
+        String baseUrl = "/medicine";
+
+        switch (activityType) {
+            case WISH_ADDED:
+            case SCHEDULE_ADDED:
+                return baseUrl + "?tab=wishTab" + (referenceId != null ? "&wishId=" + referenceId : "");
+
+            case DAILY_POST:
+            case DAILY_COMMENT:
+            case DAILY_LIKE:
+                return baseUrl + "?tab=dailyTab" + (referenceId != null ? "&dailyId=" + referenceId : "");
+
+            case MEDICINE_TAKEN:
+            case MEAL_UPLOADED:
+                return baseUrl + "?tab=healthTab";
+
+            case COMMENT:
+            case COMMENT_REPLY:
+                return baseUrl + "?tab=homeTab";
+
+            case PROFILE_UPDATED:
+                return baseUrl + "?tab=profileTab";
+
+            default:
+                return baseUrl + "?tab=activityTab";
+        }
     }
 }
