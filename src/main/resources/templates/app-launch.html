@@ -161,22 +161,38 @@
             window.location.href = targetUrl;
         }
 
-        // 외부 브라우저로 열기 (Intent URL 사용)
+        // 외부 브라우저/PWA로 열기
         function openInExternalBrowser() {
             const isAndroid = /android/i.test(navigator.userAgent);
             const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
             const isKakao = /kakaotalk/i.test(navigator.userAgent);
             const isLine = /line/i.test(navigator.userAgent);
-            const isInApp = /instagram|fbav|fban|twitter/i.test(navigator.userAgent);
+            const isInApp = /instagram|fbav|fban|twitter|naver|band/i.test(navigator.userAgent);
 
-            if (isAndroid && (isKakao || isLine || isInApp)) {
-                // Android에서 인앱 브라우저인 경우 Intent URL 사용
-                const intentUrl = `intent://${window.location.host}${targetUrl}#Intent;scheme=https;package=com.android.chrome;end`;
+            if (isAndroid) {
+                // Android: Intent URL 사용 (패키지 지정 없이 시스템이 앱 선택)
+                // PWA가 설치되어 있으면 앱 선택기에서 PWA 선택 가능
+                const intentUrl = `intent://${window.location.host}${targetUrl}#Intent;scheme=https;action=android.intent.action.VIEW;end`;
                 window.location.href = intentUrl;
-            } else if (isIOS && (isKakao || isLine || isInApp)) {
-                // iOS에서 인앱 브라우저인 경우
-                // Safari로 열기 시도
-                window.location.href = fullUrl;
+
+                // Intent가 작동하지 않을 경우를 대비한 폴백
+                setTimeout(() => {
+                    // 카카오톡 전용 외부 브라우저 열기
+                    if (isKakao) {
+                        window.location.href = 'kakaotalk://web/openExternal?url=' + encodeURIComponent(fullUrl);
+                    }
+                }, 500);
+            } else if (isIOS) {
+                // iOS: Safari로 열기 시도
+                if (isKakao) {
+                    // 카카오톡 외부 브라우저 열기
+                    window.location.href = 'kakaotalk://web/openExternal?url=' + encodeURIComponent(fullUrl);
+                } else if (isLine) {
+                    // 라인 외부 브라우저 열기
+                    window.location.href = fullUrl + '?openExternalBrowser=1';
+                } else {
+                    window.location.href = fullUrl;
+                }
             } else {
                 // 일반 브라우저 - 새 탭으로 열기
                 window.open(fullUrl, '_blank');

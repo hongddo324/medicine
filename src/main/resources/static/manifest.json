@@ -8,6 +8,11 @@
   "theme_color": "#4A90E2",
   "orientation": "portrait",
   "scope": "/",
+  "id": "/",
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
+  "handle_links": "preferred",
   "share_target": {
     "action": "/",
     "method": "GET",

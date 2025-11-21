@@ -16,6 +16,7 @@ import com.medicine.model.PointHistory;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -33,6 +34,9 @@ import java.util.Map;
 @Controller
 @RequiredArgsConstructor
 public class MedicineController {
+
+    @Value("${app.version:1.0.0}")
+    private String appVersion;
 
     private final MedicineService medicineService;
     private final CommentService commentService;
@@ -67,6 +71,7 @@ public class MedicineController {
         model.addAttribute("today", LocalDate.now());
         model.addAttribute("canTakeMedicine", user.getRole() == Role.FATHER);
         model.addAttribute("comments", comments);
+        model.addAttribute("appVersion", appVersion);
 
         log.debug("Home page accessed by user: {}, morning: {}, evening: {}, displayPoints: {}",
             user.getUsername(), morningRecord.isTaken() ? "taken" : "not taken",
