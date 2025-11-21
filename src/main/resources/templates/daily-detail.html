@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title th:text="${ogTitle} + ' - 약복용 관리 앱'">일상 기록 - 약복용 관리 앱</title>
+
+    <!-- Open Graph 메타태그 (카카오톡, 페이스북 등) -->
+    <meta property="og:type" content="article">
+    <meta property="og:title" th:content="${ogTitle}">
+    <meta property="og:description" th:content="${ogDescription}">
+    <meta property="og:image" th:content="@{${ogImage}}">
+    <meta property="og:url" th:content="@{${ogUrl}}">
+    <meta property="og:site_name" content="약복용 관리 앱">
+    <meta property="og:locale" content="ko_KR">
+
+    <!-- Twitter 카드 -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" th:content="${ogTitle}">
+    <meta name="twitter:description" th:content="${ogDescription}">
+    <meta name="twitter:image" th:content="@{${ogImage}}">
+
+    <!-- 기본 메타 -->
+    <meta name="description" th:content="${ogDescription}">
+    <meta name="theme-color" content="#4A90E2">
+
+    <!-- PWA 관련 -->
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="약복용">
+
+    <!-- 스타일 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4A90E2;
+            --primary-dark: #357abd;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-600: #6b7280;
+            --text-primary: #1f2937;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #4A90E2 0%, #357abd 100%);
+            padding: 24px;
+            color: white;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        .content {
+            padding: 24px;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary) 0%, #0284c7 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 18px;
+            overflow: hidden;
+        }
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .user-name {
+            font-weight: 700;
+            font-size: 16px;
+            color: var(--text-primary);
+        }
+        .post-time {
+            font-size: 13px;
+            color: var(--gray-600);
+        }
+        .post-content {
+            font-size: 15px;
+            line-height: 1.8;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+            white-space: pre-wrap;
+        }
+        .post-image {
+            width: 100%;
+            max-height: 300px;
+            object-fit: cover;
+            border-radius: 12px;
+            margin-bottom: 16px;
+        }
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 24px;
+        }
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 16px 24px;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            border: none;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #4A90E2 0%, #357abd 100%);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(74, 144, 226, 0.4);
+        }
+        .btn-secondary {
+            background: var(--gray-100);
+            color: var(--text-primary);
+        }
+        .btn-secondary:hover {
+            background: var(--gray-200);
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--gray-200);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .footer {
+            text-align: center;
+            padding: 16px 24px 24px;
+            color: var(--gray-600);
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="bi bi-heart-fill"></i> 일상 기록</h1>
+            <p>우리 가족의 소중한 순간</p>
+        </div>
+
+        <div class="content">
+            <!-- 게시글 작성자 정보 -->
+            <div class="user-info">
+                <div class="avatar">
+                    <img th:if="${daily.user.profileImage != null}" th:src="${daily.user.profileImage}" alt="프로필">
+                    <span th:if="${daily.user.profileImage == null}" th:text="${daily.user.displayName != null ? daily.user.displayName.substring(0,1) : daily.user.username.substring(0,1)}">홍</span>
+                </div>
+                <div>
+                    <div class="user-name" th:text="${daily.user.displayName != null ? daily.user.displayName : daily.user.username}">작성자</div>
+                    <div class="post-time" th:text="${#temporals.format(daily.createdAt, 'yyyy년 M월 d일 HH:mm')}">2024년 1월 1일</div>
+                </div>
+            </div>
+
+            <!-- 게시글 내용 -->
+            <div class="post-content" th:text="${daily.content}">게시글 내용이 여기에 표시됩니다.</div>
+
+            <!-- 대표 이미지 -->
+            <img th:if="${daily.images != null and !daily.images.isEmpty()}"
+                 th:src="${daily.images[0].imageUrl}"
+                 class="post-image"
+                 alt="게시글 이미지">
+            <img th:if="${(daily.images == null or daily.images.isEmpty()) and daily.mediaUrl != null and daily.mediaType != 'VIDEO'}"
+                 th:src="${daily.mediaUrl}"
+                 class="post-image"
+                 alt="게시글 이미지">
+
+            <!-- 액션 버튼 -->
+            <div class="action-buttons">
+                <!-- 로그인된 사용자: 앱에서 보기 -->
+                <a th:if="${isLoggedIn}" th:href="@{/?tab=daily&postId={id}(id=${dailyId})}" class="btn btn-primary">
+                    <i class="bi bi-app"></i> 앱에서 보기
+                </a>
+
+                <!-- 비로그인 사용자: 로그인 유도 -->
+                <a th:unless="${isLoggedIn}" href="/login" class="btn btn-primary">
+                    <i class="bi bi-box-arrow-in-right"></i> 로그인하고 더 보기
+                </a>
+
+                <!-- 공유하기 버튼 -->
+                <button class="btn btn-secondary" onclick="sharePost()">
+                    <i class="bi bi-share-fill"></i> 공유하기
+                </button>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>약복용 관리 앱에서 가족과 함께 건강을 관리하세요</p>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        const dailyId = [[${dailyId}]];
+        const ogTitle = [[${ogTitle}]];
+        const isLoggedIn = [[${isLoggedIn}]];
+
+        // 로그인된 사용자는 자동으로 앱으로 리다이렉트
+        if (isLoggedIn) {
+            // 딜레이를 주어 OG 태그가 크롤링될 시간 확보
+            setTimeout(() => {
+                window.location.href = '/?tab=daily&postId=' + dailyId;
+            }, 100);
+        }
+
+        // 공유 기능
+        async function sharePost() {
+            const shareUrl = window.location.href;
+            const shareTitle = ogTitle;
+            const shareText = '우리 가족의 일상을 확인해보세요!';
+
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: shareTitle,
+                        text: shareText,
+                        url: shareUrl
+                    });
+                } catch (error) {
+                    if (error.name !== 'AbortError') {
+                        copyToClipboard(shareUrl);
+                    }
+                }
+            } else {
+                copyToClipboard(shareUrl);
+            }
+        }
+
+        function copyToClipboard(text) {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(() => {
+                    alert('링크가 복사되었습니다!');
+                }).catch(() => {
+                    fallbackCopy(text);
+                });
+            } else {
+                fallbackCopy(text);
+            }
+        }
+
+        function fallbackCopy(text) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-999999px';
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                alert('링크가 복사되었습니다!');
+            } catch (err) {
+                prompt('링크를 복사하세요:', text);
+            }
+            document.body.removeChild(textArea);
+        }
+
+        // Service Worker 등록
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/service-worker.js')
+                .then(() => console.log('Service Worker registered'))
+                .catch(err => console.log('Service Worker registration failed:', err));
+        }
+    </script>
+</body>
+</html>
