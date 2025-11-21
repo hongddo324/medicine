@@ -253,10 +253,9 @@
 
         // 앱에서 열기
         function openInApp() {
-            const fullUrl = window.location.origin + appUrl;
-
-            // 새 창으로 열어서 PWA 실행 유도 (Android에서 PWA 설치 시 앱으로 열림)
-            window.open(fullUrl, '_blank');
+            // PWA 런처 페이지로 이동 (PWA 세션 유지)
+            const launchUrl = '/app/launch?tab=daily&postId=' + dailyId;
+            window.location.href = launchUrl;
         }
 
         // 공유 기능
