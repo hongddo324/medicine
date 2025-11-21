@@ -15,8 +15,8 @@ import java.util.Set;
 @AllArgsConstructor
 @Entity
 @Table(name = "comments", indexes = {
-    @Index(name = "idx_user_id", columnList = "user_id"),
-    @Index(name = "idx_created_at", columnList = "created_at")
+    @Index(name = "idx_comment_user_id", columnList = "user_id"),
+    @Index(name = "idx_comment_created_at", columnList = "created_at")
 })
 public class Comment implements Serializable {
 

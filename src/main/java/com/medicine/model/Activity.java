@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Entity
 @Table(name = "activity", indexes = {
-    @Index(name = "idx_created_at", columnList = "created_at"),
+    @Index(name = "idx_activity_created_at", columnList = "created_at"),
     @Index(name = "idx_is_read", columnList = "is_read"),
     @Index(name = "idx_recipient_user_id", columnList = "recipient_user_id"),
     @Index(name = "idx_recipient_created", columnList = "recipient_user_id, created_at")
