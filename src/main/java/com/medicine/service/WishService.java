@@ -97,7 +97,7 @@ public class WishService {
     @Transactional
     public Wish updateWish(Long wishId, User user, String title, String description, Wish.WishCategory category,
                            Double latitude, Double longitude, String address, MultipartFile imageFile, Long dailyId) throws IOException {
-        Wish wish = wishRepository.findById(wishId)
+        Wish wish = wishRepository.findByIdWithUser(wishId)
                 .orElseThrow(() -> new IllegalArgumentException("위시를 찾을 수 없습니다."));
 
         // 권한 확인
@@ -140,7 +140,7 @@ public class WishService {
      */
     @Transactional
     public Wish toggleWishCompletion(Long wishId, User user) {
-        Wish wish = wishRepository.findById(wishId)
+        Wish wish = wishRepository.findByIdWithUser(wishId)
                 .orElseThrow(() -> new IllegalArgumentException("위시를 찾을 수 없습니다."));
 
         // 권한 확인
@@ -186,7 +186,7 @@ public class WishService {
      */
     @Transactional
     public void deleteWish(Long wishId, User user) {
-        Wish wish = wishRepository.findById(wishId)
+        Wish wish = wishRepository.findByIdWithUser(wishId)
                 .orElseThrow(() -> new IllegalArgumentException("위시를 찾을 수 없습니다."));
 
         // 권한 확인
