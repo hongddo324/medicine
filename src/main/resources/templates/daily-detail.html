@@ -221,9 +221,9 @@
             <!-- 액션 버튼 -->
             <div class="action-buttons">
                 <!-- 앱에서 보기 (PWA 설치 시 앱으로 열림) -->
-                <a th:href="@{/?tab=daily&postId={id}(id=${dailyId})}" class="btn btn-primary">
+                <button class="btn btn-primary" onclick="openInApp()">
                     <i class="bi bi-app"></i> 앱에서 보기
-                </a>
+                </button>
 
                 <!-- 공유하기 버튼 -->
                 <button class="btn btn-secondary" onclick="sharePost()">
@@ -241,13 +241,53 @@
         const dailyId = [[${dailyId}]];
         const ogTitle = [[${ogTitle}]];
         const isLoggedIn = [[${isLoggedIn}]];
+        const appUrl = '/?tab=daily&postId=' + dailyId;
 
         // 로그인된 사용자는 자동으로 앱으로 리다이렉트
         if (isLoggedIn) {
             // 딜레이를 주어 OG 태그가 크롤링될 시간 확보
             setTimeout(() => {
-                window.location.href = '/?tab=daily&postId=' + dailyId;
+                window.location.href = appUrl;
             }, 100);
+        }
+
+        // 앱에서 열기 (PWA 실행 시도)
+        async function openInApp() {
+            const fullUrl = window.location.origin + appUrl;
+
+            // 1. getInstalledRelatedApps API 시도 (Chrome 80+)
+            if ('getInstalledRelatedApps' in navigator) {
+                try {
+                    const relatedApps = await navigator.getInstalledRelatedApps();
+                    if (relatedApps.length > 0) {
+                        // PWA 설치됨 - 새 창으로 열어 PWA 실행 유도
+                        window.open(fullUrl, '_blank');
+                        return;
+                    }
+                } catch (e) {
+                    console.log('getInstalledRelatedApps failed:', e);
+                }
+            }
+
+            // 2. standalone 모드 감지 (이미 PWA 내에서 실행 중인지)
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+                || window.navigator.standalone
+                || document.referrer.includes('android-app://');
+
+            if (isStandalone) {
+                // 이미 PWA 내에서 실행 중
+                window.location.href = appUrl;
+                return;
+            }
+
+            // 3. 새 창으로 열어 PWA 실행 유도 (Android에서 PWA 설치 시 동작)
+            const newWindow = window.open(fullUrl, '_blank');
+
+            // 4. 팝업 차단된 경우 또는 새 창이 열리지 않은 경우
+            if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+                // 현재 페이지에서 이동
+                window.location.href = appUrl;
+            }
         }
 
         // 공유 기능
