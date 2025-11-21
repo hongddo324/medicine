@@ -37,15 +37,25 @@ self.addEventListener('activate', (event) => {
 // Fetch event - Network First, then Cache
 self.addEventListener('fetch', (event) => {
   const requestUrl = event.request.url;
+  const method = event.request.method;
 
   // chrome-extension, data:, blob: 등 지원하지 않는 스킴 무시
   if (!requestUrl.startsWith('http://') && !requestUrl.startsWith('https://')) {
-    console.log('Ignoring non-http request:', requestUrl);
     return;
   }
 
   // Chrome 확장 프로그램 리소스 무시
   if (requestUrl.includes('chrome-extension://')) {
+    return;
+  }
+
+  // GET 요청이 아닌 경우 캐시하지 않음 (PUT, POST, DELETE 등)
+  if (method !== 'GET') {
+    return;
+  }
+
+  // API 요청은 캐시하지 않음
+  if (requestUrl.includes('/api/')) {
     return;
   }
 
