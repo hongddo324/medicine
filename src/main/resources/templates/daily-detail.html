@@ -253,9 +253,10 @@
 
         // 앱에서 열기
         function openInApp() {
-            // 로그인 페이지로 이동하면서 로그인 후 돌아올 URL 전달
-            const redirectUrl = encodeURIComponent(appUrl);
-            window.location.href = '/login?redirect=' + redirectUrl;
+            const fullUrl = window.location.origin + appUrl;
+
+            // 새 창으로 열어서 PWA 실행 유도 (Android에서 PWA 설치 시 앱으로 열림)
+            window.open(fullUrl, '_blank');
         }
 
         // 공유 기능
