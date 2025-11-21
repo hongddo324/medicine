@@ -22,11 +22,16 @@ public class LoginController {
     private final UserService userService;
 
     @GetMapping("/login")
-    public String loginPage(HttpSession session) {
+    public String loginPage(@RequestParam(required = false) String redirect,
+                           HttpSession session,
+                           Model model) {
         User user = (User) session.getAttribute("user");
         if (user != null) {
             log.debug("User already logged in: {}, redirecting to home", user.getUsername());
             return "redirect:/";
+        }
+        if (redirect != null && !redirect.isEmpty()) {
+            model.addAttribute("redirect", redirect);
         }
         return "login";
     }
@@ -34,6 +39,7 @@ public class LoginController {
     @PostMapping("/login")
     public String login(@RequestParam String username,
                        @RequestParam String password,
+                       @RequestParam(required = false) String redirect,
                        HttpSession session,
                        Model model) {
 
@@ -49,12 +55,17 @@ public class LoginController {
             accessLogger.info("Login successful - Username: {}, Role: {}", username, user.getRole());
             log.debug("User logged in: {} with role: {}", username, user.getRole());
 
+            // 리다이렉트 URL이 있으면 해당 URL로 이동
+            if (redirect != null && !redirect.isEmpty() && redirect.startsWith("/")) {
+                return "redirect:" + redirect;
+            }
             return "redirect:/";
         } else {
             accessLogger.warn("Login failed - Username: {}", username);
             log.debug("Login failed for username: {}", username);
 
             model.addAttribute("error", "아이디 또는 비밀번호가 잘못되었습니다.");
+            model.addAttribute("redirect", redirect);
             return "login";
         }
     }
