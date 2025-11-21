@@ -1,8 +1,8 @@
-const CACHE_NAME = 'medicine-app-v2'; // 버전 업데이트로 강제 재설치
+const CACHE_NAME = 'medicine-app-v3'; // 버전 업데이트로 강제 재설치
 
 // Install Service Worker
 self.addEventListener('install', (event) => {
-  console.log('Service Worker v2 installing...');
+  console.log('Service Worker v3 installing...');
   // 즉시 활성화
   self.skipWaiting();
 });
@@ -10,8 +10,10 @@ self.addEventListener('install', (event) => {
 // Activate Service Worker
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
+    (async () => {
+      // 이전 캐시 삭제
+      const cacheNames = await caches.keys();
+      await Promise.all(
         cacheNames.map((cacheName) => {
           if (cacheName !== CACHE_NAME) {
             console.log('Deleting old cache:', cacheName);
@@ -19,7 +21,15 @@ self.addEventListener('activate', (event) => {
           }
         })
       );
-    })
+
+      // 모든 클라이언트에 새 버전 알림
+      const allClients = await self.clients.matchAll({ includeUncontrolled: true });
+      for (const client of allClients) {
+        client.postMessage({ type: 'NEW_VERSION_READY' });
+      }
+
+      console.log('Service Worker v3 activated, notified clients');
+    })()
   );
   self.clients.claim();
 });
@@ -64,6 +74,13 @@ self.addEventListener('fetch', (event) => {
         return caches.match(event.request);
       })
   );
+});
+
+// 클라이언트로부터 메시지 수신
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
 
 // Push notification은 firebase-messaging-sw.js에서 처리합니다.

@@ -96,6 +96,10 @@ firebase:
   enabled: true
   project-id: mdedicine
 
+# App Version Configuration
+app:
+  version: 1.0.0
+
 # Logging Configuration
 logging:
   level:
