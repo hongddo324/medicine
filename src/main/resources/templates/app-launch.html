@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>앱으로 이동 중... - 약복용 관리 앱</title>
+    <meta name="theme-color" content="#4A90E2">
+
+    <!-- PWA 관련 -->
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="약복용">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4A90E2;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            width: 100%;
+            padding: 40px 30px;
+            text-align: center;
+        }
+        .icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary) 0%, #357abd 100%);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+        }
+        .icon i {
+            font-size: 36px;
+            color: white;
+        }
+        h1 {
+            font-size: 22px;
+            color: #1f2937;
+            margin-bottom: 12px;
+        }
+        .status {
+            color: #6b7280;
+            font-size: 15px;
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e5e7eb;
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 24px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            border: none;
+            margin-bottom: 12px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #4A90E2 0%, #357abd 100%);
+            color: white;
+        }
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #1f2937;
+        }
+        .hidden { display: none; }
+        .message {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+            color: #92400e;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon">
+            <i class="bi bi-capsule"></i>
+        </div>
+
+        <!-- 로딩 상태 -->
+        <div id="loading-state">
+            <div class="spinner"></div>
+            <h1>앱으로 이동 중...</h1>
+            <p class="status">잠시만 기다려주세요</p>
+        </div>
+
+        <!-- PWA 미설치 또는 세션 없음 -->
+        <div id="fallback-state" class="hidden">
+            <h1>약복용 관리 앱</h1>
+            <div class="message">
+                <i class="bi bi-info-circle"></i>
+                앱이 설치되어 있다면 앱에서 열기를 눌러주세요.<br>
+                앱 내 로그인 세션이 유지됩니다.
+            </div>
+
+            <button class="btn btn-primary" onclick="openPWA()">
+                <i class="bi bi-app"></i> 앱에서 열기
+            </button>
+
+            <a th:href="@{/login(redirect=${targetUrl})}" class="btn btn-secondary">
+                <i class="bi bi-box-arrow-in-right"></i> 웹에서 로그인
+            </a>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        const targetUrl = [[${targetUrl}]];
+        const isLoggedIn = [[${isLoggedIn}]];
+
+        // PWA standalone 모드 감지
+        function isPWAMode() {
+            return window.matchMedia('(display-mode: standalone)').matches
+                || window.navigator.standalone === true
+                || document.referrer.includes('android-app://');
+        }
+
+        // PWA에서 실행 중이면 바로 리다이렉트
+        if (isPWAMode()) {
+            console.log('Running in PWA mode, redirecting to:', targetUrl);
+            window.location.href = targetUrl;
+        } else {
+            // 브라우저에서 실행 중
+            console.log('Running in browser mode');
+
+            // 잠시 후 fallback UI 표시
+            setTimeout(() => {
+                document.getElementById('loading-state').classList.add('hidden');
+                document.getElementById('fallback-state').classList.remove('hidden');
+            }, 1500);
+
+            // PWA 자동 실행 시도 (intent URL for Android)
+            tryOpenPWA();
+        }
+
+        function tryOpenPWA() {
+            const fullUrl = window.location.origin + targetUrl;
+
+            // Android Intent URL 시도
+            if (/android/i.test(navigator.userAgent)) {
+                // Intent URL로 PWA 실행 시도
+                const intentUrl = `intent:${fullUrl}#Intent;scheme=https;package=com.example.pwa;end`;
+
+                // 먼저 일반 URL로 시도 (Chrome이 PWA를 인식하면 앱으로 열림)
+                const link = document.createElement('a');
+                link.href = fullUrl;
+                link.target = '_blank';
+                link.rel = 'noopener';
+
+                // 잠시 후 클릭 트리거
+                setTimeout(() => {
+                    // PWA 설치 확인 후 열기 시도
+                    if ('getInstalledRelatedApps' in navigator) {
+                        navigator.getInstalledRelatedApps().then(apps => {
+                            console.log('Installed related apps:', apps);
+                        });
+                    }
+                }, 500);
+            }
+        }
+
+        function openPWA() {
+            const fullUrl = window.location.origin + targetUrl;
+
+            // 새 창으로 열기 - Android에서 PWA 설치 시 앱으로 열림
+            const newWindow = window.open(fullUrl, '_blank');
+
+            // 팝업이 차단된 경우 직접 이동
+            if (!newWindow || newWindow.closed) {
+                window.location.href = fullUrl;
+            }
+        }
+
+        // Service Worker 등록
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/service-worker.js')
+                .then(() => console.log('Service Worker registered'))
+                .catch(err => console.log('SW registration failed:', err));
+        }
+    </script>
+</body>
+</html>

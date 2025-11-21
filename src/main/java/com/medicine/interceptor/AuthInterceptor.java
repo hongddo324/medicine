@@ -39,6 +39,7 @@ public class AuthInterceptor implements HandlerInterceptor {
             requestURI.startsWith("/images") ||
             requestURI.startsWith("/files") ||
             requestURI.startsWith("/daily/") ||
+            requestURI.startsWith("/app/launch") ||
             requestURI.startsWith("/icons") ||
             requestURI.equals("/manifest.json") ||
             requestURI.equals("/service-worker.js")) {
