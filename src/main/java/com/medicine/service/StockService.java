@@ -37,6 +37,10 @@ public class StockService {
 
     private static final int POINT_TO_WON = 50;
 
+    // 토큰 캐싱
+    private String cachedAccessToken = null;
+    private long tokenExpiryTime = 0;
+
     // 국내 주식 검색
     public List<StockDTO> searchDomesticStocks(String keyword) {
         try {
@@ -170,17 +174,62 @@ public class StockService {
     private HttpHeaders createHeaders(String trId) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("authorization", "Bearer " + getAccessToken());
-        headers.set("appkey", appKey);
-        headers.set("appsecret", appSecret);
+
+        // API 키가 설정되어 있을 때만 인증 헤더 추가
+        if (appKey != null && !appKey.isEmpty()) {
+            String token = getAccessToken();
+            if (token != null && !token.isEmpty()) {
+                headers.set("authorization", token);  // Bearer 접두사 제거
+            }
+            headers.set("appkey", appKey);
+            headers.set("appsecret", appSecret);
+        }
+
         headers.set("tr_id", trId);
         return headers;
     }
 
-    // Access Token 발급 (간단한 구현)
+    // Access Token 발급
     private String getAccessToken() {
-        // 실제로는 토큰을 캐싱하고 만료시 재발급해야 함
-        return ""; // 토큰 발급 로직 추가 필요
+        // API 키가 없으면 null 반환 (fallback 데이터 사용)
+        if (appKey == null || appKey.isEmpty() || appSecret == null || appSecret.isEmpty()) {
+            return null;
+        }
+
+        // 토큰이 유효하면 재사용
+        if (cachedAccessToken != null && System.currentTimeMillis() < tokenExpiryTime) {
+            return cachedAccessToken;
+        }
+
+        try {
+            String url = baseUrl + "/oauth2/tokenP";
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            Map<String, String> body = new HashMap<>();
+            body.put("grant_type", "client_credentials");
+            body.put("appkey", appKey);
+            body.put("appsecret", appSecret);
+
+            HttpEntity<Map<String, String>> entity = new HttpEntity<>(body, headers);
+            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
+
+            if (response.getStatusCode() == HttpStatus.OK) {
+                JsonNode jsonNode = objectMapper.readTree(response.getBody());
+                cachedAccessToken = jsonNode.get("access_token").asText();
+
+                // 토큰 만료 시간 설정 (발급 후 23시간 유효)
+                tokenExpiryTime = System.currentTimeMillis() + (23 * 60 * 60 * 1000);
+
+                log.info("OAuth 토큰 발급 성공");
+                return cachedAccessToken;
+            }
+        } catch (Exception e) {
+            log.error("OAuth 토큰 발급 실패: {}", e.getMessage());
+        }
+
+        return null;
     }
 
     // 거래소 코드 변환
