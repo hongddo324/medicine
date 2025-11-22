@@ -24,16 +24,29 @@ public class DailyController {
     private final DailyService dailyService;
 
     /**
-     * 모든 일상 게시물 조회
+     * 모든 일상 게시물 조회 (증분 갱신 지원)
+     * @param since 선택적 파라미터: 이 ID 이후의 게시물만 조회
      */
     @GetMapping
-    public ResponseEntity<?> getAllDailies(HttpSession session) {
+    public ResponseEntity<?> getAllDailies(
+            @RequestParam(required = false) Long since,
+            HttpSession session) {
         User user = (User) session.getAttribute("user");
         if (user == null) {
             return ResponseEntity.status(401).body(Map.of("error", "인증되지 않은 사용자입니다."));
         }
 
-        List<Daily> dailies = dailyService.getAllDailies();
+        List<Daily> dailies;
+
+        // since 파라미터가 있으면 해당 ID 이후의 게시물만 조회
+        if (since != null && since > 0) {
+            dailies = dailyService.getAllDailies().stream()
+                    .filter(daily -> daily.getId() > since)
+                    .toList();
+        } else {
+            dailies = dailyService.getAllDailies();
+        }
+
         java.time.LocalDateTime threeDaysAgo = java.time.LocalDateTime.now().minusDays(3);
 
         // 각 게시물에 현재 사용자의 좋아요 여부 및 NEW 뱃지 추가
