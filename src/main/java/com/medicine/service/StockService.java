@@ -184,7 +184,7 @@ public class StockService {
         if (appKey != null && !appKey.isEmpty()) {
             String token = getAccessToken();
             if (token != null && !token.isEmpty()) {
-                headers.set("authorization", "Bearer " + token);  // Bearer 접두사 필수!
+                headers.set("Authorization", "Bearer " + token);  // 대문자 A
             }
             headers.set("appkey", appKey);
             headers.set("appsecret", appSecret);
