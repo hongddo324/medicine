@@ -1282,7 +1282,8 @@ async function searchStock(event){
             return;
         }
 
-        const results=await response.json();
+        const data=await response.json();
+        const results=data.items || [];
 
         if(results.length===0){
             resultsDiv.innerHTML='<div style="padding:12px;text-align:center;color:var(--gray-600)">검색 결과가 없습니다</div>';
@@ -1296,8 +1297,8 @@ async function searchStock(event){
                  onmouseout="this.style.borderColor='var(--gray-300)';this.style.background='var(--white)'">
                 <div style="display:flex;justify-content:space-between;align-items:center">
                     <div>
-                        <div style="font-weight:600;color:var(--text-primary)">${stock.name}</div>
-                        <div style="font-size:12px;color:var(--gray-600);margin-top:2px">${stock.code} · ${stock.market}</div>
+                        <div style="font-weight:600;color:var(--text-primary)">${stock.stockName}</div>
+                        <div style="font-size:12px;color:var(--gray-600);margin-top:2px">${stock.stockCode} · ${stock.marketCode}</div>
                     </div>
                     <div style="text-align:right">
                         <div style="font-size:16px;font-weight:700;color:var(--primary)">${stock.currentPrice.toLocaleString()}원</div>
