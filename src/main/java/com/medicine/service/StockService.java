@@ -3,6 +3,10 @@ package com.medicine.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.medicine.dto.StockDTO;
+import com.medicine.dto.StockPriceOutput;
+import com.medicine.dto.StockPriceResponse;
+import com.medicine.dto.StockSearchItem;
+import com.medicine.dto.StockSearchResponse;
 import com.medicine.model.Stock;
 import com.medicine.model.User;
 import com.medicine.repository.StockRepository;
@@ -45,7 +49,131 @@ public class StockService {
     // 토큰 발급 동기화를 위한 락 객체
     private final Object tokenLock = new Object();
 
-    // 국내 주식 검색
+    // 국내 주식 검색 (한글 키워드)
+    public StockDTO searchDomesticStockByKoreanName(String keyword) {
+        try {
+            log.info("한글 종목 검색 시작: {}", keyword);
+
+            // 1. 종목 검색 API 호출
+            StockSearchResponse searchResponse = searchStockInfo(keyword);
+
+            // 2. 응답 검증
+            if (!"0".equals(searchResponse.getRtCd())) {
+                log.error("종목 검색 실패 - rt_cd: {}, msg: {}", searchResponse.getRtCd(), searchResponse.getMsg1());
+                throw new IllegalStateException("종목 검색 실패: " + searchResponse.getMsg1());
+            }
+
+            if (searchResponse.getOutput() == null || searchResponse.getOutput().isEmpty()) {
+                log.warn("검색 결과 없음 - keyword: {}", keyword);
+                throw new IllegalArgumentException("해당 키워드에 대한 종목이 없습니다: " + keyword);
+            }
+
+            // 3. 첫 번째 종목 선택
+            StockSearchItem firstItem = searchResponse.getOutput().get(0);
+            String stockCode = firstItem.getSrtnCd() != null ? firstItem.getSrtnCd() : firstItem.getStockCode();
+            String stockName = firstItem.getHname();
+
+            log.info("종목 검색 결과 - 종목명: {}, 종목코드: {}", stockName, stockCode);
+
+            // 4. 현재가 조회 API 호출
+            StockPriceResponse priceResponse = getDomesticPrice(stockCode);
+
+            // 5. 응답 검증
+            if (!"0".equals(priceResponse.getRtCd())) {
+                log.error("현재가 조회 실패 - rt_cd: {}, msg: {}", priceResponse.getRtCd(), priceResponse.getMsg1());
+                throw new IllegalStateException("현재가 조회 실패: " + priceResponse.getMsg1());
+            }
+
+            StockPriceOutput priceOutput = priceResponse.getOutput();
+            if (priceOutput == null) {
+                log.error("현재가 데이터 없음 - stockCode: {}", stockCode);
+                throw new IllegalStateException("현재가 데이터가 없습니다");
+            }
+
+            // 6. StockDTO로 변환
+            StockDTO dto = new StockDTO();
+            dto.setCode(stockCode);
+            dto.setName(stockName);
+            dto.setMarket("DOMESTIC");
+            dto.setCurrentPrice(parseLong(priceOutput.getStckPrpr()));
+            dto.setChange(parseLong(priceOutput.getPrdyVrss()));
+            dto.setChangeRate(parseDouble(priceOutput.getPrdyCtrt()));
+            dto.setVolume(parseLong(priceOutput.getAcmlVol()));
+
+            log.info("종목 정보 조회 완료 - {}: {}원", stockName, dto.getCurrentPrice());
+            return dto;
+
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            // 비즈니스 예외는 그대로 던짐
+            throw e;
+        } catch (Exception e) {
+            log.error("한글 종목 검색 중 오류 발생 - keyword: {}, error: {}", keyword, e.getMessage(), e);
+            throw new RuntimeException("종목 검색 중 오류가 발생했습니다: " + e.getMessage(), e);
+        }
+    }
+
+    // 종목 검색 API 호출
+    private StockSearchResponse searchStockInfo(String keyword) {
+        try {
+            String url = baseUrl + "/uapi/domestic-stock/v1/quotations/search-stock-info";
+            HttpHeaders headers = createHeaders("FHPP0C01010000");
+
+            String requestUrl = url + "?KEYWORD=" + java.net.URLEncoder.encode(keyword, "UTF-8");
+            log.debug("종목 검색 API 호출 - URL: {}", requestUrl);
+
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+            ResponseEntity<String> response = restTemplate.exchange(requestUrl, HttpMethod.GET, entity, String.class);
+
+            log.debug("종목 검색 API 응답 - status: {}, body: {}", response.getStatusCode(), response.getBody());
+
+            return objectMapper.readValue(response.getBody(), StockSearchResponse.class);
+        } catch (Exception e) {
+            log.error("종목 검색 API 호출 실패 - keyword: {}, error: {}", keyword, e.getMessage(), e);
+            throw new RuntimeException("종목 검색 API 호출 실패", e);
+        }
+    }
+
+    // 현재가 조회 API 호출
+    private StockPriceResponse getDomesticPrice(String stockCode) {
+        try {
+            String url = baseUrl + "/uapi/domestic-stock/v1/quotations/inquire-price";
+            HttpHeaders headers = createHeaders("FHKST01010100");
+
+            String requestUrl = url + "?FID_COND_MRKT_DIV_CODE=J&FID_INPUT_ISCD=" + stockCode;
+            log.debug("현재가 조회 API 호출 - URL: {}", requestUrl);
+
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+            ResponseEntity<String> response = restTemplate.exchange(requestUrl, HttpMethod.GET, entity, String.class);
+
+            log.debug("현재가 조회 API 응답 - status: {}, body: {}", response.getStatusCode(), response.getBody());
+
+            return objectMapper.readValue(response.getBody(), StockPriceResponse.class);
+        } catch (Exception e) {
+            log.error("현재가 조회 API 호출 실패 - stockCode: {}, error: {}", stockCode, e.getMessage(), e);
+            throw new RuntimeException("현재가 조회 API 호출 실패", e);
+        }
+    }
+
+    // 문자열 → Long 파싱 (예외 안전)
+    private Long parseLong(String value) {
+        try {
+            return value != null ? Long.parseLong(value.replaceAll("[^0-9-]", "")) : 0L;
+        } catch (Exception e) {
+            return 0L;
+        }
+    }
+
+    // 문자열 → Double 파싱 (예외 안전)
+    private Double parseDouble(String value) {
+        try {
+            return value != null ? Double.parseDouble(value.replaceAll("[^0-9.-]", "")) : 0.0;
+        } catch (Exception e) {
+            return 0.0;
+        }
+    }
+
+    // 국내 주식 검색 (레거시 - 사용 안 함)
+    @Deprecated
     public List<StockDTO> searchDomesticStocks(String keyword) {
         try {
             // 한국투자증권 API - 국내주식 종목검색
@@ -124,7 +252,8 @@ public class StockService {
         }
     }
 
-    // 통합 주식 검색
+    // 통합 주식 검색 (레거시 - 사용 안 함)
+    @Deprecated
     public List<StockDTO> searchStocks(String keyword) {
         List<StockDTO> results = new ArrayList<>();
 

@@ -24,15 +24,34 @@ public class StockController {
     private final StockService stockService;
     private final UserService userService;
 
-    // 주식 검색 (통합)
+    // 주식 검색 (한글 키워드로 종목 검색 + 현재가 조회)
     @GetMapping("/search")
-    public ResponseEntity<List<StockDTO>> searchStocks(@RequestParam String keyword) {
+    public ResponseEntity<?> searchStocks(@RequestParam String keyword) {
         try {
-            List<StockDTO> results = stockService.searchStocks(keyword);
-            return ResponseEntity.ok(results);
+            log.info("주식 검색 요청 - keyword: {}", keyword);
+            StockDTO result = stockService.searchDomesticStockByKoreanName(keyword);
+            return ResponseEntity.ok(result);
+        } catch (IllegalArgumentException e) {
+            // 종목 없음 (400 Bad Request)
+            log.warn("종목 검색 실패 - keyword: {}, reason: {}", keyword, e.getMessage());
+            Map<String, Object> error = new HashMap<>();
+            error.put("success", false);
+            error.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        } catch (IllegalStateException e) {
+            // API 응답 오류 (500 Internal Server Error)
+            log.error("종목 검색 중 API 오류 - keyword: {}, reason: {}", keyword, e.getMessage());
+            Map<String, Object> error = new HashMap<>();
+            error.put("success", false);
+            error.put("message", e.getMessage());
+            return ResponseEntity.internalServerError().body(error);
         } catch (Exception e) {
-            log.error("주식 검색 실패: {}", e.getMessage());
-            return ResponseEntity.ok(List.of());
+            // 기타 예외 (500 Internal Server Error)
+            log.error("주식 검색 중 예외 발생 - keyword: {}", keyword, e);
+            Map<String, Object> error = new HashMap<>();
+            error.put("success", false);
+            error.put("message", "주식 검색 중 오류가 발생했습니다");
+            return ResponseEntity.internalServerError().body(error);
         }
     }
 
