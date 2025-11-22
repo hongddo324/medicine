@@ -4,13 +4,13 @@ import com.medicine.dto.StockDTO;
 import com.medicine.model.Stock;
 import com.medicine.model.User;
 import com.medicine.service.StockService;
+import com.medicine.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +22,7 @@ import java.util.Map;
 public class StockController {
 
     private final StockService stockService;
-    private final com.medicine.repository.UserRepository userRepository;
+    private final UserService userService;
 
     // 주식 검색 (통합)
     @GetMapping("/search")
@@ -65,10 +65,18 @@ public class StockController {
     // 주식 매수
     @PostMapping("/buy")
     public ResponseEntity<Map<String, Object>> buyStock(
-            @AuthenticationPrincipal UserDetails userDetails,
-            @RequestBody Map<String, Object> request) {
+            @RequestBody Map<String, Object> request,
+            HttpSession session) {
         try {
-            User user = userRepository.findByUsername(userDetails.getUsername())
+            String username = (String) session.getAttribute("username");
+            if (username == null) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "로그인이 필요합니다");
+                return ResponseEntity.status(401).body(response);
+            }
+
+            User user = userService.findByUsername(username)
                     .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다"));
 
             String stockCode = (String) request.get("stockCode");
@@ -100,10 +108,14 @@ public class StockController {
 
     // 내 보유 주식 조회
     @GetMapping("/my-stocks")
-    public ResponseEntity<List<Map<String, Object>>> getMyStocks(
-            @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<List<Map<String, Object>>> getMyStocks(HttpSession session) {
         try {
-            User user = userRepository.findByUsername(userDetails.getUsername())
+            String username = (String) session.getAttribute("username");
+            if (username == null) {
+                return ResponseEntity.status(401).body(List.of());
+            }
+
+            User user = userService.findByUsername(username)
                     .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다"));
 
             List<Stock> stocks = stockService.getUserStocks(user);
