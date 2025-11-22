@@ -42,6 +42,9 @@ public class StockService {
     private static final String STOCK_TOKEN_KEY = "stock:access_token";
     private static final long TOKEN_EXPIRE_HOURS = 23;
 
+    // 토큰 발급 동기화를 위한 락 객체
+    private final Object tokenLock = new Object();
+
     // 국내 주식 검색
     public List<StockDTO> searchDomesticStocks(String keyword) {
         try {
@@ -190,7 +193,7 @@ public class StockService {
         return headers;
     }
 
-    // Access Token 발급 (Redis 캐싱)
+    // Access Token 발급 (Redis 캐싱 + 동기화)
     private String getAccessToken() {
         // API 키가 없으면 null 반환 (fallback 데이터 사용)
         if (appKey == null || appKey.isEmpty() || appSecret == null || appSecret.isEmpty()) {
@@ -198,7 +201,7 @@ public class StockService {
             return null;
         }
 
-        // Redis에서 토큰 조회
+        // 1차 Redis 조회 (Lock 없이 빠르게)
         try {
             String cachedToken = redisTemplate.opsForValue().get(STOCK_TOKEN_KEY);
             if (cachedToken != null && !cachedToken.isEmpty()) {
@@ -209,46 +212,61 @@ public class StockService {
             log.warn("Redis 토큰 조회 실패: {}", e.getMessage());
         }
 
-        // 토큰 재발급
-        try {
-            String url = baseUrl + "/oauth2/tokenP";
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-
-            Map<String, String> body = new HashMap<>();
-            body.put("grant_type", "client_credentials");
-            body.put("appkey", appKey);
-            body.put("appsecret", appSecret);
-
-            HttpEntity<Map<String, String>> entity = new HttpEntity<>(body, headers);
-            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
-
-            if (response.getStatusCode() == HttpStatus.OK) {
-                JsonNode jsonNode = objectMapper.readTree(response.getBody());
-                String accessToken = jsonNode.get("access_token").asText();
-
-                // Redis에 토큰 저장 (23시간 TTL)
-                try {
-                    redisTemplate.opsForValue().set(
-                        STOCK_TOKEN_KEY,
-                        accessToken,
-                        Duration.ofHours(TOKEN_EXPIRE_HOURS)
-                    );
-                    log.info("OAuth 토큰 발급 및 Redis 저장 완료 (만료: {}시간)", TOKEN_EXPIRE_HOURS);
-                } catch (Exception e) {
-                    log.warn("Redis 토큰 저장 실패: {} (메모리에서만 사용)", e.getMessage());
+        // Redis에 토큰이 없을 때만 동기화 블록 진입
+        synchronized (tokenLock) {
+            // 2차 Redis 조회 (다른 스레드가 이미 발급했을 수 있음)
+            try {
+                String cachedToken = redisTemplate.opsForValue().get(STOCK_TOKEN_KEY);
+                if (cachedToken != null && !cachedToken.isEmpty()) {
+                    log.debug("Redis에서 캐시된 토큰 사용 (동기화 블록 내)");
+                    return cachedToken;
                 }
-
-                return accessToken;
-            } else {
-                log.error("OAuth 토큰 발급 실패 - 응답 코드: {}", response.getStatusCode());
+            } catch (Exception e) {
+                log.warn("Redis 토큰 재조회 실패: {}", e.getMessage());
             }
-        } catch (Exception e) {
-            log.error("OAuth 토큰 발급 실패: {}", e.getMessage());
-        }
 
-        return null;
+            // 토큰 발급 (이제 한 번에 하나의 스레드만 실행)
+            log.info("OAuth 토큰 발급 시작 (Redis에 토큰 없음)");
+            try {
+                String url = baseUrl + "/oauth2/tokenP";
+
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.APPLICATION_JSON);
+
+                Map<String, String> body = new HashMap<>();
+                body.put("grant_type", "client_credentials");
+                body.put("appkey", appKey);
+                body.put("appsecret", appSecret);
+
+                HttpEntity<Map<String, String>> entity = new HttpEntity<>(body, headers);
+                ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
+
+                if (response.getStatusCode() == HttpStatus.OK) {
+                    JsonNode jsonNode = objectMapper.readTree(response.getBody());
+                    String accessToken = jsonNode.get("access_token").asText();
+
+                    // Redis에 토큰 저장 (23시간 TTL)
+                    try {
+                        redisTemplate.opsForValue().set(
+                            STOCK_TOKEN_KEY,
+                            accessToken,
+                            Duration.ofHours(TOKEN_EXPIRE_HOURS)
+                        );
+                        log.info("✅ OAuth 토큰 발급 및 Redis 저장 완료 (만료: {}시간)", TOKEN_EXPIRE_HOURS);
+                    } catch (Exception e) {
+                        log.warn("Redis 토큰 저장 실패: {} (메모리에서만 사용)", e.getMessage());
+                    }
+
+                    return accessToken;
+                } else {
+                    log.error("OAuth 토큰 발급 실패 - 응답 코드: {}", response.getStatusCode());
+                }
+            } catch (Exception e) {
+                log.error("❌ OAuth 토큰 발급 실패: {}", e.getMessage());
+            }
+
+            return null;
+        }
     }
 
     // 거래소 코드 변환
