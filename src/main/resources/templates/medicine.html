@@ -324,6 +324,9 @@
                         <span class="points-unit">P</span>
                     </div>
                 </div>
+                <button class="dark-mode-toggle shop-icon-btn" onclick="openStockModal()" style="position:absolute;top:16px;right:64px" title="주식 투자">
+                    <i class="bi bi-graph-up-arrow"></i>
+                </button>
                 <button class="dark-mode-toggle shop-icon-btn" onclick="openModal('pointShopModal');loadPointShop()" style="position:absolute;top:16px;right:16px" title="포인트 상점">
                     <i class="bi bi-shop"></i>
                 </button>
@@ -833,6 +836,116 @@
         </div>
     </div>
 </div>
+<div class="modal-overlay" id="stockModal" onclick="closeStockModal()">
+    <div class="modal-content" onclick="event.stopPropagation()" style="max-width:500px;max-height:90vh;overflow-y:auto">
+        <div class="modal-header">
+            <div class="modal-title" style="display:flex;align-items:center;gap:8px">
+                <i class="bi bi-graph-up-arrow" style="color:var(--primary)"></i>
+                <span>주식 투자</span>
+            </div>
+            <button class="modal-close" onclick="closeStockModal()"><i class="bi bi-x"></i></button>
+        </div>
+
+        <!-- 포인트 잔고 및 보유 주식 수 -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px">
+            <div style="padding:16px;background:linear-gradient(135deg,#3b82f6 0%,#2563eb 100%);border-radius:12px;color:white">
+                <div style="font-size:12px;margin-bottom:4px;opacity:0.9">포인트 잔고</div>
+                <div style="font-size:24px;font-weight:700"><span id="stockModalPoints">0</span>P</div>
+            </div>
+            <div style="padding:16px;background:linear-gradient(135deg,#10b981 0%,#059669 100%);border-radius:12px;color:white">
+                <div style="font-size:12px;margin-bottom:4px;opacity:0.9">보유 주식</div>
+                <div style="font-size:24px;font-weight:700"><span id="stockModalCount">0</span>개</div>
+            </div>
+        </div>
+
+        <!-- 주식 검색 -->
+        <div style="margin-bottom:20px">
+            <label style="display:block;margin-bottom:8px;font-weight:600;font-size:14px">주식 검색</label>
+            <div style="position:relative">
+                <input type="text" id="stockSearchInput" class="comment-input"
+                       placeholder="종목명 또는 종목코드 입력"
+                       style="width:100%;padding-right:40px"
+                       onkeyup="searchStock(event)">
+                <i class="bi bi-search" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--gray-400)"></i>
+            </div>
+            <div id="stockSearchResults" style="margin-top:8px"></div>
+        </div>
+
+        <!-- 선택된 주식 정보 -->
+        <div id="selectedStockInfo" style="display:none;margin-bottom:20px">
+            <div style="padding:20px;background:var(--gray-100);border-radius:12px;border:2px solid var(--primary)">
+                <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:16px">
+                    <div>
+                        <div style="font-size:18px;font-weight:700;color:var(--text-primary)" id="selectedStockName">-</div>
+                        <div style="font-size:13px;color:var(--gray-600);margin-top:4px" id="selectedStockCode">-</div>
+                    </div>
+                    <button onclick="clearSelectedStock()" style="background:none;border:none;color:var(--gray-600);cursor:pointer;padding:4px">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center">
+                    <div>
+                        <div style="font-size:12px;color:var(--gray-600);margin-bottom:4px">현재가</div>
+                        <div style="font-size:24px;font-weight:700;color:var(--primary)" id="selectedStockPrice">0</div>
+                    </div>
+                    <div style="text-align:right">
+                        <div style="font-size:12px;color:var(--gray-600);margin-bottom:4px">변환 포인트</div>
+                        <div style="font-size:18px;font-weight:700;color:#f59e0b" id="selectedStockPoints">0P</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 매수 가격 입력 -->
+            <div style="margin-top:16px">
+                <label style="display:block;margin-bottom:8px;font-weight:600;font-size:14px">매수 가격 (원)</label>
+                <input type="number" id="buyPriceInput" class="comment-input"
+                       placeholder="매수하실 가격을 입력하세요"
+                       style="width:100%;font-size:16px"
+                       oninput="calculateStockPoints()">
+                <div id="buyPricePoints" style="margin-top:8px;font-size:14px;color:var(--gray-600)"></div>
+            </div>
+
+            <!-- 수량 입력 -->
+            <div style="margin-top:16px">
+                <label style="display:block;margin-bottom:8px;font-weight:600;font-size:14px">수량</label>
+                <div style="display:flex;gap:8px">
+                    <button onclick="adjustQuantity(-1)" style="width:40px;height:44px;border:1px solid var(--gray-300);background:var(--white);border-radius:8px;cursor:pointer;color:var(--text-primary)">
+                        <i class="bi bi-dash-lg"></i>
+                    </button>
+                    <input type="number" id="quantityInput" class="comment-input"
+                           value="1" min="1"
+                           style="flex:1;text-align:center;font-size:16px;font-weight:600"
+                           oninput="calculateTotalPoints()">
+                    <button onclick="adjustQuantity(1)" style="width:40px;height:44px;border:1px solid var(--gray-300);background:var(--white);border-radius:8px;cursor:pointer;color:var(--text-primary)">
+                        <i class="bi bi-plus-lg"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 총 소모 포인트 -->
+            <div style="margin-top:20px;padding:16px;background:linear-gradient(135deg,#fef3c7 0%,#fde68a 100%);border-radius:12px">
+                <div style="font-size:13px;color:#92400e;margin-bottom:4px">총 소모 포인트</div>
+                <div style="font-size:28px;font-weight:900;color:#78350f" id="totalPoints">0P</div>
+            </div>
+
+            <!-- 매수 버튼 -->
+            <button id="buyStockBtn" onclick="buyStock()" class="comment-submit-btn"
+                    style="width:100%;margin-top:20px;padding:16px;font-size:16px;font-weight:700;background:linear-gradient(135deg,#3b82f6 0%,#2563eb 100%);box-shadow:0 4px 12px rgba(59,130,246,0.3)"
+                    disabled>
+                <i class="bi bi-cart-check-fill"></i> 매수하기
+            </button>
+        </div>
+
+        <!-- 내 주식 목록 -->
+        <div style="margin-top:32px">
+            <h6 style="font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px">
+                <i class="bi bi-briefcase-fill" style="color:var(--primary)"></i>
+                <span>내 보유 주식</span>
+            </h6>
+            <div id="myStocksList"></div>
+        </div>
+    </div>
+</div>
 <div class="modal-overlay" id="dailyPostModal" onclick="closeModal('dailyPostModal')">
     <div class="modal-content" onclick="event.stopPropagation()" style="max-width:600px">
         <div class="modal-header">
@@ -1117,6 +1230,244 @@ function closeUpdateModal(){const modal=document.getElementById('updateModal');i
 async function performUpdate(){closeUpdateModal();showToast('업데이트 준비 중...','info');await forceReloadWithServiceWorkerCleanup()}
 async function forceReloadWithServiceWorkerCleanup(){try{if('serviceWorker' in navigator){const registrations=await navigator.serviceWorker.getRegistrations();for(const reg of registrations){await reg.unregister()}console.log('서비스워커 해제 완료')}if(window.caches){const keys=await caches.keys();await Promise.all(keys.map(key=>caches.delete(key)));console.log('캐시 정리 완료')}window.location.reload(true)}catch(e){console.error('업데이트 실패:',e);window.location.reload(true)}}
 function setupServiceWorkerListener(){if('serviceWorker' in navigator){navigator.serviceWorker.addEventListener('message',(event)=>{if(event.data&&event.data.type==='NEW_VERSION_READY'){console.log('서비스워커에서 새 버전 알림 수신');checkAppVersion()}})}}
+
+// 주식 거래 시스템
+let selectedStock=null;
+let myStocks=JSON.parse(localStorage.getItem('myStocks')||'[]');
+const POINT_TO_WON=50;
+const stockDatabase={
+    '005930':{name:'삼성전자',code:'005930',price:75000},
+    '000660':{name:'SK하이닉스',code:'000660',price:145000},
+    '035420':{name:'NAVER',code:'035420',price:210000},
+    '005380':{name:'현대자동차',code:'005380',price:235000},
+    '051910':{name:'LG화학',code:'051910',price:480000},
+    '006400':{name:'삼성SDI',code:'006400',price:425000},
+    '035720':{name:'카카오',code:'035720',price:48000},
+    '105560':{name:'KB금융',code:'105560',price:68000},
+    '055550':{name:'신한지주',code:'055550',price:43000},
+    '068270':{name:'셀트리온',code:'068270',price:185000}
+};
+
+function openStockModal(){
+    document.getElementById('stockModal').classList.add('active');
+    updateStockModalInfo();
+    renderMyStocks();
+}
+
+function closeStockModal(){
+    document.getElementById('stockModal').classList.remove('active');
+    clearSelectedStock();
+    document.getElementById('stockSearchInput').value='';
+    document.getElementById('stockSearchResults').innerHTML='';
+}
+
+function updateStockModalInfo(){
+    const currentPoints=parseInt(document.getElementById('userPoints').textContent)||0;
+    document.getElementById('stockModalPoints').textContent=currentPoints.toLocaleString();
+    document.getElementById('stockModalCount').textContent=myStocks.length;
+}
+
+function searchStock(event){
+    const query=event.target.value.trim().toLowerCase();
+    const resultsDiv=document.getElementById('stockSearchResults');
+
+    if(query.length<1){
+        resultsDiv.innerHTML='';
+        return;
+    }
+
+    const results=Object.values(stockDatabase).filter(stock=>
+        stock.name.toLowerCase().includes(query)||stock.code.includes(query)
+    );
+
+    if(results.length===0){
+        resultsDiv.innerHTML='<div style="padding:12px;text-align:center;color:var(--gray-600)">검색 결과가 없습니다</div>';
+        return;
+    }
+
+    resultsDiv.innerHTML=results.map(stock=>`
+        <div onclick="selectStock('${stock.code}')"
+             style="padding:12px;border:1px solid var(--gray-300);border-radius:8px;margin-bottom:8px;cursor:pointer;transition:all .2s;background:var(--white)"
+             onmouseover="this.style.borderColor='var(--primary)';this.style.background='var(--gray-50)'"
+             onmouseout="this.style.borderColor='var(--gray-300)';this.style.background='var(--white)'">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+                <div>
+                    <div style="font-weight:600;color:var(--text-primary)">${stock.name}</div>
+                    <div style="font-size:12px;color:var(--gray-600);margin-top:2px">${stock.code}</div>
+                </div>
+                <div style="text-align:right">
+                    <div style="font-size:16px;font-weight:700;color:var(--primary)">${stock.price.toLocaleString()}원</div>
+                    <div style="font-size:12px;color:#f59e0b">${Math.ceil(stock.price/POINT_TO_WON)}P</div>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function selectStock(code){
+    selectedStock=stockDatabase[code];
+    document.getElementById('stockSearchInput').value='';
+    document.getElementById('stockSearchResults').innerHTML='';
+    document.getElementById('selectedStockInfo').style.display='block';
+    document.getElementById('selectedStockName').textContent=selectedStock.name;
+    document.getElementById('selectedStockCode').textContent=selectedStock.code;
+    document.getElementById('selectedStockPrice').textContent=selectedStock.price.toLocaleString()+'원';
+    document.getElementById('selectedStockPoints').textContent=Math.ceil(selectedStock.price/POINT_TO_WON).toLocaleString()+'P';
+    document.getElementById('buyPriceInput').value=selectedStock.price;
+    calculateStockPoints();
+}
+
+function clearSelectedStock(){
+    selectedStock=null;
+    document.getElementById('selectedStockInfo').style.display='none';
+    document.getElementById('buyPriceInput').value='';
+    document.getElementById('quantityInput').value='1';
+    document.getElementById('buyPricePoints').innerHTML='';
+    document.getElementById('totalPoints').textContent='0P';
+    document.getElementById('buyStockBtn').disabled=true;
+}
+
+function calculateStockPoints(){
+    const price=parseInt(document.getElementById('buyPriceInput').value)||0;
+    const points=Math.ceil(price/POINT_TO_WON);
+    document.getElementById('buyPricePoints').innerHTML=`변환 포인트: <strong style="color:#f59e0b">${points.toLocaleString()}P</strong>`;
+    calculateTotalPoints();
+}
+
+function calculateTotalPoints(){
+    const price=parseInt(document.getElementById('buyPriceInput').value)||0;
+    const quantity=parseInt(document.getElementById('quantityInput').value)||1;
+    const pointsPerShare=Math.ceil(price/POINT_TO_WON);
+    const totalPoints=pointsPerShare*quantity;
+
+    document.getElementById('totalPoints').textContent=totalPoints.toLocaleString()+'P';
+
+    const currentPoints=parseInt(document.getElementById('userPoints').textContent)||0;
+    const buyBtn=document.getElementById('buyStockBtn');
+
+    if(totalPoints>0&&totalPoints<=currentPoints){
+        buyBtn.disabled=false;
+        buyBtn.style.opacity='1';
+    }else{
+        buyBtn.disabled=true;
+        buyBtn.style.opacity='0.5';
+    }
+}
+
+function adjustQuantity(delta){
+    const input=document.getElementById('quantityInput');
+    const current=parseInt(input.value)||1;
+    const newValue=Math.max(1,current+delta);
+    input.value=newValue;
+    calculateTotalPoints();
+}
+
+async function buyStock(){
+    if(!selectedStock)return;
+
+    const price=parseInt(document.getElementById('buyPriceInput').value);
+    const quantity=parseInt(document.getElementById('quantityInput').value);
+    const pointsPerShare=Math.ceil(price/POINT_TO_WON);
+    const totalPoints=pointsPerShare*quantity;
+    const currentPoints=parseInt(document.getElementById('userPoints').textContent)||0;
+
+    if(totalPoints>currentPoints){
+        showToast('포인트가 부족합니다','error');
+        return;
+    }
+
+    if(!confirm(`${selectedStock.name} ${quantity}주를 ${totalPoints.toLocaleString()}P에 매수하시겠습니까?`))return;
+
+    try{
+        const response=await fetch('/api/points/deduct',{
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({
+                points:totalPoints,
+                description:`${selectedStock.name} ${quantity}주 매수`
+            })
+        });
+
+        if(response.ok){
+            const result=await response.json();
+            const newPoints=result.remainingPoints||currentPoints-totalPoints;
+
+            const stockPurchase={
+                code:selectedStock.code,
+                name:selectedStock.name,
+                quantity:quantity,
+                buyPrice:price,
+                buyDate:new Date().toISOString(),
+                totalPoints:totalPoints
+            };
+
+            myStocks.push(stockPurchase);
+            localStorage.setItem('myStocks',JSON.stringify(myStocks));
+
+            document.getElementById('userPoints').textContent=newPoints;
+            document.getElementById('stockModalPoints').textContent=newPoints.toLocaleString();
+            document.getElementById('stockModalCount').textContent=myStocks.length;
+
+            showToast(`${selectedStock.name} ${quantity}주 매수 완료!`,'success');
+            clearSelectedStock();
+            renderMyStocks();
+        }else{
+            showToast('매수에 실패했습니다','error');
+        }
+    }catch(error){
+        console.error('주식 매수 실패:',error);
+        showToast('매수에 실패했습니다','error');
+    }
+}
+
+function renderMyStocks(){
+    const container=document.getElementById('myStocksList');
+
+    if(myStocks.length===0){
+        container.innerHTML='<div style="padding:20px;text-align:center;color:var(--gray-600);background:var(--gray-100);border-radius:8px">보유 주식이 없습니다</div>';
+        return;
+    }
+
+    const stockGroups={};
+    myStocks.forEach(stock=>{
+        if(!stockGroups[stock.code])stockGroups[stock.code]={...stock,totalQuantity:0,totalPoints:0};
+        stockGroups[stock.code].totalQuantity+=stock.quantity;
+        stockGroups[stock.code].totalPoints+=stock.totalPoints;
+    });
+
+    container.innerHTML=Object.values(stockGroups).map(stock=>{
+        const currentPrice=stockDatabase[stock.code]?.price||0;
+        const currentValue=Math.ceil(currentPrice/POINT_TO_WON)*stock.totalQuantity;
+        const profit=currentValue-stock.totalPoints;
+        const profitRate=stock.totalPoints>0?((profit/stock.totalPoints)*100):0;
+        const profitColor=profit>=0?'#10b981':'#ef4444';
+
+        return`
+            <div style="padding:16px;background:var(--white);border:1px solid var(--gray-300);border-radius:12px;margin-bottom:12px">
+                <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:12px">
+                    <div>
+                        <div style="font-weight:700;font-size:16px;color:var(--text-primary)">${stock.name}</div>
+                        <div style="font-size:12px;color:var(--gray-600);margin-top:2px">${stock.code} · ${stock.totalQuantity}주</div>
+                    </div>
+                    <div style="text-align:right">
+                        <div style="font-size:14px;font-weight:600;color:${profitColor}">${profit>=0?'+':''}${profit.toLocaleString()}P</div>
+                        <div style="font-size:12px;color:${profitColor}">${profitRate>=0?'+':''}${profitRate.toFixed(2)}%</div>
+                    </div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px">
+                    <div>
+                        <div style="color:var(--gray-600)">매수가</div>
+                        <div style="font-weight:600">${stock.buyPrice.toLocaleString()}원</div>
+                    </div>
+                    <div>
+                        <div style="color:var(--gray-600)">현재가</div>
+                        <div style="font-weight:600">${currentPrice.toLocaleString()}원</div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
 </script>
 
 <!-- Firebase SDK & FCM Setup -->
