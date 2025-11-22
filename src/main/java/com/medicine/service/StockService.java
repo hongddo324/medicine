@@ -10,10 +10,12 @@ import com.medicine.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.Duration;
 import java.util.*;
 
 @Service
@@ -23,6 +25,7 @@ public class StockService {
 
     private final StockRepository stockRepository;
     private final UserRepository userRepository;
+    private final StringRedisTemplate redisTemplate;
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -36,10 +39,8 @@ public class StockService {
     private String baseUrl;
 
     private static final int POINT_TO_WON = 50;
-
-    // 토큰 캐싱
-    private String cachedAccessToken = null;
-    private long tokenExpiryTime = 0;
+    private static final String STOCK_TOKEN_KEY = "stock:access_token";
+    private static final long TOKEN_EXPIRE_HOURS = 23;
 
     // 국내 주식 검색
     public List<StockDTO> searchDomesticStocks(String keyword) {
@@ -189,18 +190,26 @@ public class StockService {
         return headers;
     }
 
-    // Access Token 발급
+    // Access Token 발급 (Redis 캐싱)
     private String getAccessToken() {
         // API 키가 없으면 null 반환 (fallback 데이터 사용)
         if (appKey == null || appKey.isEmpty() || appSecret == null || appSecret.isEmpty()) {
+            log.debug("API 키 미설정 - fallback 데이터 사용");
             return null;
         }
 
-        // 토큰이 유효하면 재사용
-        if (cachedAccessToken != null && System.currentTimeMillis() < tokenExpiryTime) {
-            return cachedAccessToken;
+        // Redis에서 토큰 조회
+        try {
+            String cachedToken = redisTemplate.opsForValue().get(STOCK_TOKEN_KEY);
+            if (cachedToken != null && !cachedToken.isEmpty()) {
+                log.debug("Redis에서 캐시된 토큰 사용");
+                return cachedToken;
+            }
+        } catch (Exception e) {
+            log.warn("Redis 토큰 조회 실패: {}", e.getMessage());
         }
 
+        // 토큰 재발급
         try {
             String url = baseUrl + "/oauth2/tokenP";
 
@@ -217,13 +226,23 @@ public class StockService {
 
             if (response.getStatusCode() == HttpStatus.OK) {
                 JsonNode jsonNode = objectMapper.readTree(response.getBody());
-                cachedAccessToken = jsonNode.get("access_token").asText();
+                String accessToken = jsonNode.get("access_token").asText();
 
-                // 토큰 만료 시간 설정 (발급 후 23시간 유효)
-                tokenExpiryTime = System.currentTimeMillis() + (23 * 60 * 60 * 1000);
+                // Redis에 토큰 저장 (23시간 TTL)
+                try {
+                    redisTemplate.opsForValue().set(
+                        STOCK_TOKEN_KEY,
+                        accessToken,
+                        Duration.ofHours(TOKEN_EXPIRE_HOURS)
+                    );
+                    log.info("OAuth 토큰 발급 및 Redis 저장 완료 (만료: {}시간)", TOKEN_EXPIRE_HOURS);
+                } catch (Exception e) {
+                    log.warn("Redis 토큰 저장 실패: {} (메모리에서만 사용)", e.getMessage());
+                }
 
-                log.info("OAuth 토큰 발급 성공");
-                return cachedAccessToken;
+                return accessToken;
+            } else {
+                log.error("OAuth 토큰 발급 실패 - 응답 코드: {}", response.getStatusCode());
             }
         } catch (Exception e) {
             log.error("OAuth 토큰 발급 실패: {}", e.getMessage());
