@@ -273,10 +273,11 @@
         body.dark-mode .shop-icon-btn:hover{background:rgba(255,255,255,0.1)}
         .shop-icon-btn{position:relative}
         .shop-icon-btn::before{content:'';position:absolute;inset:-12px;border-radius:50%;z-index:-1}
-        .image-slider{position:relative;width:100%;overflow:hidden;border-radius:8px;margin-bottom:16px}
+        .image-slider{position:relative;width:100%;overflow:hidden;border-radius:8px;margin-bottom:16px;background:var(--gray-100)}
         .slider-container{display:flex;transition:transform .3s ease}
-        .slider-item{min-width:100%;display:flex;align-items:center;justify-content:center}
-        .slider-item img,.slider-item video{width:100%;max-height:500px;object-fit:contain}
+        .slider-item{min-width:100%;display:flex;align-items:center;justify-content:center;background:var(--gray-100)}
+        .slider-item img,.slider-item video{width:100%;height:auto;max-height:60vh;object-fit:contain}
+        .comment-image{width:100%;height:auto;max-height:60vh;object-fit:contain}
         .slider-btn{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.6);color:#333;border:none;border-radius:50%;width:28px;height:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .3s;z-index:10;opacity:0.4;font-size:12px;box-shadow:0 1px 4px rgba(0,0,0,.15)}
         .slider-btn:hover{background:rgba(255,255,255,.9);opacity:1}
         .slider-btn.prev{left:4px}
@@ -284,8 +285,10 @@
         .slider-indicators{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:10}
         .slider-indicator{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.5);cursor:pointer;transition:all .3s}
         .slider-indicator.active{background:white;width:24px;border-radius:4px}
-        @media (min-width:768px) and (max-width:1024px){.slider-item img,.slider-item video{max-height:400px;object-fit:contain}.comment-image{max-height:400px;object-fit:contain}}
-        @media (max-width:767px){.slider-item img,.slider-item video{max-height:300px;object-fit:contain}.comment-image{max-height:300px;object-fit:contain}}
+        @media (min-width:768px) and (max-width:1024px){.slider-item img,.slider-item video{max-height:55vh}.comment-image{max-height:55vh}}
+        @media (max-width:767px){.slider-item img,.slider-item video{max-height:50vh}.comment-image{max-height:50vh}}
+        body.dark-mode .image-slider{background:var(--gray-800)}
+        body.dark-mode .slider-item{background:var(--gray-800)}
         body.dark-mode .calendar-nav-btn{color:#e5e5e5;border-color:#4a4a4a}
         body.dark-mode .calendar-nav-btn:hover{background:rgba(255,255,255,0.1)}
     </style>
@@ -1004,8 +1007,8 @@ async function purchaseItem(itemId){if(!confirm('이 상품을 구매하시겠�
 async function calculateExpectedPoints(){try{const today=new Date().toISOString().split('T')[0];const [medicineRes,mealRes]=await Promise.all([fetch(`/api/medicine/today`),fetch(`/api/meals/date/${today}`)]);const medicineRecords=await medicineRes.json();const meals=await mealRes.json();let medicinePoints=0;if(medicineRecords.morning&&medicineRecords.morning.taken)medicinePoints+=10;if(medicineRecords.evening&&medicineRecords.evening.taken)medicinePoints+=10;let mealPoints=0;if(meals&&meals.length>0){const avgScore=meals.reduce((sum,m)=>sum+(m.score||0),0)/meals.length;if(avgScore>=80)mealPoints=70;else if(avgScore>=60)mealPoints=50;else if(avgScore>=40)mealPoints=30;else mealPoints=20}const totalExpected=medicinePoints+mealPoints;const expectedEl=document.getElementById('healthExpectedPointsValue');if(expectedEl)expectedEl.textContent=`${totalExpected} (약: ${medicinePoints}p + 식단: ${mealPoints}p)`}catch(error){console.error('예상 포인트 계산 실패:',error);const expectedEl=document.getElementById('healthExpectedPointsValue');if(expectedEl)expectedEl.textContent='계산 실패'}}
 async function initializeHomeMeals(){try{const today=new Date().toISOString().split('T')[0];const response=await fetch(`/api/meal/date/${today}`);const data=await response.json();if(data.success&&data.meals){data.meals.forEach(meal=>{const mealType=meal.mealType.toLowerCase();const element=document.getElementById(`home${mealType.charAt(0).toUpperCase()+mealType.slice(1)}Meal`);if(element&&meal.imageUrl){element.classList.add('has-image');element.innerHTML=`<img src="${meal.imageUrl}" alt="${meal.mealType}" onclick="showImageModal('${meal.imageUrl}')">`;if(meal.aiEvaluation){element.innerHTML+=`<button class="ai-eval-btn" onclick="event.stopPropagation();showAiEvaluation('${mealType}','${escapeForAttribute(meal.aiEvaluation)}',${meal.score||0})"><i class="bi bi-stars"></i> AI평가</button>`}}currentMealData[mealType]=meal})}}catch(error){console.error('홈 식단 로드 실패:',error)}}
 function escapeForAttribute(text){return text.replace(/'/g,'&apos;').replace(/"/g,'&quot;').replace(/\n/g,' ')}
-let currentZoom=1,initialPinchDistance=0,lastPinchZoom=1,imgPosX=0,imgPosY=0,isDragging=false,lastTouchX=0,lastTouchY=0;
-function showImageModal(imageUrl){currentZoom=1;imgPosX=0;imgPosY=0;const img=document.getElementById('imageModalImage');img.src=imageUrl;updateImageTransform();document.getElementById('zoomLevel').textContent='100%';document.getElementById('imageModal').classList.add('active');document.body.style.overflow='hidden';setupPinchZoom()}
+let currentZoom=0.5,initialPinchDistance=0,lastPinchZoom=0.5,imgPosX=0,imgPosY=0,isDragging=false,lastTouchX=0,lastTouchY=0;
+function showImageModal(imageUrl){currentZoom=0.5;imgPosX=0;imgPosY=0;const img=document.getElementById('imageModalImage');img.src=imageUrl;updateImageTransform();document.getElementById('zoomLevel').textContent='50%';document.getElementById('imageModal').classList.add('active');document.body.style.overflow='hidden';setupPinchZoom()}
 function closeImageZoomModal(){document.getElementById('imageModal').classList.remove('active');document.body.style.overflow=''}
 function zoomImage(delta){currentZoom=Math.max(0.5,Math.min(4,currentZoom+delta));updateImageTransform();document.getElementById('zoomLevel').textContent=Math.round(currentZoom*100)+'%'}
 function resetImageZoom(){currentZoom=1;imgPosX=0;imgPosY=0;updateImageTransform();document.getElementById('zoomLevel').textContent='100%'}
