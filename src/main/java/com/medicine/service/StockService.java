@@ -131,9 +131,10 @@ public class StockService {
         // 국내 주식 검색
         results.addAll(searchDomesticStocks(keyword));
 
-        // 해외 주식 검색 (NASDAQ, NYSE)
-        results.addAll(searchOverseasStocks(keyword, "NASDAQ"));
-        results.addAll(searchOverseasStocks(keyword, "NYSE"));
+        // 해외 주식은 Fallback만 사용 (API 엔드포인트 미확인)
+        // TODO: 해외 주식 API 확인 후 활성화
+        // results.addAll(searchOverseasStocks(keyword, "NASDAQ"));
+        // results.addAll(searchOverseasStocks(keyword, "NYSE"));
 
         return results.stream().limit(10).toList();
     }
@@ -183,10 +184,11 @@ public class StockService {
         if (appKey != null && !appKey.isEmpty()) {
             String token = getAccessToken();
             if (token != null && !token.isEmpty()) {
-                headers.set("authorization", token);  // Bearer 접두사 제거
+                headers.set("authorization", "Bearer " + token);  // Bearer 접두사 필수!
             }
             headers.set("appkey", appKey);
             headers.set("appsecret", appSecret);
+            headers.set("custtype", "P");  // 개인고객
         }
 
         headers.set("tr_id", trId);
