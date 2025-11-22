@@ -8,8 +8,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.List;
-
+/**
+ * 한국투자증권 Open API 클라이언트
+ *
+ * 주식 현재가 조회 전용
+ * (종목 검색은 DB에서 수행)
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -20,71 +24,14 @@ public class KisStockClient {
     private final KisApiProperties kisApiProperties;
 
     /**
-     * 종목 검색 (한글 키워드)
-     *
-     * @param keyword 검색 키워드 (예: "삼성전자")
-     * @return 종목 검색 결과 리스트
-     */
-    public List<StockSearchItemDto> searchStocks(String keyword) {
-        String accessToken = tokenService.getAccessToken();
-        if (accessToken == null) {
-            throw new StockSearchException("API 인증 토큰을 가져올 수 없습니다");
-        }
-
-        String searchTrId = kisApiProperties.getTrId().getSearchStock();
-        log.info("종목 검색 API 호출 - keyword: {}, tr_id: {}", keyword, searchTrId);
-
-        try {
-            StockSearchResponseDto response = kisWebClient.get()
-                    .uri(uriBuilder -> uriBuilder
-                            .path("/uapi/domestic-stock/v1/quotations/search-stock-info")
-                            .queryParam("KEYWORD", keyword)
-                            .build())
-                    .header("Authorization", "Bearer " + accessToken)
-                    .header("appkey", kisApiProperties.getAppKey())
-                    .header("appsecret", kisApiProperties.getAppSecret())
-                    .header("tr_id", searchTrId)
-                    .header("custtype", "P")
-                    .retrieve()
-                    .bodyToMono(StockSearchResponseDto.class)
-                    .block();
-
-            if (response == null) {
-                log.error("종목 검색 API 응답이 null");
-                throw new StockSearchException("종목 검색 API 응답을 받지 못했습니다");
-            }
-
-            log.debug("종목 검색 API 응답 - rt_cd: {}, msg_cd: {}, msg: {}",
-                    response.getRtCd(), response.getMsgCd(), response.getMsg());
-
-            if (!"0".equals(response.getRtCd())) {
-                String errorMsg = String.format("종목 검색 실패 [%s] %s", response.getMsgCd(), response.getMsg());
-                log.error(errorMsg);
-                throw new StockSearchException(errorMsg);
-            }
-
-            List<StockSearchItemDto> items = response.getItems();
-            if (items == null || items.isEmpty()) {
-                log.warn("검색 결과 없음 - keyword: {}", keyword);
-                throw new StockSearchException("해당 키워드로 검색된 종목이 없습니다: " + keyword);
-            }
-
-            log.info("종목 검색 성공 - 검색된 종목 수: {}", items.size());
-            return items;
-
-        } catch (StockSearchException e) {
-            throw e;
-        } catch (Exception e) {
-            log.error("종목 검색 API 호출 중 예외 발생 - keyword: {}", keyword, e);
-            throw new StockSearchException("종목 검색 중 오류가 발생했습니다: " + e.getMessage(), e);
-        }
-    }
-
-    /**
      * 주식 현재가 조회
      *
+     * 한국투자증권 API: /uapi/domestic-stock/v1/quotations/inquire-price
+     * TR_ID: FHKST01010100
+     *
      * @param stockCode 종목코드 (예: "005930")
-     * @return 현재가 정보
+     * @return 현재가 정보 (가격, 등락률 등)
+     * @throws StockSearchException API 호출 실패 시
      */
     public StockPriceDto getCurrentPrice(String stockCode) {
         String accessToken = tokenService.getAccessToken();
