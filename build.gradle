@@ -22,6 +22,9 @@ dependencies {
     // Spring Boot Web
     implementation 'org.springframework.boot:spring-boot-starter-web'
 
+    // Spring Boot WebFlux (WebClient)
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
     // Spring Boot Thymeleaf
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 

@@ -100,7 +100,16 @@ firebase:
 app:
   version: 1.0.0
 
-# Stock API Configuration (한국투자증권 Open API)
+# KIS API Configuration (한국투자증권 Open API)
+kis:
+  base-url: ${KIS_BASE_URL:https://openapi.koreainvestment.com:9443}
+  app-key: ${KIS_APP_KEY:}
+  app-secret: ${KIS_APP_SECRET:}
+  tr-id:
+    search-stock: ${KIS_SEARCH_TR_ID:FHPP0C01010000}  # 종목 검색 TR_ID
+    price-quote: ${KIS_PRICE_TR_ID:FHKST01010100}     # 주식현재가 시세 TR_ID
+
+# Deprecated: 기존 stock 설정 (하위 호환성)
 stock:
   api:
     app-key: ${STOCK_API_KEY:}
